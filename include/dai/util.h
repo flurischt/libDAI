@@ -24,6 +24,10 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <cerrno>
+
+#if defined(WINDOWS)
+#include <cstdint> // only defined in C++11 and higher, but needed for Win64 builds in order to enable conditional code in MPIR library
+#endif
 #include <gmpxx.h>
 
 #include <dai/exceptions.h>
@@ -71,6 +75,9 @@
 
     /// Define INFINITY
     #define INFINITY (std::numeric_limits<Real>::infinity())
+
+    /// Define NAN
+    #define NAN (std::numeric_limits<Real>::quiet_NaN())
 #endif
 
 
@@ -85,7 +92,7 @@ typedef mpz_class BigInt;
 
 /// Safe down-cast of big integer to size_t
 inline size_t BigInt_size_t( const BigInt &N ) {
-    DAI_ASSERT( N <= std::numeric_limits<std::size_t>::max() );
+    DAI_ASSERT( N <= (BigInt)std::numeric_limits<std::size_t>::max() );
     return N.get_ui();
 }
 

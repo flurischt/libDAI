@@ -130,7 +130,7 @@ class VarSet : public SmallSet<Var> {
         BigInt nrStates() const {
             BigInt states = 1;
             for( VarSet::const_iterator n = begin(); n != end(); n++ )
-                states *= n->states();
+                states *= (BigInt)n->states();
             return states;
         }
     //@}

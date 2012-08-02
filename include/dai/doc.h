@@ -200,7 +200,7 @@
  *    - GNU make
  *    - recent boost C++ libraries (at least version 1.37; however,
  *      version 1.37 shipped with Ubuntu 9.04 is known not to work)
- *    - GMP library (or the Windows port called MPIR)
+ *    - GMP library (or the Windows port called MPIR, for 64 bits builds MPIR 2.5.0 or higher is needed)
  *    - doxygen (only for building the documentation)
  *    - graphviz (only for using some of the libDAI command line utilities)
  *    - CImg library (only for building the image segmentation example)
@@ -259,7 +259,7 @@
  *  You need:
  *  - A recent version of MicroSoft Visual Studio (2008 is known to work)
  *  - recent boost C++ libraries (version 1.37 or higher)
- *  - GMP or MPIR library
+ *  - GMP or MPIR library (for 64-bits builds, MPIR 2.5.0 or higher is needed)
  *  - GNU make (can be obtained from http://gnuwin32.sourceforge.net)
  *  - CImg library (only for building the image segmentation example)
  *
@@ -290,6 +290,7 @@
  *  
  *  Information about how to build GPR or MPIR under Windows can be found on the internet.
  *  The user has to update Makefile.WINDOWS in order to link with the GPR/MPIR libraries.
+ *  Note that for 64-bit builds, MPIR 2.5.0 or higher is needed.
  *
  *  \subsection build-windows-libdai Building libDAI
  *

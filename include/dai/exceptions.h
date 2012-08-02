@@ -54,7 +54,7 @@
  *  DAI_THROWE(NOT_IMPLEMENTED,"Detailed error message");
  *  \endcode
  */
-#define DAI_THROWE(cod,msg) throw dai::Exception(dai::Exception::cod, __FILE__, __PRETTY_FUNCTION__, DAI_TOSTRING(__LINE__), msg)
+#define DAI_THROWE(cod,msg) throw dai::Exception(dai::Exception::cod, __FILE__, FUNCTION_NAME, DAI_TOSTRING(__LINE__), msg)
 
 /// Assertion mechanism, similar to the standard assert() macro. It is always active, even if NDEBUG is defined
 #define DAI_ASSERT(condition) ((condition) ? ((void)0) : DAI_THROWE(ASSERTION_FAILED, std::string("Assertion \"" #condition "\" failed")))

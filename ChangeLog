@@ -1,5 +1,11 @@
 git master
 ----------
+* Added VC10 build files, kindly provided by Sameh Khamis
+* Fixed several Win64 related bugs (found by Sameh Khamis): 
+  - define NAN
+  - add some necessary casts of size_t to BigInt
+  - replaced occurrence of __PRETTY_FUNCTION__ with FUNCTION_NAME that was forgotten in a previous fix
+  This means that libDAI now builds successfully also on 64-bit Windows systems.
 * Fixed bug (found by Andy Mueller): added GMP library invocations to swig Makefile
 * Fixed bug (found by Yan): replaced GNU extension __PRETTY_FUNCTION__ by __FUNCTION (Visual Studio) or __func__ (other compilers)
 * Fixed bug (found by cax): when building MatLab MEX files, GMP libraries were not linked
@@ -7,7 +13,7 @@ git master
 * Fixed bug in findMaximum (it only considered a single connected component of the factor graph)
 * [Benjamin Piwowarski] Renamed "foreach" macro into "bforeach" to avoid conflicts with newer Boost library versions
 * Optimized ClusterGraph( const FactorGraph&, bool) constructor
-* Fixed "typename" bug in src/alldai.cpp which resulted in FTBFS for older g++ compilers
+* Fixed "typename" bug in src/alldai.cpp which resulted in FTBFS with older g++ compilers
 * Fixed memory leak in alldai.cpp and removed the function builtinInfAlgs()
 * Fixed memory leak in CBP::run()
 * Fixed typo in Priya's name

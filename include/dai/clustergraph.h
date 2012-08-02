@@ -241,7 +241,7 @@ namespace dai {
                     result.insert( Di );
                     if( maxStates ) {
                         totalStates += Di.nrStates();
-                        if( totalStates > maxStates )
+                        if( totalStates > (BigInt)maxStates )
                             DAI_THROW(OUT_OF_MEMORY);
                     }
                     varindices.erase( i );

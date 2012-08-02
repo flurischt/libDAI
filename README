@@ -2,8 +2,8 @@ libDAI  -  A free/open source C++ library for Discrete Approximate Inference
 
 -------------------------------------------------------------------------------
 
-Version:  0.3.0
-Date:     July 12, 2011
+Version:  git HEAD
+Date:     July 12, 2011 - or later
 See also: http://www.libdai.org
 
 -------------------------------------------------------------------------------
@@ -163,7 +163,8 @@ You need:
   * GNU make
   * recent boost C++ libraries (at least version 1.37; however, version 1.37
     shipped with Ubuntu 9.04 is known not to work)
-  * GMP library (or the Windows port called MPIR)
+  * GMP library (or the Windows port called MPIR, for 64 bits builds MPIR 2.5.0
+    or higher is needed)
   * doxygen (only for building the documentation)
   * graphviz (only for using some of the libDAI command line utilities)
   * CImg library (only for building the image segmentation example)
@@ -192,7 +193,7 @@ Building boost under Cygwin
   * Download the latest boost libraries from http://www.boost.org
   * Build the required boost libraries using:
 
-        ./bootstrap.sh --with-libraries=program_options,math,graph,test --prefix=/boost_root/
+        ./bootstrap.sh –with-libraries=program_options,math,graph,test –prefix=/boost_root/
         ./bjam
 
   * In order to use dynamic linking, the boost .dll's should be somewhere in
@@ -221,7 +222,7 @@ If the build is successful, you can test the example program:
 
 or the more extensive test program:
 
-  tests/testdai --aliases tests/aliases.conf --filename tests/alarm.fg --methods JTREE_HUGIN BP_SEQMAX
+  tests/testdai –aliases tests/aliases.conf –filename tests/alarm.fg –methods JTREE_HUGIN BP_SEQMAX
 
 -------------------------------------------------------------------------------
 
@@ -233,7 +234,7 @@ You need:
 
   * A recent version of MicroSoft Visual Studio (2008 is known to work)
   * recent boost C++ libraries (version 1.37 or higher)
-  * GMP or MPIR library
+  * GMP or MPIR library (for 64-bits builds, MPIR 2.5.0 or higher is needed)
   * GNU make (can be obtained from http://gnuwin32.sourceforge.net)
   * CImg library (only for building the image segmentation example)
 
@@ -260,13 +261,13 @@ Because building boost under Windows is tricky, I provide some guidance here.
   * The following command builds the boost libraries that are relevant for
     libDAI:
 
-        bjam --with-graph --with-math --with-program_options --with-test link=static runtime-link=shared
+        bjam –with-graph –with-math –with-program_options –with-test link=static runtime-link=shared
 
 Building GMP or MPIR under Windows
 
 Information about how to build GPR or MPIR under Windows can be found on the
 internet. The user has to update Makefile.WINDOWS in order to link with the GPR
-/MPIR libraries.
+/MPIR libraries. Note that for 64-bit builds, MPIR 2.5.0 or higher is needed.
 
 Building libDAI
 
@@ -284,7 +285,7 @@ If the build is successful, you can test the example program:
 
 or the more extensive test program:
 
-  tests\testdai --aliases tests\aliases.conf --filename tests\alarm.fg --methods JTREE_HUGIN BP_SEQMAX
+  tests\testdai –aliases tests\aliases.conf –filename tests\alarm.fg –methods JTREE_HUGIN BP_SEQMAX
 
 -------------------------------------------------------------------------------
 

@@ -93,7 +93,7 @@ void SharedParameters::setPermsAndVarSetsFromVarOrders() {
         VarSet vs;
         _perms[foi->first] = calculatePermutation( foi->second, vs );
         _varsets[foi->first] = vs;
-        DAI_ASSERT( _estimation->probSize() == vs.nrStates() );
+        DAI_ASSERT( (BigInt)_estimation->probSize() == vs.nrStates() );
     }
 }
 
