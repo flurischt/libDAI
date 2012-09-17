@@ -1,20 +1,24 @@
-git master
-----------
-* Added Makefile.WINDOWS64, kindly provided by Lin Ming
+libDAI-0.3.1 (2012-09-17)
+-------------------------
+
+Miscellaneous improvements:
+* Full 64-bit support on all supported platforms (Linux, OSX, Windows)
 * Added special MatLab interface for junction tree algorithm (dai_jtree)
-* Added VC10 build files, kindly provided by Sameh Khamis
-* Fixed several Win64 related bugs (found by Sameh Khamis): 
-  - define NAN
-  - add some necessary casts of size_t to BigInt
-  - replaced occurrence of __PRETTY_FUNCTION__ with FUNCTION_NAME that was forgotten in a previous fix
-  This means that libDAI now builds successfully also on 64-bit Windows systems.
-* Fixed bug (found by Andy Mueller): added GMP library invocations to swig Makefile
-* Fixed bug (found by Yan): replaced GNU extension __PRETTY_FUNCTION__ by __FUNCTION (Visual Studio) or __func__ (other compilers)
-* Fixed bug (found by cax): when building MatLab MEX files, GMP libraries were not linked
+* Optimized ClusterGraph( const FactorGraph&, bool) constructor
+
+Build system improvements:
+* Added Makefile.WINDOWS64, kindly provided by Lin Ming
 * [Arman Aksoy] Added Makefile.MACOSX64
+* Added VC10 build files, kindly provided by Sameh Khamis
+
+Bug fixes:
+* Fixed bug (found by Sameh Khamis): define NAN (Windows)
+* Fixed bug (found by Same Khamis): add some necessary casts of size_t to BigInt (Windows)
+* Fixed bug (found by Yan): replaced GNU extension __PRETTY_FUNCTION__ by __FUNCTION__ (Visual Studio) or __func__ (other compilers)
+* Fixed bug (found by Andy Mueller): added GMP library invocations to swig Makefile
+* Fixed bug (found by cax): when building MatLab MEX files, GMP/MPIR libraries were not linked
 * Fixed bug in findMaximum (it only considered a single connected component of the factor graph)
 * [Benjamin Piwowarski] Renamed "foreach" macro into "bforeach" to avoid conflicts with newer Boost library versions
-* Optimized ClusterGraph( const FactorGraph&, bool) constructor
 * Fixed "typename" bug in src/alldai.cpp which resulted in FTBFS with older g++ compilers
 * Fixed memory leak in alldai.cpp and removed the function builtinInfAlgs()
 * Fixed memory leak in CBP::run()

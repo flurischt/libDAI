@@ -2,8 +2,8 @@ libDAI  -  A free/open source C++ library for Discrete Approximate Inference
 
 -------------------------------------------------------------------------------
 
-Version:  git HEAD
-Date:     July 12, 2011 - or later
+Version:  0.3.1
+Date:     September 17, 2012
 See also: http://www.libdai.org
 
 -------------------------------------------------------------------------------
@@ -31,16 +31,16 @@ Journal of Machine Learning Research, 11(Aug):2169-2173, 2010.
 
 In BiBTeX format (for your convenience):
 
-  @article{Mooij_libDAI_10,
-    author    = {Joris M. Mooij},
-    title     = {lib{DAI}: A Free and Open Source {C++} Library for Discrete Approximate Inference in Graphical Models},
-    journal   = {Journal of Machine Learning Research},
-    year      = 2010,
-    month     = Aug,
-    volume    = 11,
-    pages     = {2169-2173},
-    url       = "http://www.jmlr.org/papers/volume11/mooij10a/mooij10a.pdf"
-  }
+@article{Mooij_libDAI_10,
+  author    = {Joris M. Mooij},
+  title     = {lib{DAI}: A Free and Open Source {C++} Library for Discrete Approximate Inference in Graphical Models},
+  journal   = {Journal of Machine Learning Research},
+  year      = 2010,
+  month     = Aug,
+  volume    = 11,
+  pages     = {2169-2173},
+  url       = "http://www.jmlr.org/papers/volume11/mooij10a/mooij10a.pdf"
+}
 
 Moreover, as a personal note, I would appreciate it to be informed about any
 publications using libDAI at joris dot mooij at libdai dot org.
@@ -133,13 +133,14 @@ provides a command line interface and experimental python and octave interfaces
 Compatibility
 
 The code has been developed under Debian GNU/Linux with the GCC compiler suite.
-libDAI compiles successfully with g++ versions 3.4 up to 4.6.
+libDAI compiles successfully with g++ versions 3.4 up to 4.7 (both 32 and 64
+bits).
 
 libDAI has also been successfully compiled with MS Visual Studio 2008 under
-Windows (but not all build targets are supported yet) and with Cygwin under
-Windows.
+Windows, MS Visual Studio 2010 under Windows 64, and with Cygwin under Windows.
 
-Finally, libDAI has been compiled successfully on MacOS X.
+Finally, libDAI has been compiled successfully on MacOS X (both 32 and 64
+bits).
 
 Downloading libDAI
 
