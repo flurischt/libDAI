@@ -78,6 +78,16 @@
 
     /// Define NAN
     #define NAN (std::numeric_limits<Real>::quiet_NaN())
+
+    #if defined(_MSC_VER)
+      // Disable unsafe warning (use of the function 'strcpy' instead of 
+      // 'strcpy_s' for portability reasons;
+      #pragma warning( disable : 4996 )
+      // Workaround for the char16_t type defined in Matlab and MSVC 2010
+      #if (_MSC_VER >= 1600)
+        #define __STDC_UTF_16__
+      #endif
+    #endif
 #endif
 
 

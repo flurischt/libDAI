@@ -1,5 +1,6 @@
 git master
 ----------
+* Added Makefile.WINDOWS64, kindly provided by Lin Ming
 * Added special MatLab interface for junction tree algorithm (dai_jtree)
 * Added VC10 build files, kindly provided by Sameh Khamis
 * Fixed several Win64 related bugs (found by Sameh Khamis): 

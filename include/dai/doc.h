@@ -117,12 +117,12 @@
  *  \section compatibility Compatibility
  *  
  *  The code has been developed under Debian GNU/Linux with the GCC compiler suite.
- *  libDAI compiles successfully with g++ versions 3.4 up to 4.6.
+ *  libDAI compiles successfully with g++ versions 3.4 up to 4.7 (both 32 and 64 bits).
  *
- *  libDAI has also been successfully compiled with MS Visual Studio 2008 under Windows
- *  (but not all build targets are supported yet) and with Cygwin under Windows.
+ *  libDAI has also been successfully compiled with MS Visual Studio 2008 under Windows,
+ *  MS Visual Studio 2010 under Windows 64, and with Cygwin under Windows.
  *
- *  Finally, libDAI has been compiled successfully on MacOS X.
+ *  Finally, libDAI has been compiled successfully on MacOS X (both 32 and 64 bits).
  *
  *  \section download Downloading libDAI
  *  The libDAI sources and documentation can be downloaded from the libDAI website:
