@@ -3,6 +3,7 @@ libDAI was written by Joris M. Mooij with the help of the following people:
 Martijn Leisink (laid down the foundations for the library),
 Frederik Eaton (contributed the Gibbs sampler, conditioned BP, fractional BP and various other improvements),
 Charles Vaske (contributed the parameter learning algorithms),
+Siamak Ravanbakhsh (contributed the generalized loop corrections code),
 Giuseppe Passino (contributed the findMaximum function, and various other improvements),
 Bastian Wemmenhove (contributed the MR algorithm),
 Patrick Pletscher (contributed the SWIG interface).

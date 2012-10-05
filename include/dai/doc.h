@@ -31,8 +31,8 @@
 
 /** \mainpage Reference manual for libDAI - A free/open source C++ library for Discrete Approximate Inference methods
  *  \author Joris Mooij (with contributions of Frederik Eaton)
- *  \version 0.3.1
- *  \date September 17, 2012
+ *  \version git HEAD
+ *  \date September 17, 2012 - or later
  *
  *  <hr size="1">
  *  \section about About libDAI
@@ -832,6 +832,12 @@
  *  "How to Compute Loop Corrections to the Bethe Approximation",
  *  <em>Journal of Statistical Mechanics: Theory and Experiment</em> 2005(10)-P10011,
  *  http://stacks.iop.org/1742-5468/2005/P10011
+ *
+ *  \anchor RYG12 \ref RYG12
+ *  S. Ravanbakhsh, C.-N. Yu, R. Greiner (2012):
+ *  "A Generalized Loop Correction Method for Approximate Inference in Graphical Models",
+ *  <em>29th International Conference on Machine Learning (ICML 2012)</em>,
+ *  http://www.icml.cc/2012/papers/#paper-304
  *
  *  \anchor StW99 \ref StW99
  *  A. Steger and N. C. Wormald (1999):

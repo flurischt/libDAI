@@ -12,8 +12,8 @@ include Makefile.ALL
 include Makefile.conf
 
 # Set version and date
-DAI_VERSION="0.3.1"
-DAI_DATE="September 17, 2012"
+DAI_VERSION="git HEAD"
+DAI_DATE="September 17, 2012 - or later"
 
 # Directories of libDAI sources
 # Location of libDAI headers
@@ -41,7 +41,7 @@ ifdef WITH_DOC
 endif
 
 # Define conditional build targets
-NAMES:=graph dag bipgraph varset daialg alldai clustergraph factor factorgraph properties regiongraph util weightedgraph exceptions exactinf evidence emalg io
+NAMES:=graph dag bipgraph varset daialg alldai clustergraph factor factorgraph properties regiongraph cobwebgraph util weightedgraph exceptions exactinf evidence emalg io
 ifdef WITH_BP
   WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_BP
   NAMES:=$(NAMES) bp
@@ -90,6 +90,11 @@ ifdef WITH_DECMAP
   WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_DECMAP
   NAMES:=$(NAMES) decmap
 endif
+ifdef WITH_GLC
+  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_GLC
+  NAMES:=$(NAMES) glc 
+endif
+
 
 # Define standard libDAI header dependencies, source file names and object file names
 HEADERS=$(foreach name,graph dag bipgraph index var factor varset smallset prob daialg properties alldai enum exceptions util,$(INC)/$(name).h)
@@ -189,6 +194,9 @@ emalg$(OE) : $(SRC)/emalg.cpp $(INC)/emalg.h $(INC)/evidence.h $(HEADERS)
 	$(CC) -c $<
 
 decmap$(OE) : $(SRC)/decmap.cpp $(INC)/decmap.h $(HEADERS)
+	$(CC) -c $<
+
+glc$(OE) : $(SRC)/glc.cpp $(INC)/glc.h $(HEADERS) $(INC)/cobwebgraph.h
 	$(CC) -c $<
 
 

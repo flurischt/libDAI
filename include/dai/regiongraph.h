@@ -234,14 +234,14 @@ class RegionGraph : public FactorGraph {
             DAI_THROW(NOT_IMPLEMENTED);
         }
 
-        /// Writes a factor graph to a file
+        /// Writes a region graph to a file
         /** \note Not implemented yet
          */
         virtual void WriteToFile( const char* /*filename*/, size_t /*precision*/=15 ) const {
             DAI_THROW(NOT_IMPLEMENTED);
         }
 
-        /// Writes a RegionGraph to an output stream
+        /// Writes a region graph to an output stream
         friend std::ostream& operator<< ( std::ostream& os, const RegionGraph& rg );
 
         /// Writes a region graph to a GraphViz .dot file

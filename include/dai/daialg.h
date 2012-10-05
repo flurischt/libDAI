@@ -19,6 +19,7 @@
 #include <vector>
 #include <dai/factorgraph.h>
 #include <dai/regiongraph.h>
+#include <dai/cobwebgraph.h>
 #include <dai/properties.h>
 
 
@@ -152,6 +153,11 @@ class InfAlg {
         /** If \a backup == \c true, make a backup of all factors that are changed.
          */
         virtual void makeCavity( size_t i, bool backup = false ) = 0;
+
+        /// Sets all factors indicated by \a facInds to one.
+        /** If \a backup == \c true, make a backup of all factors that are changed.
+         */
+        virtual void makeRegionCavity( std::vector<size_t> facInds, bool backup = false ) = 0;
     //@}
 
     /// \name Backup/restore mechanism for factors
@@ -229,6 +235,11 @@ class DAIAlg : public InfAlg, public GRM {
         /** If \a backup == \c true, make a backup of all factors that are changed.
          */
         void makeCavity( size_t i, bool backup = false ) { GRM::makeCavity( i, backup ); }
+
+        /// Sets all factors indicated by \a facInds to one.
+        /** If \a backup == \c true, make a backup of all factors that are changed.
+         */
+        void makeRegionCavity( std::vector<size_t> facInds, bool backup ){ GRM::makeRegionCavity( facInds, backup ); }
     //@}
 
     /// \name Backup/restore mechanism for factors
@@ -242,6 +253,8 @@ class DAIAlg : public InfAlg, public GRM {
         void restoreFactor( size_t I ) { GRM::restoreFactor( I ); }
         /// Restore the factors involving the variables in \a vs from their backup copies
         void restoreFactors( const VarSet &vs ) { GRM::restoreFactors( vs ); }
+        /// Restore all factors from their backup copies
+        void restoreFactors() { GRM::restoreFactors(); }
     //@}
 };
 
@@ -251,6 +264,9 @@ typedef DAIAlg<FactorGraph> DAIAlgFG;
 
 /// Base class for inference algorithms that operate on a RegionGraph
 typedef DAIAlg<RegionGraph> DAIAlgRG;
+
+/// Base class for GLC that operates on CobwebGraph
+typedef DAIAlg<CobwebGraph> DAIAlgCG;
 
 
 /// Calculates the marginal probability distribution for \a vs using inference algorithm \a obj.

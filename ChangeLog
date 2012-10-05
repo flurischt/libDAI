@@ -1,3 +1,8 @@
+git HEAD
+--------
+* Merged Generalized Loop Correction code kindly provided by Siamak Ravanbakhsh
+
+
 libDAI-0.3.1 (2012-09-17)
 -------------------------
 
@@ -13,7 +18,7 @@ Build system improvements:
 
 Bug fixes:
 * Fixed bug (found by Sameh Khamis): define NAN (Windows)
-* Fixed bug (found by Same Khamis): add some necessary casts of size_t to BigInt (Windows)
+* Fixed bug (found by Sameh Khamis): add some necessary casts of size_t to BigInt (Windows)
 * Fixed bug (found by Yan): replaced GNU extension __PRETTY_FUNCTION__ by __FUNCTION__ (Visual Studio) or __func__ (other compilers)
 * Fixed bug (found by Andy Mueller): added GMP library invocations to swig Makefile
 * Fixed bug (found by cax): when building MatLab MEX files, GMP/MPIR libraries were not linked
