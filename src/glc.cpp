@@ -276,9 +276,15 @@ void GLC::CalcBelief( size_t i, bool isFinal ) {
 
 void GLC::CalcFactorBelief( size_t I ) {
     VarSet ns = factor(I).vars();
+    Factor tmp( ns, 1.0 );
+    size_t counter = 0;
     for( size_t R = 0; R < nrCWs(); R++ )
-        if( ns << inds2vars( INRs(R).elements() ) )
-            _factorBeliefs[ns] = CW(R).belief(ns);
+        if( ns << inds2vars( INRs(R).elements() ) ) {
+            tmp *= CW(R).belief(ns);
+            counter++;
+        }
+    if( counter > 0 )
+        _factorBeliefs[ns] = tmp ^ (1.0 / counter);
 }
 
 
@@ -291,6 +297,9 @@ Factor GLC::belief( const VarSet &ns ) const {
         map<VarSet, Factor>::const_iterator it = _factorBeliefs.find(ns);
         if( it != _factorBeliefs.end() )
             return it->second;
+        for( map<VarSet, Factor>::const_iterator it = _factorBeliefs.begin(); it != _factorBeliefs.end(); it++ )
+            if( ns << it->second.vars() )
+                return it->second.marginal( ns );
     }
     DAI_THROW(BELIEF_NOT_AVAILABLE);
     return Factor();
