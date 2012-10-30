@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( QueriesTest ) {
         x.set( i, 2.0 - i );
 
     // test min, max, sum, sumAbs, maxAbs
-    BOOST_CHECK_CLOSE( x.sum(), (Real)0.0, tol );
+    BOOST_CHECK_SMALL( x.sum(), tol );
     BOOST_CHECK_CLOSE( x.max(), (Real)2.0, tol );
     BOOST_CHECK_CLOSE( x.min(), (Real)-2.0, tol );
     BOOST_CHECK_CLOSE( x.sumAbs(), (Real)6.0, tol );
@@ -205,12 +205,12 @@ BOOST_AUTO_TEST_CASE( UnaryTransformationsTest ) {
 
     Factor y = -x;
     BOOST_CHECK_CLOSE( y[0], (Real)2.0, tol );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], (Real)-2.0, tol );
 
     y = x.abs();
     BOOST_CHECK_CLOSE( y[0], (Real)2.0, tol );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], (Real)2.0, tol );
 
     y = x.exp();
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE( UnaryTransformationsTest ) {
 
     y = x.log(true);
     BOOST_CHECK( dai::isnan( y[0] ) );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], dai::log((Real)2.0), tol );
 
     y = x.inverse(false);
@@ -235,24 +235,24 @@ BOOST_AUTO_TEST_CASE( UnaryTransformationsTest ) {
 
     y = x.inverse(true);
     BOOST_CHECK_CLOSE( y[0], (Real)-0.5, tol );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], (Real)0.5, tol );
 
     x.set( 0, 2.0 );
     y = x.normalized();
     BOOST_CHECK_CLOSE( y[0], (Real)0.5, tol );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], (Real)0.5, tol );
 
     y = x.normalized( NORMPROB );
     BOOST_CHECK_CLOSE( y[0], (Real)0.5, tol );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], (Real)0.5, tol );
 
     x.set( 0, -2.0 );
     y = x.normalized( NORMLINF );
     BOOST_CHECK_CLOSE( y[0], (Real)-1.0, tol );
-    BOOST_CHECK_CLOSE( y[1], (Real)0.0, tol );
+    BOOST_CHECK_SMALL( y[1], tol );
     BOOST_CHECK_CLOSE( y[2], (Real)1.0, tol );
 }
 
@@ -810,24 +810,24 @@ BOOST_AUTO_TEST_CASE( RelatedFunctionsTest ) {
     BOOST_CHECK_EQUAL( z[1], (Real)0.8 );
     BOOST_CHECK_EQUAL( z[2], (Real)0.4 );
 
-    BOOST_CHECK_CLOSE( dist( x, x, DISTL1 ), (Real)0.0, tol );
-    BOOST_CHECK_CLOSE( dist( y, y, DISTL1 ), (Real)0.0, tol );
+    BOOST_CHECK_SMALL( dist( x, x, DISTL1 ), tol );
+    BOOST_CHECK_SMALL( dist( y, y, DISTL1 ), tol );
     BOOST_CHECK_CLOSE( dist( x, y, DISTL1 ), (Real)(0.2 + 0.2 + 0.4), tol );
     BOOST_CHECK_CLOSE( dist( y, x, DISTL1 ), (Real)(0.2 + 0.2 + 0.4), tol );
-    BOOST_CHECK_CLOSE( dist( x, x, DISTLINF ), (Real)0.0, tol );
-    BOOST_CHECK_CLOSE( dist( y, y, DISTLINF ), (Real)0.0, tol );
+    BOOST_CHECK_SMALL( dist( x, x, DISTLINF ), tol );
+    BOOST_CHECK_SMALL( dist( y, y, DISTLINF ), tol );
     BOOST_CHECK_CLOSE( dist( x, y, DISTLINF ), (Real)0.4, tol );
     BOOST_CHECK_CLOSE( dist( y, x, DISTLINF ), (Real)0.4, tol );
-    BOOST_CHECK_CLOSE( dist( x, x, DISTTV ), (Real)0.0, tol );
-    BOOST_CHECK_CLOSE( dist( y, y, DISTTV ), (Real)0.0, tol );
+    BOOST_CHECK_SMALL( dist( x, x, DISTTV ), tol );
+    BOOST_CHECK_SMALL( dist( y, y, DISTTV ), tol );
     BOOST_CHECK_CLOSE( dist( x, y, DISTTV ), (Real)(0.5 * (0.2 + 0.2 + 0.4)), tol );
     BOOST_CHECK_CLOSE( dist( y, x, DISTTV ), (Real)(0.5 * (0.2 + 0.2 + 0.4)), tol );
-    BOOST_CHECK_CLOSE( dist( x, x, DISTKL ), (Real)0.0, tol );
-    BOOST_CHECK_CLOSE( dist( y, y, DISTKL ), (Real)0.0, tol );
+    BOOST_CHECK_SMALL( dist( x, x, DISTKL ), tol );
+    BOOST_CHECK_SMALL( dist( y, y, DISTKL ), tol );
     BOOST_CHECK_EQUAL( dist( x, y, DISTKL ), INFINITY );
     BOOST_CHECK_EQUAL( dist( y, x, DISTKL ), INFINITY );
-    BOOST_CHECK_CLOSE( dist( x, x, DISTHEL ), (Real)0.0, tol );
-    BOOST_CHECK_CLOSE( dist( y, y, DISTHEL ), (Real)0.0, tol );
+    BOOST_CHECK_SMALL( dist( x, x, DISTHEL ), tol );
+    BOOST_CHECK_SMALL( dist( y, y, DISTHEL ), tol );
     BOOST_CHECK_CLOSE( dist( x, y, DISTHEL ), (Real)(0.5 * (0.2 + dai::pow(std::sqrt(0.8) - std::sqrt(0.6), 2.0) + 0.4)), tol );
     BOOST_CHECK_CLOSE( dist( y, x, DISTHEL ), (Real)(0.5 * (0.2 + dai::pow(std::sqrt(0.8) - std::sqrt(0.6), 2.0) + 0.4)), tol );
     x.set( 1, 0.7 ); x.set( 2, 0.1 );
