@@ -1,5 +1,6 @@
 git HEAD
 --------
+* Fixed division-by-zero issue in pow() which caused problems for GLC+ with sparse factors
 * Fixed bugs in unit test prob_test.cpp: replaced all occurences of
   BOOST_CHECK_CLOSE(...,(Real)0.0,tol) with BOOST_CHECK_SMALL(...,tol)
 * Merged Generalized Loop Correction code kindly provided by Siamak Ravanbakhsh

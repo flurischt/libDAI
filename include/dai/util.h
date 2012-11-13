@@ -124,9 +124,15 @@ inline Real exp( Real x ) {
     return std::exp(x);
 }
 
-/// Returns \a to the power \a y
+/// Returns \a x to the power \a y
+/** We use the convention that division by zero yields zero;
+ *  for powers, this means that if \a x == 0.0 and \a y < 0.0, we 
+ *  return 0.0 instead of generating an error.
+ */
 inline Real pow( Real x, Real y ) {
     errno = 0;
+    if( x == 0.0 && y < 0.0 )
+        return 0.0;
     Real result = std::pow(x, y);
     DAI_DEBASSERT( errno == 0 );
     return result;
