@@ -264,9 +264,4 @@ void CobwebGraph::setExtnFact() {
 }
 
 
-ostream& operator<< ( ostream& os, const CobwebGraph& rg ) {
-    return os;
-}
-
-
 } // end of namespace dai

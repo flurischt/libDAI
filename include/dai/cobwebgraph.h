@@ -29,22 +29,10 @@ namespace dai {
 
 /// A CobwebGraph is a special type of region graph used by the GLC algorithm
 /** \author Siamak Ravanbakhsh
+ *  \todo Implement unit test for Cobwebgraph
  */
 class CobwebGraph : public FactorGraph {
-    protected:
-        /// Vector of variable indices internal to each region (r)
-        std::vector<SmallSet<size_t> >        _INRs;
-        /// Vector of variable indices on the boundary of each region (\ominus r)
-        std::vector<SmallSet<size_t> >        _EXRs;
-        /// Index of factors in each region
-        std::vector<SmallSet<size_t> >        _Rfs;
-        /// Index of factors internal to each region, i.e., all its variables are internal to the region
-        std::vector<SmallSet<size_t> >        _Rifs;
-        /// Index of factors that bridge each region, i.e., not all its variables are internal to the region
-        std::vector<SmallSet<size_t> >        _Rxfs;
-        /// The vector of domain of messages leaving each region (\ominus r_{p,q})
-        std::vector<std::vector<VarSet> >     _outM;
-
+    public:
         /// The information in connection between two regions
         struct Connection {
             /// Index of the first region (p)
@@ -78,6 +66,19 @@ class CobwebGraph : public FactorGraph {
          */
         DAI_ENUM(NeighborType,ALL,TOP,CLOSEST);
 
+    protected:
+        /// Vector of variable indices internal to each region (r)
+        std::vector<SmallSet<size_t> >        _INRs;
+        /// Vector of variable indices on the boundary of each region (\ominus r)
+        std::vector<SmallSet<size_t> >        _EXRs;
+        /// Index of factors in each region
+        std::vector<SmallSet<size_t> >        _Rfs;
+        /// Index of factors internal to each region, i.e., all its variables are internal to the region
+        std::vector<SmallSet<size_t> >        _Rifs;
+        /// Index of factors that bridge each region, i.e., not all its variables are internal to the region
+        std::vector<SmallSet<size_t> >        _Rxfs;
+        /// The vector of domain of messages leaving each region (\ominus r_{p,q})
+        std::vector<std::vector<VarSet> >     _outM;
         /// Vector of all connections to each region
         std::vector<std::vector<Connection> > _M;
 
@@ -92,7 +93,6 @@ class CobwebGraph : public FactorGraph {
 
         /// Whether a given set of region vars makes a partitioning or not
         bool isPartition;
-
 
     public:
     /// \name Constructors and destructors
@@ -241,7 +241,16 @@ class CobwebGraph : public FactorGraph {
         }
 
         /// Writes a cobweb graph to an output stream
-        friend std::ostream& operator<< ( std::ostream& os, const CobwebGraph& rg );
+        friend std::ostream& operator<< ( std::ostream& /*os*/, const CobwebGraph& /*rg*/ ) {
+            DAI_THROW(NOT_IMPLEMENTED);
+        }
+
+        /// Formats a cobweb graph as a string
+        std::string toString() const {
+            std::stringstream ss;
+            ss << *this;
+            return ss.str();
+        }
 
         /// Writes a cobweb graph to a GraphViz .dot file
         /** \note Not implemented yet

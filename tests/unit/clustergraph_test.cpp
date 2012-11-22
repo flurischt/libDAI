@@ -540,4 +540,6 @@ BOOST_AUTO_TEST_CASE( IOTest ) {
     std::string s;
     getline( ss, s );
     BOOST_CHECK_EQUAL( s, "({x0, x1}, {x1, x2}, {x2, x3}, {x1, x3})" );
+
+    BOOST_CHECK_EQUAL( G.toString(), "({x0, x1}, {x1, x2}, {x2, x3}, {x1, x3})" );
 }

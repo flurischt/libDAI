@@ -92,7 +92,7 @@ Factor ExactInf::calcMarginal( const VarSet &vs ) const {
 }
 
         
-std::vector<std::size_t> ExactInf::findMaximum() const {
+std::vector<size_t> ExactInf::findMaximum() const {
     Factor P;
     for( size_t I = 0; I < nrFactors(); I++ )
         P *= factor(I);

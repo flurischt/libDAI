@@ -124,7 +124,7 @@ class InfAlg {
         /** \note Before this method is called, run() should have been called.
          *  \throw NOT_IMPLEMENTED if not implemented/supported
          */
-        virtual std::vector<std::size_t> findMaximum() const { DAI_THROW(NOT_IMPLEMENTED); }
+        virtual std::vector<size_t> findMaximum() const { DAI_THROW(NOT_IMPLEMENTED); }
 
         /// Returns maximum difference between single variable beliefs in the last iteration.
         /** \throw NOT_IMPLEMENTED if not implemented/supported

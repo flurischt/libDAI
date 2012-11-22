@@ -748,6 +748,8 @@ BOOST_AUTO_TEST_CASE( IOTest ) {
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "0          3" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "1          3" );
 
+    BOOST_CHECK_EQUAL( G.toString(), "3\n\n2\n0 1 \n2 2 \n4\n0          1\n1          1\n2          1\n3          1\n\n2\n1 2 \n2 2 \n4\n0          2\n1          2\n2          2\n3          2\n\n1\n1 \n2 \n2\n0          3\n1          3\n" );
+
     ss << G;
     FactorGraph G3;
     ss >> G3;
@@ -758,5 +760,16 @@ BOOST_AUTO_TEST_CASE( IOTest ) {
         BOOST_CHECK( G.factor(I).vars() == G3.factor(I).vars() );
         for( size_t s = 0; s < G.factor(I).nrStates(); s++ )
             BOOST_CHECK_CLOSE( G.factor(I)[s], G3.factor(I)[s], tol );
+    }
+
+    FactorGraph G4;
+    G4.fromString( G.toString() );
+    BOOST_CHECK( G.vars() == G4.vars() );
+    BOOST_CHECK( G.bipGraph() == G4.bipGraph() );
+    BOOST_CHECK_EQUAL( G.nrFactors(), G4.nrFactors() );
+    for( size_t I = 0; I < G.nrFactors(); I++ ) {
+        BOOST_CHECK( G.factor(I).vars() == G4.factor(I).vars() );
+        for( size_t s = 0; s < G.factor(I).nrStates(); s++ )
+            BOOST_CHECK_CLOSE( G.factor(I)[s], G4.factor(I)[s], tol );
     }
 }

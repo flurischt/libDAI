@@ -1029,4 +1029,6 @@ BOOST_AUTO_TEST_CASE( IOTest ) {
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "\ta0 -> b0;" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "\ta1 -> b0;" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "}" );
+
+    BOOST_CHECK_EQUAL( G.toString(), "digraph RegionGraph {\nnode[shape=box];\n\ta0 [label=\"a0: {x0, x1}, c=1\"];\n\ta1 [label=\"a1: {x1, x2}, c=1\"];\nnode[shape=ellipse];\n\tb0 [label=\"b0: {x1}, c=-1\"];\n\ta0 -> b0;\n\ta1 -> b0;\n}\n" );
 }

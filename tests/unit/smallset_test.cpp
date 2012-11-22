@@ -7,6 +7,7 @@
 
 
 #include <dai/smallset.h>
+#include <sstream>
 #include <vector>
 
 
@@ -824,4 +825,16 @@ BOOST_AUTO_TEST_CASE( OperatorTest ) {
     BOOST_CHECK(  (x123 >> x13 ) );
     BOOST_CHECK(  (x123 >> x23 ) );
     BOOST_CHECK(  (x123 >> x123) );
+}
+
+
+BOOST_AUTO_TEST_CASE( IOTest ) {
+    SmallSet<size_t> u( 0, 5 );
+    u |= 1;
+    std::stringstream ss;
+    std::string s;
+    ss << u;
+    std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "{0, 1, 5}" );
+    
+    BOOST_CHECK_EQUAL( u.toString(), "{0, 1, 5}" );
 }

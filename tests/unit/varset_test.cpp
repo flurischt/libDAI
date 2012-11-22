@@ -806,6 +806,7 @@ BOOST_AUTO_TEST_CASE( StreamTest ) {
     std::string s;
     std::getline( ss, s );
     BOOST_CHECK_EQUAL( s, "{x1, x2}" );
+    BOOST_CHECK_EQUAL( x.toString(), s );
 }
 
 

@@ -845,6 +845,9 @@ BOOST_AUTO_TEST_CASE( RelatedFunctionsTest ) {
     std::getline( ss2, s );
     BOOST_CHECK_EQUAL( s, std::string("({x0}, (0.1, 0.5, 0.4))") );
 
+    BOOST_CHECK_EQUAL( x.toString(), "({x0}, (0.2, 0.7, 0.1))" );
+    BOOST_CHECK_EQUAL( y.toString(), "({x0}, (0.1, 0.5, 0.4))" );
+
     z = min( x, y );
     BOOST_CHECK_EQUAL( z[0], (Real)0.1 );
     BOOST_CHECK_EQUAL( z[1], (Real)0.5 );

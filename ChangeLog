@@ -1,5 +1,8 @@
 git HEAD
 --------
+* Extended SWIG python interface (inspired by Kyle Ellrott): inference is possible in Python now!
+* Added toString() formatting functions to the classes that had an output streaming operator<<
+* Replaced all occurrences of std::size_t by size_t to avoid SWIG problems
 * Fixed division-by-zero issue in pow() which caused problems for GLC+ with sparse factors
 * Fixed bugs in unit test prob_test.cpp: replaced all occurences of
   BOOST_CHECK_CLOSE(...,(Real)0.0,tol) with BOOST_CHECK_SMALL(...,tol)

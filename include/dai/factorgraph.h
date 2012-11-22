@@ -361,6 +361,19 @@ class FactorGraph {
 
         /// Writes a factor graph to a GraphViz .dot file
         virtual void printDot( std::ostream& os ) const;
+
+        /// Formats a factor graph as a string
+        std::string toString() const {
+            std::stringstream ss;
+            ss << *this;
+            return ss.str();
+        }
+        
+        /// Reads a factor graph from a string
+        void fromString( const std::string& s ) {
+            std::stringstream ss( s );
+            ss >> *this;
+        }
     //@}
 
     private:

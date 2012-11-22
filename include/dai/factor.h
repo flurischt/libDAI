@@ -177,6 +177,13 @@ class TFactor {
         bool operator==( const TFactor<T>& y ) const {
             return (_vs == y._vs) && (_p == y._p);
         }
+
+        /// Formats a factor as a string
+        std::string toString() const {
+            std::stringstream ss;
+            ss << *this;
+            return ss.str();
+        }
     //@}
 
     /// \name Unary transformations

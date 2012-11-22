@@ -102,7 +102,7 @@ typedef mpz_class BigInt;
 
 /// Safe down-cast of big integer to size_t
 inline size_t BigInt_size_t( const BigInt &N ) {
-    DAI_ASSERT( N <= (BigInt)std::numeric_limits<std::size_t>::max() );
+    DAI_ASSERT( N <= (BigInt)std::numeric_limits<size_t>::max() );
     return N.get_ui();
 }
 

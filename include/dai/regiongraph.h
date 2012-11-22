@@ -244,6 +244,13 @@ class RegionGraph : public FactorGraph {
         /// Writes a region graph to an output stream
         friend std::ostream& operator<< ( std::ostream& os, const RegionGraph& rg );
 
+        /// Formats a region graph as a string
+        std::string toString() const {
+            std::stringstream ss;
+            ss << *this;
+            return ss.str();
+        }
+
         /// Writes a region graph to a GraphViz .dot file
         /** \note Not implemented yet
          */

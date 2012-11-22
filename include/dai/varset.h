@@ -145,6 +145,13 @@ class VarSet : public SmallSet<Var> {
             os << "}";
             return( os );
         }
+
+        /// Formats a VarSet as a string
+        std::string toString() const {
+            std::stringstream ss;
+            ss << *this;
+            return ss.str();
+        }
     //@}
 };
 

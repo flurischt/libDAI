@@ -189,7 +189,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray*prhs[] ) {
     }
 
     if( nlhs >= 5 ) {
-        std::vector<std::size_t> map_state;
+        std::vector<size_t> map_state;
         bool supported = true;
         try {
             map_state = jt.findMaximum();

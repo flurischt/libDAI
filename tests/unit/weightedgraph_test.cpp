@@ -74,6 +74,7 @@ BOOST_AUTO_TEST_CASE( DEdgeTest ) {
     std::string s;
     ss >> s;
     BOOST_CHECK_EQUAL( s, "(5->3)" );
+    BOOST_CHECK_EQUAL( c.toString(), s );
 }
 
 
@@ -134,9 +135,11 @@ BOOST_AUTO_TEST_CASE( UEdgeTest ) {
     ss << c;
     ss >> s;
     BOOST_CHECK_EQUAL( s, "{3--5}" );
+    BOOST_CHECK_EQUAL( c.toString(), s );
     ss << b;
     ss >> s;
     BOOST_CHECK_EQUAL( s, "{3--5}" );
+    BOOST_CHECK_EQUAL( b.toString(), s );
 }
 
 

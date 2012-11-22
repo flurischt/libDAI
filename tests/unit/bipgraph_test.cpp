@@ -417,4 +417,6 @@ BOOST_AUTO_TEST_CASE( StreamTest ) {
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "\tx1 -- y1;" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "\tx1 -- y2;" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "}" );
+
+    BOOST_CHECK_EQUAL( G.toString(), "graph BipartiteGraph {\nnode[shape=circle,width=0.4,fixedsize=true];\n\tx0;\n\tx1;\nnode[shape=box,width=0.3,height=0.3,fixedsize=true];\n\ty0;\n\ty1;\n\ty2;\n\tx0 -- y0;\n\tx0 -- y1;\n\tx1 -- y1;\n\tx1 -- y2;\n}\n" );
 }

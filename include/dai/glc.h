@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <set>
-#include <iostream>
 #include <string>
 #include <dai/util.h>
 #include <dai/daialg.h>

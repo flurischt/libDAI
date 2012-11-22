@@ -454,4 +454,6 @@ BOOST_AUTO_TEST_CASE( StreamTest ) {
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "\tx1 -- x3;" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "\tx2 -- x3;" );
     std::getline( ss, s ); BOOST_CHECK_EQUAL( s, "}" );
+
+    BOOST_CHECK_EQUAL( G.toString(), "graph GraphAL {\nnode[shape=circle,width=0.4,fixedsize=true];\n\tx0;\n\tx1;\n\tx2;\n\tx3;\n\tx0 -- x1;\n\tx0 -- x2;\n\tx1 -- x3;\n\tx2 -- x3;\n}\n" );
 }

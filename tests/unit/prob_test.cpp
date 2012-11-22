@@ -751,18 +751,20 @@ BOOST_AUTO_TEST_CASE( RelatedFunctionsTest ) {
     std::string s;
     std::getline( ss, s );
 #ifdef DAI_SPARSE
-    BOOST_CHECK_EQUAL( s, std::string("(size:4, def:0.25, 0:0.2, 1:0.7, 2:0.1)") );
+    BOOST_CHECK_EQUAL( s, "(size:4, def:0.25, 0:0.2, 1:0.7, 2:0.1)" );
 #else
-    BOOST_CHECK_EQUAL( s, std::string("(0.2, 0.7, 0.1, 0.25)") );
+    BOOST_CHECK_EQUAL( s, "(0.2, 0.7, 0.1, 0.25)" );
 #endif
+    BOOST_CHECK_EQUAL( xx.toString(), s );
     std::stringstream ss2;
     ss2 << yy;
     std::getline( ss2, s );
 #ifdef DAI_SPARSE
-    BOOST_CHECK_EQUAL( s, std::string("(size:4, def:0.25, 0:0.1, 1:0.5, 2:0.4)") );
+    BOOST_CHECK_EQUAL( s, "(size:4, def:0.25, 0:0.1, 1:0.5, 2:0.4)" );
 #else
-    BOOST_CHECK_EQUAL( s, std::string("(0.1, 0.5, 0.4, 0.25)") );
+    BOOST_CHECK_EQUAL( s, "(0.1, 0.5, 0.4, 0.25)" );
 #endif
+    BOOST_CHECK_EQUAL( yy.toString(), s );
 
     z = min( x, y );
     BOOST_CHECK_EQUAL( z[0], (Real)0.1 );

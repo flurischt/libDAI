@@ -67,4 +67,5 @@ BOOST_AUTO_TEST_CASE( StreamTest ) {
     std::string s;
     ss >> s;
     BOOST_CHECK_EQUAL( s, "x5" );
+    BOOST_CHECK_EQUAL( x.toString(), s );
 }
