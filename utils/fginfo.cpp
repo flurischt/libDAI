@@ -95,6 +95,7 @@ int main( int argc, char *argv[] ) {
         cout << "Pairwise interactions? " << fg.isPairwise() << endl;
         
         // Calculate treewidth using various heuristics
+#ifdef DAI_WITH_JTREE
         std::pair<size_t,BigInt> tw;
         cout << "Treewidth (MinNeighbors):     ";
         try {
@@ -139,6 +140,7 @@ int main( int argc, char *argv[] ) {
             else
                 cout << "an exception occurred" << endl;
         }
+#endif
         
         // Calculate total state space
         BigInt stsp = 1;

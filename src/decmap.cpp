@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_DECMAP
+
+
 #include <dai/alldai.h>
 
 
@@ -177,3 +181,6 @@ Real DecMAP::run() {
 
 
 } // end of namespace dai
+
+
+#endif

@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_CBP
+
+
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -631,3 +635,6 @@ string CBP::Properties::toString() const {
 }
 } // end of namespace dai
 /* }}} END OF GENERATED CODE */
+
+
+#endif

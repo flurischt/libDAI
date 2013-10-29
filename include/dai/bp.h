@@ -15,6 +15,10 @@
 #define __defined_libdai_bp_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_BP
+
+
 #include <string>
 #include <dai/daialg.h>
 #include <dai/factorgraph.h>
@@ -261,6 +265,9 @@ class BP : public DAIAlgFG {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

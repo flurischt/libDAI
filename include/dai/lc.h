@@ -14,6 +14,10 @@
 #define __defined_libdai_lc_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_LC
+
+
 #include <string>
 #include <dai/daialg.h>
 #include <dai/enum.h>
@@ -141,6 +145,9 @@ class LC : public DAIAlgFG {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

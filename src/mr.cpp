@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_MR
+
+
 #include <cstdio>
 #include <ctime>
 #include <cmath>
@@ -481,3 +485,6 @@ MR::MR( const FactorGraph &fg, const PropertySet &opts ) : DAIAlgFG(fg), support
 
 
 } // end of namespace dai
+
+
+#endif

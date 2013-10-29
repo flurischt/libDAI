@@ -14,6 +14,10 @@
 #define __defined_libdai_gibbs_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_GIBBS
+
+
 #include <dai/daialg.h>
 #include <dai/factorgraph.h>
 #include <dai/properties.h>
@@ -141,6 +145,9 @@ std::vector<size_t> getGibbsState( const FactorGraph &fg, size_t maxiter );
 /** \example example_sprinkler_gibbs.cpp
  *  This example shows how to use the Gibbs class.
  */
+
+
+#endif
 
 
 #endif

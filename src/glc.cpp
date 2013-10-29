@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_GLC
+
+
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -598,3 +602,6 @@ void GLC::initCWs(){
 
 
 } // end of namespace dai
+
+
+#endif

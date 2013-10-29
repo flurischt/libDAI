@@ -14,6 +14,10 @@
 #define __defined_libdai_fbp_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_FBP
+
+
 #include <string>
 #include <dai/daialg.h>
 #include <dai/factorgraph.h>
@@ -118,6 +122,9 @@ class FBP : public BP {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

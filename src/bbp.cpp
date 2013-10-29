@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_CBP
+
+
 #include <dai/bp.h>
 #include <dai/bbp.h>
 #include <dai/gibbs.h>
@@ -1189,3 +1193,6 @@ string BBP::Properties::toString() const {
 }
 } // end of namespace dai
 /* }}} END OF GENERATED CODE */
+
+
+#endif

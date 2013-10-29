@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_LC
+
+
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -338,3 +342,6 @@ Real LC::run() {
 
 
 } // end of namespace dai
+
+
+#endif

@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_HAK
+
+
 #include <map>
 #include <dai/hak.h>
 #include <dai/util.h>
@@ -611,3 +615,6 @@ Real HAK::logZ() const {
 
 
 } // end of namespace dai
+
+
+#endif

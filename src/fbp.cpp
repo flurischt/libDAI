@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_FBP
+
+
 #include <dai/fbp.h>
 
 
@@ -154,3 +158,6 @@ void FBP::construct() {
 
 
 } // end of namespace dai
+
+
+#endif

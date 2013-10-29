@@ -14,6 +14,10 @@
 /// \todo Implement GBP parent-child  algorithm.
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_HAK
+
+
 #ifndef __defined_libdai_hak_h
 #define __defined_libdai_hak_h
 
@@ -158,6 +162,9 @@ class HAK : public DAIAlgRG {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

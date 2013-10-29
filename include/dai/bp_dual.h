@@ -16,6 +16,10 @@
 #define __defined_libdai_bp_dual_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_CBP
+
+
 #include <dai/daialg.h>
 #include <dai/factorgraph.h>
 #include <dai/enum.h>
@@ -130,6 +134,9 @@ class BP_dual {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

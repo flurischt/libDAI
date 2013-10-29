@@ -14,6 +14,10 @@
 #define __defined_libdai_mr_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_MR
+
+
 #include <vector>
 #include <string>
 #include <dai/factorgraph.h>
@@ -181,6 +185,9 @@ class MR : public DAIAlgFG {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

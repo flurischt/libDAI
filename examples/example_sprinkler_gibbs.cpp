@@ -16,6 +16,7 @@ using namespace std;
 using namespace dai;
 
 int main() {
+#ifdef DAI_WITH_GIBBS
     // This example program illustrates how to use Gibbs sampling
     // to sample from a joint probability distribution described
     // by a factor graph, using the sprinkler network example discussed at
@@ -69,4 +70,7 @@ int main() {
     outfile.close();
 
     return 0;
+#else
+    cout << "libDAI was configured without Gibbs (this can be changed in include/dai/dai_config.h)." << endl;
+#endif
 }

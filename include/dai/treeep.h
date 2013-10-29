@@ -16,6 +16,10 @@
 #define __defined_libdai_treeep_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_TREEEP
+
+
 #include <vector>
 #include <string>
 #include <dai/daialg.h>
@@ -202,6 +206,9 @@ class TreeEP : public JTree {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

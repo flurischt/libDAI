@@ -15,6 +15,10 @@
 #define ___defined_libdai_bbp_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_CBP
+
+
 #include <vector>
 #include <utility>
 
@@ -417,6 +421,9 @@ Real numericBBPTest( const InfAlg &bp, const std::vector<size_t> *state, const P
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

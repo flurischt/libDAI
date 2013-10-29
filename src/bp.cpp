@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_BP
+
+
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -471,3 +475,6 @@ void BP::updateResidual( size_t i, size_t _I, Real r ) {
 
 
 } // end of namespace dai
+
+
+#endif

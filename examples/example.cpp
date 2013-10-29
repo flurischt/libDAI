@@ -19,6 +19,7 @@ using namespace std;
 
 
 int main( int argc, char *argv[] ) {
+#if defined(DAI_WITH_BP) && defined(DAI_WITH_JTREE)
     if ( argc != 2 && argc != 3 ) {
         cout << "Usage: " << argv[0] << " <filename.fg> [maxstates]" << endl << endl;
         cout << "Reads factor graph <filename.fg> and runs" << endl;
@@ -194,4 +195,7 @@ int main( int argc, char *argv[] ) {
     }
 
     return 0;
+#else
+    cout << "libDAI was configured without BP or JunctionTree (this can be changed in include/dai/dai_config.h)." << endl;
+#endif
 }

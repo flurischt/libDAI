@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_GIBBS
+
+
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -271,3 +275,6 @@ std::vector<size_t> getGibbsState( const FactorGraph &fg, size_t maxiter ) {
 
 
 } // end of namespace dai
+
+
+#endif

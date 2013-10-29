@@ -42,58 +42,7 @@ endif
 
 # Define conditional build targets
 NAMES:=graph dag bipgraph varset daialg alldai clustergraph factor factorgraph properties regiongraph cobwebgraph util weightedgraph exceptions exactinf evidence emalg io
-ifdef WITH_BP
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_BP
-  NAMES:=$(NAMES) bp
-endif
-ifdef WITH_FBP
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_FBP
-  NAMES:=$(NAMES) fbp
-endif
-ifdef WITH_TRWBP
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_TRWBP
-  NAMES:=$(NAMES) trwbp
-endif
-ifdef WITH_MF
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_MF
-  NAMES:=$(NAMES) mf
-endif
-ifdef WITH_HAK
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_HAK
-  NAMES:=$(NAMES) hak
-endif
-ifdef WITH_LC
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_LC
-  NAMES:=$(NAMES) lc
-endif
-ifdef WITH_TREEEP
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_TREEEP
-  NAMES:=$(NAMES) treeep
-endif
-ifdef WITH_JTREE
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_JTREE
-  NAMES:=$(NAMES) jtree
-endif
-ifdef WITH_MR
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_MR
-  NAMES:=$(NAMES) mr
-endif
-ifdef WITH_GIBBS
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_GIBBS
-  NAMES:=$(NAMES) gibbs
-endif
-ifdef WITH_CBP
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_CBP
-  NAMES:=$(NAMES) bbp cbp bp_dual
-endif
-ifdef WITH_DECMAP
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_DECMAP
-  NAMES:=$(NAMES) decmap
-endif
-ifdef WITH_GLC
-  WITHFLAGS:=$(WITHFLAGS) -DDAI_WITH_GLC
-  NAMES:=$(NAMES) glc 
-endif
+NAMES:=$(NAMES) bp fbp trwbp mf hak lc treeep jtree mr gibbs bbp cbp bp_dual decmap glc
 
 
 # Define standard libDAI header dependencies, source file names and object file names
@@ -126,9 +75,7 @@ all : $(TARGETS)
 	@echo libDAI built successfully!
 
 EXAMPLES=$(foreach name,example example_bipgraph example_varset example_permute example_sprinkler example_sprinkler_em,examples/$(name)$(EE))
-ifdef WITH_GIBBS
-  EXAMPLES:=$(EXAMPLES) examples/example_sprinkler_gibbs$(EE)
-endif
+EXAMPLES:=$(EXAMPLES) examples/example_sprinkler_gibbs$(EE)
 ifdef WITH_CIMG
   EXAMPLES:=$(EXAMPLES) examples/example_imagesegmentation$(EE)
 endif
@@ -236,11 +183,7 @@ tests/testdai$(EE) : tests/testdai.cpp $(HEADERS) $(LIB)/libdai$(LE)
 tests/testem/testem$(EE) : tests/testem/testem.cpp $(HEADERS) $(LIB)/libdai$(LE)
 	$(CC) $(CCO)$@ $< $(LIBS) $(BOOSTLIBS_PO)
 tests/testbbp$(EE) : tests/testbbp.cpp $(HEADERS) $(LIB)/libdai$(LE)
-ifdef WITH_CBP
 	$(CC) $(CCO)$@ $< $(LIBS)
-else
-	@echo Skipping $@
-endif
 
 
 # MATLAB INTERFACE

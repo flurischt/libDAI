@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_MF
+
+
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -223,3 +227,6 @@ void MF::init( const VarSet &ns ) {
 
 
 } // end of namespace dai
+
+
+#endif

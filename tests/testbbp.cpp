@@ -8,7 +8,6 @@
 
 #include <iostream>
 #include <dai/alldai.h>
-#include <dai/bbp.h>
 
 
 using namespace dai;
@@ -16,6 +15,7 @@ using namespace std;
 
 
 int main( int argc, char *argv[] ) {
+#ifdef DAI_WITH_CBP
     if ( argc != 2 ) {
         cout << "Usage: " << argv[0] << " <filename.fg>" << endl << endl;
         cout << "Reads factor graph <filename.fg> and verifies" << endl;
@@ -104,4 +104,7 @@ int main( int argc, char *argv[] ) {
     }
 
     return 0;
+#else
+    cout << "libDAI is configured not to include CBP (this can be changed in include/dai/dai_config.h)." << endl;
+#endif
 }

@@ -14,6 +14,10 @@
 #define __defined_libdai_jtree_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_JTREE
+
+
 #include <vector>
 #include <string>
 #include <dai/daialg.h>
@@ -206,6 +210,9 @@ std::pair<size_t,BigInt> boundTreewidth( const FactorGraph &fg, greedyVariableEl
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

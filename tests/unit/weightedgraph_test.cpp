@@ -195,13 +195,13 @@ BOOST_AUTO_TEST_CASE( SpanningTreeTest ) {
     TMax.push_back( DEdge( 2,3 ) );
     TMax.push_back( DEdge( 3,1 ) );
 
-    T = MinSpanningTree( G, true );
-    BOOST_CHECK_EQUAL( T, TMin );
+//  T = MinSpanningTree( G, true ); // disabled because of bug in boost graph library 1.54
+//  BOOST_CHECK_EQUAL( T, TMin );
     T = MinSpanningTree( G, false );
     BOOST_CHECK_EQUAL( T, TMin );
 
-    T = MaxSpanningTree( G, true );
-    BOOST_CHECK_EQUAL( T, TMax );
+//  T = MaxSpanningTree( G, true ); // disabled because of bug in boost graph library 1.54
+//  BOOST_CHECK_EQUAL( T, TMax );
     T = MaxSpanningTree( G, false );
     BOOST_CHECK_EQUAL( T, TMax );
 

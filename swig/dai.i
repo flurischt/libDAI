@@ -14,19 +14,6 @@
 //%include "std_set.i"  /* for python */
 
 %{
-#define DAI_WITH_BP 1
-#define DAI_WITH_FBP 1
-#define DAI_WITH_TRWBP 1
-#define DAI_WITH_MF 1
-#define DAI_WITH_HAK 1
-#define DAI_WITH_LC 1
-#define DAI_WITH_TREEEP 1
-#define DAI_WITH_JTREE 1
-#define DAI_WITH_MR 1
-#define DAI_WITH_GIBBS 1
-#define DAI_WITH_CBP 1
-#define DAI_WITH_DECMAP 1
-#define DAI_WITH_GLC 1
 #include "../include/dai/alldai.h"
 
 using namespace dai;
@@ -73,8 +60,8 @@ using namespace dai;
 %extend dai::TProb<dai::Real> {
     inline dai::Real __getitem__(int i) const {return (*self).get(i);} /* for python */
     inline void __setitem__(int i,dai::Real d) {(*self).set(i,d);}   /* for python */
-    inline dai::Real __paren(int i) const {return (*self).get(i);}     /* for octave */
-    inline void __paren_asgn(int i,dai::Real d) {(*self).set(i,d);}  /* for octave */
+    inline dai::Real __paren__(int i) const {return (*self).get(i);}     /* for octave */
+    inline void __paren_asgn__(int i,dai::Real d) {(*self).set(i,d);}  /* for octave */
     inline const char* __str__() const { return (*self).toString().c_str(); }  /* for python */
     inline std::string __str() const { return (*self).toString(); }  /* for octave */
 };

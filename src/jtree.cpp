@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_JTREE
+
+
 #include <iostream>
 #include <stack>
 #include <dai/jtree.h>
@@ -138,8 +142,8 @@ void JTree::construct( const FactorGraph &fg, const std::vector<VarSet> &cl, boo
     if( props.verbose >= 3 )
         cerr << "Weightedgraph: " << JuncGraph << endl;
 
-    // Construct maximal spanning tree using Prim's algorithm
-    RTree = MaxSpanningTree( JuncGraph, true );
+    // Construct maximal spanning tree
+    RTree = MaxSpanningTree( JuncGraph, /*true*/false ); // WORKAROUND FOR BUG IN BOOST GRAPH LIBRARY VERSION 1.54
     if( props.verbose >= 3 )
         cerr << "Spanning tree: " << RTree << endl;
     DAI_DEBASSERT( RTree.size() == cl.size() - 1 );
@@ -646,3 +650,6 @@ std::vector<size_t> JTree::findMaximum() const {
 
 
 } // end of namespace dai
+
+
+#endif

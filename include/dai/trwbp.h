@@ -14,6 +14,10 @@
 #define __defined_libdai_trwbp_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_TRWBP
+
+
 #include <string>
 #include <dai/daialg.h>
 #include <dai/factorgraph.h>
@@ -135,6 +139,9 @@ class TRWBP : public BP {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

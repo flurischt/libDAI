@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_CBP
+
+
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -145,3 +149,6 @@ void BP_dual::calcBeliefF( size_t I ) {
 
 
 } // end of namespace dai
+
+
+#endif

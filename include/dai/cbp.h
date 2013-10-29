@@ -14,6 +14,10 @@
 #define __defined_libdai_cbp_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_CBP
+
+
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 
@@ -246,6 +250,9 @@ std::pair<size_t, size_t> BBPFindClampVar( const InfAlg &in_bp, bool clampingVar
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

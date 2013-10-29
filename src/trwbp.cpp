@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_TRWBP
+
+
 #include <dai/trwbp.h>
 
 
@@ -174,7 +178,7 @@ void TRWBP::sampleWeights( size_t nrTrees ) {
     // now repeatedly change the random weights, find the minimal spanning tree, and add it to the weights
     for( size_t nr = 0; nr < nrTrees; nr++ ) {
         // find minimal spanning tree
-        RootedTree randTree = MinSpanningTree( wg, true );
+        RootedTree randTree = MinSpanningTree( wg, /*true*/false ); // WORKAROUND FOR BUG IN BOOST GRAPH LIBRARY VERSION 1.54
         // add it to the weights
         addTreeToWeights( randTree );
         // resample weights of the graph
@@ -196,3 +200,6 @@ void TRWBP::sampleWeights( size_t nrTrees ) {
 
 
 } // end of namespace dai
+
+
+#endif

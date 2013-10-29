@@ -19,6 +19,7 @@
 #define __defined_libdai_alldai_h
 
 
+#include <dai/dai_config.h>
 #include <string>
 #include <dai/daialg.h>
 #include <dai/properties.h>

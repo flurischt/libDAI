@@ -15,6 +15,10 @@
 #define __defined_libdai_glc_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_GLC
+
+
 #include <algorithm>
 #include <set>
 #include <string>
@@ -360,6 +364,9 @@ class GLC : public DAIAlgCG {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif

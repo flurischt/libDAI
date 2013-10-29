@@ -6,6 +6,10 @@
  */
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_TREEEP
+
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -120,7 +124,7 @@ TreeEP::TreeEP( const FactorGraph &fg, const PropertySet &opts ) : JTree(fg, opt
             // find maximal spanning tree
             if( props.verbose >= 3 )
                 cerr << "WeightedGraph: " << wg << endl;
-            RootedTree t = MaxSpanningTree( wg, true );
+            RootedTree t = MaxSpanningTree( wg, /*true*/false ); // WORKAROUND FOR BUG IN BOOST GRAPH LIBRARY VERSION 1.54
             if( props.verbose >= 3 )
                 cerr << "Spanningtree: " << t << endl;
             construct( fg, t );
@@ -380,3 +384,6 @@ Real TreeEP::TreeEPSubTree::logZ( const std::vector<Factor> &Qa, const std::vect
 
 
 } // end of namespace dai
+
+
+#endif

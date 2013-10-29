@@ -14,6 +14,10 @@
 #define __defined_libdai_decmap_h
 
 
+#include <dai/dai_config.h>
+#ifdef DAI_WITH_DECMAP
+
+
 #include <dai/daialg.h>
 
 
@@ -88,6 +92,9 @@ class DecMAP : public DAIAlgFG {
 
 
 } // end of namespace dai
+
+
+#endif
 
 
 #endif
