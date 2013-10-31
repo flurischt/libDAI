@@ -8,6 +8,8 @@
 
 %module dai
 
+#include <fstream>
+
 %include "std_string.i"
 %include "std_vector.i"
 %template(IntVector) std::vector<size_t>;
@@ -109,6 +111,11 @@ typedef std::vector<VecFactor> VecVecFactor;
 %extend dai::FactorGraph {
     inline const char* __str__() const { return (*self).toString().c_str(); }  /* for python */
     inline std::string __str() const { return (*self).toString(); }  /* for octave */
+    inline void printDot(const std::string& fname) const {
+      std::ofstream o(fname.c_str(), std::ofstream::out);
+      self->printDot(o);
+      o.close();
+    }
 }
 
 // ************************************************************************************************

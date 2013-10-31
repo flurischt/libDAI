@@ -1,5 +1,9 @@
 git HEAD
 --------
+* [Julien Rebetez] added FactorGraph::printDot() to SWIG interface
+* Build system: optional compilation targets are now set in include/dai/dai_config.h instead of Makefile.ALL
+* Workaround for bug in Boost Graph Library version 1.54 ("The graph may not contain an edge with negative weight") by not using Prim's minimum spanning tree algorithm anymore
+* Removed conversion script FastInf->libDAI because it is buggy (uses wrong permutation of factor entries)
 * Extended SWIG python interface (inspired by Kyle Ellrott): inference is possible in Python now!
 * Added toString() formatting functions to the classes that had an output streaming operator<<
 * Replaced all occurrences of std::size_t by size_t to avoid SWIG problems
