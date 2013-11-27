@@ -1,5 +1,7 @@
 git HEAD
 --------
+* Fixed regression in SWIG interface caused by new build system (thanks to Benjamin Mumm for reporting this)
+* Added 'inclusive' argument to DAG::ancestors() and DAG::descendants()
 * [Julien Rebetez] added FactorGraph::printDot() to SWIG interface
 * Build system: optional compilation targets are now set in include/dai/dai_config.h instead of Makefile.ALL
 * Workaround for bug in Boost Graph Library version 1.54 ("The graph may not contain an edge with negative weight") by not using Prim's minimum spanning tree algorithm anymore

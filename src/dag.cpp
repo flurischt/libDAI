@@ -129,9 +129,11 @@ SmallSet<size_t> DAG::chSet( size_t n ) const {
 }
 
 
-/// Returns the set of ancestors of node \a n, i.e., all nodes \a m such that there exists a directed path from \a m to \a n (excluding \a n itself)
-std::set<size_t> DAG::ancestors( size_t n ) const {
+/// Returns the set of ancestors of node \a n, i.e., all nodes \a a such that there exists a directed path from \a a to \a n (including \a n itself if \a inclusive == \c true)
+std::set<size_t> DAG::ancestors( size_t n, bool inclusive ) const {
     set<size_t> anc;
+    if( inclusive )
+        anc.insert( n );
 
     set<size_t> curParents;
     curParents.insert( n );
@@ -151,9 +153,11 @@ std::set<size_t> DAG::ancestors( size_t n ) const {
 }
 
 
-/// Returns the set of descendants of node \a n, i.e., all nodes \a m such that there exists a directed path from \a n to \a m (excluding \a n itself)
-std::set<size_t> DAG::descendants( size_t n ) const {
+/// Returns the set of descendants of node \a n, i.e., all nodes \a d such that there exists a directed path from \a n to \a d (excluding \a n itself if \a inclusive == \c true)
+std::set<size_t> DAG::descendants( size_t n, bool inclusive ) const {
     set<size_t> desc;
+    if( inclusive )
+        desc.insert( n );
 
     set<size_t> curChildren;
     curChildren.insert( n );

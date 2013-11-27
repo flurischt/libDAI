@@ -240,11 +240,11 @@ class DAG {
         /// Returns children of node \a n as a SmallSet<size_t>.
         SmallSet<size_t> chSet( size_t n ) const;
 
-        /// Returns the set of ancestors of node \a n, i.e., all nodes \a a such that there exists a directed path from \a a to \a n (excluding \a n itself)
-        std::set<size_t> ancestors( size_t n ) const;
+        /// Returns the set of ancestors of node \a n, i.e., all nodes \a a such that there exists a directed path from \a a to \a n (including \a n itself if \a inclusive == \c true)
+        std::set<size_t> ancestors( size_t n, bool inclusive ) const;
 
-        /// Returns the set of descendants of node \a n, i.e., all nodes \a d such that there exists a directed path from \a n to \a d (excluding \a n itself)
-        std::set<size_t> descendants( size_t n ) const;
+        /// Returns the set of descendants of node \a n, i.e., all nodes \a d such that there exists a directed path from \a n to \a d (excluding \a n itself if \a inclusive == \c true)
+        std::set<size_t> descendants( size_t n, bool inclusive ) const;
 
         /// Returns whether there exists a directed path from node \a n1 to node \a n2 (which may consist of zero edges)
         bool existsDirectedPath( size_t n1, size_t n2 ) const;

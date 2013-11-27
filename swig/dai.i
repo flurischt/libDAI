@@ -14,6 +14,7 @@
 %include "std_vector.i"
 %template(IntVector) std::vector<size_t>;
 //%include "std_set.i"  /* for python */
+%include "../include/dai/dai_config.h"
 
 %{
 #include "../include/dai/alldai.h"

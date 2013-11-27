@@ -319,37 +319,38 @@ BOOST_AUTO_TEST_CASE( QueriesTest ) {
     BOOST_CHECK(  G.existsDirectedPath( 3, 3 ) );
 
     std::set<size_t> s;
+    std::set<size_t> ss;
     G.addNode();
     G.addEdge( 3, 4 );
     G.addNode();
     G.addEdge( 1, 4 );
     G.addEdge( 1, 5 );
-    BOOST_CHECK( G.descendants( 4 ) == s );
-    BOOST_CHECK( G.descendants( 5 ) == s );
+    BOOST_CHECK( G.descendants( 4, false ) == s ); ss = s; ss.insert( 4 ); BOOST_CHECK( G.descendants( 4, true ) == ss );
+    BOOST_CHECK( G.descendants( 5, false ) == s ); ss = s; ss.insert( 5 ); BOOST_CHECK( G.descendants( 5, true ) == ss );
     s.insert( 4 );
-    BOOST_CHECK( G.descendants( 3 ) == s );
+    BOOST_CHECK( G.descendants( 3, false ) == s ); ss = s; ss.insert( 3 ); BOOST_CHECK( G.descendants( 3, true ) == ss );
     s.insert( 5 );
-    BOOST_CHECK( G.descendants( 1 ) == s );
+    BOOST_CHECK( G.descendants( 1, false ) == s ); ss = s; ss.insert( 1 ); BOOST_CHECK( G.descendants( 1, true ) == ss );
     s.erase( 5 );
     s.insert( 3 );
-    BOOST_CHECK( G.descendants( 2 ) == s );
+    BOOST_CHECK( G.descendants( 2, false ) == s ); ss = s; ss.insert( 2 ); BOOST_CHECK( G.descendants( 2, true ) == ss );
     s.insert( 1 );
     s.insert( 5 );
-    BOOST_CHECK( G.descendants( 0 ) == s );
+    BOOST_CHECK( G.descendants( 0, false ) == s ); ss = s; ss.insert( 0 ); BOOST_CHECK( G.descendants( 0, true ) == ss );
 
     s.clear();
-    BOOST_CHECK( G.ancestors( 0 ) == s );
-    BOOST_CHECK( G.ancestors( 2 ) == s );
+    BOOST_CHECK( G.ancestors( 0, false ) == s ); ss = s; ss.insert( 0 ); BOOST_CHECK( G.ancestors( 0, true ) == ss );
+    BOOST_CHECK( G.ancestors( 2, false ) == s ); ss = s; ss.insert( 2 ); BOOST_CHECK( G.ancestors( 2, true ) == ss );
     s.insert( 0 );
-    BOOST_CHECK( G.ancestors( 1 ) == s );
+    BOOST_CHECK( G.ancestors( 1, false ) == s ); ss = s; ss.insert( 1 ); BOOST_CHECK( G.ancestors( 1, true ) == ss );
     s.insert( 2 );
-    BOOST_CHECK( G.ancestors( 3 ) == s );
+    BOOST_CHECK( G.ancestors( 3, false ) == s ); ss = s; ss.insert( 3 ); BOOST_CHECK( G.ancestors( 3, true ) == ss );
     s.erase( 2 );
     s.insert( 1 );
-    BOOST_CHECK( G.ancestors( 5 ) == s );
+    BOOST_CHECK( G.ancestors( 5, false ) == s ); ss = s; ss.insert( 5 ); BOOST_CHECK( G.ancestors( 5, true ) == ss );
     s.insert( 2 );
     s.insert( 3 );
-    BOOST_CHECK( G.ancestors( 4 ) == s );
+    BOOST_CHECK( G.ancestors( 4, false ) == s ); ss = s; ss.insert( 4 ); BOOST_CHECK( G.ancestors( 4, true ) == ss );
 }
 
 
