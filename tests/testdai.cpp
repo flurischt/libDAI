@@ -361,7 +361,7 @@ int main( int argc, char *argv[] ) {
             // If this is not the base method
             if( m > 0 ) {
                 cout.setf( ios_base::scientific );
-                cout.precision( 3 );
+                cout.precision( 2 );
 
                 // Output maximum error in variable marginals
                 Real mev = clipReal( testdai.maxVarErr(), 1e-9 );

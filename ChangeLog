@@ -1,5 +1,8 @@
 git HEAD
 --------
+* Disabled debugging output in src/cobwebgraph.cpp to fix compilation issue under OSX
+* Use less precision for regression test so that platform-dependent differences are suppressed
+* [Lee C Baker] patch in include/dai/enum.h to fix compilation issues on OSX related to std::wistream and std::wostream
 * [Charles Vaske] Various improvements to EM code, including interface changes
 * Fixed regression in SWIG interface caused by new build system (thanks to Benjamin Mumm for reporting this)
 * Added 'inclusive' argument to DAG::ancestors() and DAG::descendants()

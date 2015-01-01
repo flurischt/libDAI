@@ -80,6 +80,22 @@
                 }\
         }\
 \
+        operator wchar_t const*() const {\
+            static wchar_t labelstring[] = #val0 L"," #__VA_ARGS__;\
+            size_t pos_begin = 0;\
+            size_t i = 0;\
+            for( size_t pos_end = 0; ; pos_end++ )\
+                if( (labelstring[pos_end] == L',') || (labelstring[pos_end] == L'\0') ) {\
+                    if( (size_t)v == i ) {\
+                        labelstring[pos_end] = L'\0';\
+                        return labelstring + pos_begin;\
+                    } else {\
+                        i++;\
+                        pos_begin = pos_end + 1;\
+                    }\
+                }\
+        }\
+\
         friend std::istream& operator >> (std::istream& is, x& y) {\
             std::string s;\
             is >> s;\
@@ -87,9 +103,21 @@
             return is;\
         }\
 \
+        friend std::wistream& operator >> (std::wistream& wis, x& y) {\
+            std::wstring s;\
+            wis >> s;\
+            y = x((const char *)s.c_str());\
+            return wis;\
+        }\
+\
         friend std::ostream& operator << (std::ostream& os, const x& y) {\
             os << (const char *)y;\
             return os;\
+        }\
+\
+        friend std::wostream& operator << (std::wostream& wos, const x& y) {\
+            wos << (const wchar_t *)y;\
+            return wos;\
         }\
 \
     protected:\

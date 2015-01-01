@@ -145,8 +145,8 @@ void CobwebGraph::setCountingNumbers( bool debugging ) {
                 }
             }
         }
-        if( debugging )
-            cerr << "cn[" << R << "] " << _cn[R] << endl;
+//        if( debugging )
+//            cerr << "cn[" << R << "] " << _cn[R] << endl;
     }
 }
 
