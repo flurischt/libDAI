@@ -23,6 +23,8 @@ SET (dai_hdrs
     var.h
     varset.h
     weightedgraph.h
+   cobwebgraph.cpp
+       glc.cpp
 )
 
 IF(WITH_BP)

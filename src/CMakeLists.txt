@@ -17,6 +17,8 @@ SET (dai_srcs
     evidence.cpp
     emalg.cpp
     io.cpp
+    cobwebgraph.cpp
+    glc.cpp
 )
 
 IF(WITH_BP)
@@ -76,3 +78,4 @@ INSTALL (TARGETS dai
     LIBRARY DESTINATION lib COMPONENT main
     ARCHIVE DESTINATION lib COMPONENT main
 )
+
