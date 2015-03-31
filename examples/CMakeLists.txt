@@ -48,6 +48,13 @@ IF(WITH_CIMG)
     ADD_EXECUTABLE(example_imagesegmentation example_imagesegmentation.cpp)
     TARGET_LINK_LIBRARIES(example_imagesegmentation ${EXTRA_LIBS})
     INSTALL(TARGETS example_imagesegmentation DESTINATION share/dai/examples)
+
+    # For convenience, copy default input images into binary directory
+    ADD_CUSTOM_COMMAND(TARGET example_imagesegmentation POST_BUILD
+                       COMMAND cp "${CMAKE_SOURCE_DIR}/examples/example_img_in*.jpg"
+                                  "${CMAKE_CURRENT_BINARY_DIR}/"
+                      )
+
 ENDIF()
 
 INSTALL(FILES ${dai_EXAMPLE_RESOURCES} DESTINATION share/dai/examples)
