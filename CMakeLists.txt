@@ -21,6 +21,8 @@ IF(COMPILER_ID MATCHES "^(apple)?clang$" OR COMPILER_ID MATCHES "gcc")
   SET(EXTRA_C_FLAGS_DEBUG "-O3 -g -DDAI_DEBUG")
 
   IF(APPLE)
+    # http://www.cmake.org/cmake/help/v3.0/policy/CMP0042.html
+    CMAKE_POLICY(SET CMP0042 NEW)
     ADD_DEFINITIONS(-DMACOSX)
   ENDIF(APPLE)
   IF(CYGWIN)
@@ -59,7 +61,7 @@ SET(WITH_CBP ON CACHE BOOL "Build with Conditioned Belief Propagation (CBT)")
 SET(WITH_DECMAP ON CACHE BOOL "Build with MAP state by decimation (DECMAP)")
 
 SET(WITH_MATLAB OFF CACHE BOOL "Build MatLab interface? (MatLab needs to be installed)")
-SET(WITH_CIMG OFF CACHE BOOL "Build image segmentation example? (CImg needs to be installed)")
+SET(WITH_CIMG ON CACHE BOOL "Build image segmentation example? (CImg needs to be installed)")
 IF(WITH_CIMG)
   SET(NEW_CIMG ON CACHE BOOL "CImg version 1.3.0 or newer?")
 ENDIF(WITH_CIMG)
