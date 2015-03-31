@@ -4,6 +4,7 @@ SET (dai_hdrs
     clustergraph.h
     dag.h
     daialg.h
+    dai_config.h
     doc.h
     emalg.h
     enum.h
@@ -23,8 +24,8 @@ SET (dai_hdrs
     var.h
     varset.h
     weightedgraph.h
-   cobwebgraph.cpp
-       glc.cpp
+    cobwebgraph.h
+    glc.h
 )
 
 IF(WITH_BP)

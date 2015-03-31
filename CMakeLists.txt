@@ -137,11 +137,17 @@ ELSE(DOXYGEN_FOUND)
 ENDIF(DOXYGEN_FOUND)
 
 IF(WITH_DOC AND DOXYGEN_FOUND)
-  # prepare doxygen configuration file
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-  # add doxygen as target
-  ADD_CUSTOM_TARGET(doc ALL ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  IF(FALSE)
+    # prepare doxygen configuration file
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
+    SET(DOXY_FILE "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
+  ELSE()
+    SET(DOXY_FILE "${CMAKE_CURRENT_SOURCE_DIR}/doxygen.conf")
+  ENDIF()
+
+    # add doxygen as target
+  ADD_CUSTOM_TARGET(doc ALL ${DOXYGEN_EXECUTABLE} ${DOXY_FILE}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
