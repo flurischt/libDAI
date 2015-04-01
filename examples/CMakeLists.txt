@@ -57,4 +57,13 @@ IF(WITH_CIMG)
 
 ENDIF()
 
+ADD_EXECUTABLE(example_recommendation example_recommendation.cpp)
+TARGET_LINK_LIBRARIES(example_recommendation ${EXTRA_LIBS})
+INSTALL(TARGETS example_recommendation DESTINATION share/dai/examples)
+ADD_CUSTOM_COMMAND(TARGET example_recommendation POST_BUILD
+                   COMMAND cp "${CMAKE_SOURCE_DIR}/examples/ml-100k/*"
+                              "${CMAKE_CURRENT_BINARY_DIR}/"
+                  )
+
+
 INSTALL(FILES ${dai_EXAMPLE_RESOURCES} DESTINATION share/dai/examples)

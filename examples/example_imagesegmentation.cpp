@@ -30,7 +30,8 @@ using namespace cimg_library;
     \param evidence The local evidence (represented as a grayscale image)
 **/
 template<class T>
-FactorGraph img2fg( const CImg<T> &img, double J, double th_min, double th_max, double scale, double pbg, CImg<unsigned char> &evidence ) {
+FactorGraph example2fg(const CImg<T> &img, double J, double th_min, double th_max, double scale, double pbg,
+                       CImg<unsigned char> &evidence) {
     vector<Var> vars;
     vector<Factor> factors;
 
@@ -196,7 +197,7 @@ double doInference( FactorGraph& fg, string algOpts, size_t maxIter, double tol,
 /// Main program
 /** This example shows how one can use approximate inference in factor graphs
  *  on a simple vision task: given two images, identify smooth regions where these
- *  two images differ more than some threshold. This can be used to seperate 
+ *  two images differ more than some threshold. This can be used to seperate
  *  foreground from background if one image contains the background and the other
  *  one the combination of background and foreground.
  */
@@ -280,7 +281,7 @@ int main(int argc,char **argv) {
     // the local evidence in image4 for visualization
     CImg<unsigned char> image4( dimx, dimy, 1, 3 );
     cout << "Converting difference image into factor graph..." << endl;
-    FactorGraph fg = img2fg( image3, J, th_min, th_max, scale, pbg, image4 );
+    FactorGraph fg = example2fg(image3, J, th_min, th_max, scale, pbg, image4);
 
     // Display local evidence
     cout << "Displaying local evidence..." << endl;
