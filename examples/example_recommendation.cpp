@@ -187,21 +187,16 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > >& votings, int user) {
     return FactorGraph(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size() );
 }
 
-bool compareSecondRating(const pair<int, int>& i, const pair<int, int>& j) {
-    return i.second > j.second;
-}
-
-double getPrecision(vector<vector<pair<int, int> > >& test_data,
-                    const vector<pair<double, int> >& ratings, int user, size_t N) {
+pair<double, double> getPrecisionAndRecall(const vector<vector<pair<int, int> > >& test_data,
+                           const vector<pair<double, int> >& ratings, int user, size_t N) {
     // get the top predicted elements.
     vector<int> predicted;
     for (size_t i=0; i < std::min(N, ratings.size()); ++i) {
         predicted.push_back(ratings[i].second);
     }
-    // sort the test data according to the ratings and then take the top N elements.
-    sort(test_data[user].begin(), test_data[user].end(), compareSecondRating);
+
     vector<int> wanted;
-    for (size_t i=0; i < std::min(N, test_data[user].size()); ++i) {
+    for (size_t i=0; i < test_data[user].size(); ++i) {
         if (test_data[user][i].second >= 5) {
             wanted.push_back(test_data[user][i].first);
         }
@@ -214,9 +209,10 @@ double getPrecision(vector<vector<pair<int, int> > >& test_data,
     vector<int>::iterator  it = set_intersection(predicted.begin(), predicted.end(), wanted.begin(), wanted.end(), v.begin());
     v.resize(it-v.begin());
 
-    std::cout << "The intersection has " << (v.size()) << " elements:\n";
-    return v.size() / static_cast<double>(N);
+    //std::cout << "The intersection has " << (v.size()) << " elements:\n";
+    return make_pair<double, double> (v.size() / static_cast<double>(N), v.size() / static_cast<double>(wanted.size()));
 }
+
 
 /// Main program
 int main(int argc,char **argv) {
@@ -253,16 +249,13 @@ int main(int argc,char **argv) {
             ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
         }
         sort(ratings.begin(), ratings.end());
-        double precision10 = getPrecision(test_data, ratings, user, 10);
-        double precision20 = getPrecision(test_data, ratings, user, 20);
-        //double recall10 = getRecall(test_data, ratings, user, 10);
-        //double recall20 = getRecall(test_data, ratings, user, 20);
+        pair<double, double> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
+        pair<double, double> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
 
-        cout <<"Precision (N=10): " << precision10 << endl;
-        cout <<"Precision (N=20): " << precision20 << endl;
-        //cout <<"Recall (N=10): " << recall10 << endl;
-        //cout <<"Recall (N=10): " << recall20 << endl;
-
+        cout <<"Precision (N=10): " << pr10.first << endl;
+        cout <<"Precision (N=20): " << pr20.first << endl;
+        cout <<"Recall (N=10): " << pr10.second << endl;
+        cout <<"Recall (N=10): " << pr20.second << endl;
     }
     return 0;
 }
