@@ -1,6 +1,7 @@
 // basic file operations
 #include <iostream>
 #include <fstream>
+#include <algorithm>    // std::max, min
 #include <dai/alldai.h>  // Include main libDAI header file
 #include <CImg.h>        // This example needs CImg to be installed
 
@@ -176,7 +177,7 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > >& votings, int user) {
     for (size_t i=0; i<votings[user].size(); ++i) {
         Factor fac(vars[num_users + votings[user][i].first]);
         double like = max(0.1, min(0.9, 0.5 + (votings[user][i].second - mean)/(stdev * normalization_factor_p)));
-        cout << votings[user][i].second << " to " << like << endl;
+        //cout << votings[user][i].second << " to " << like << endl;
         fac.set(0, like);
         factors.push_back(fac);
     }
@@ -186,6 +187,36 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > >& votings, int user) {
     return FactorGraph(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size() );
 }
 
+bool compareSecondRating(const pair<int, int>& i, const pair<int, int>& j) {
+    return i.second > j.second;
+}
+
+double getPrecision(vector<vector<pair<int, int> > >& test_data,
+                    const vector<pair<double, int> >& ratings, int user, size_t N) {
+    // get the top predicted elements.
+    vector<int> predicted;
+    for (size_t i=0; i < std::min(N, ratings.size()); ++i) {
+        predicted.push_back(ratings[i].second);
+    }
+    // sort the test data according to the ratings and then take the top N elements.
+    sort(test_data[user].begin(), test_data[user].end(), compareSecondRating);
+    vector<int> wanted;
+    for (size_t i=0; i < std::min(N, test_data[user].size()); ++i) {
+        if (test_data[user][i].second >= 5) {
+            wanted.push_back(test_data[user][i].first);
+        }
+    }
+
+    // compute the intersection.
+    vector<int> v(N);
+    sort(predicted.begin(), predicted.end());
+    sort(wanted.begin(), wanted.end());
+    vector<int>::iterator  it = set_intersection(predicted.begin(), predicted.end(), wanted.begin(), wanted.end(), v.begin());
+    v.resize(it-v.begin());
+
+    std::cout << "The intersection has " << (v.size()) << " elements:\n";
+    return v.size() / static_cast<double>(N);
+}
 
 /// Main program
 int main(int argc,char **argv) {
@@ -207,6 +238,7 @@ int main(int argc,char **argv) {
     } else {
         cout << "reading data now..." << endl;
         vector<vector<pair<int, int> > > input_data = extract_ratings("u1.base");
+        vector<vector<pair<int, int> > > test_data = extract_ratings("u1.test");
         int user = 5;
         cout << "building factor graph..." << endl;
         FactorGraph fg = data2fg(input_data, user);
@@ -217,12 +249,20 @@ int main(int argc,char **argv) {
         cout << "Printing result: " << endl;
         vector<pair<double, int> > ratings;
         for (size_t i = input_data.size(); i<m.size(); ++i) {
-            ratings.push_back(make_pair<double, int>(m[i], i - input_data.size() + 1));
+            // push back the negative so we can use the standard sorting.
+            ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
         }
         sort(ratings.begin(), ratings.end());
-        for (size_t i=0; i<ratings.size(); ++i) {
-            cout << ratings[i].second << " : " << ratings[i].first << endl;
-        }
+        double precision10 = getPrecision(test_data, ratings, user, 10);
+        double precision20 = getPrecision(test_data, ratings, user, 20);
+        //double recall10 = getRecall(test_data, ratings, user, 10);
+        //double recall20 = getRecall(test_data, ratings, user, 20);
+
+        cout <<"Precision (N=10): " << precision10 << endl;
+        cout <<"Precision (N=20): " << precision20 << endl;
+        //cout <<"Recall (N=10): " << recall10 << endl;
+        //cout <<"Recall (N=10): " << recall20 << endl;
+
     }
     return 0;
 }
