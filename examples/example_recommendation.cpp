@@ -4,6 +4,7 @@
 #include <algorithm>    // std::max, min
 #include <dai/alldai.h>  // Include main libDAI header file
 #include <CImg.h>        // This example needs CImg to be installed
+#include <ctime>
 
 using namespace dai;
 using namespace std;
@@ -211,6 +212,10 @@ pair<double, double> getPrecisionAndRecall(const vector<vector<pair<int, int> > 
     v.resize(it - v.begin());
 
     //std::cout << "The intersection has " << (v.size()) << " elements:\n";
+    if (wanted.size() == 0) {
+        // dummy element to prevent division by zero.
+        wanted.push_back(0);
+    }
     return make_pair<double, double>(v.size() / static_cast<double>(N), v.size() / static_cast<double>(wanted.size()));
 }
 
@@ -237,13 +242,14 @@ int main(int argc, char **argv) {
         cout << "reading data now..." << endl;
         vector<vector<pair<int, int> > > input_data = extract_ratings("u1.base");
         vector<vector<pair<int, int> > > test_data = extract_ratings("u1.test");
-        const int N = 10;
+        const int N = 5;
         double p10 = 0;
         double p20 = 0;
         double r10 = 0;
         double r20 = 0;
+        clock_t begin = clock();
         for (int user=0; user<N; ++user) {
-            cout << "building factor graph for user " << user << endl;
+            cout << "building factor graph for user " << user << " out of " << N << endl;
             FactorGraph fg = data2fg(input_data, user);
 
             vector<double> m; // Stores the final recommendations
@@ -265,8 +271,10 @@ int main(int argc, char **argv) {
             cout << "Precision (N=10): " << pr10.first << endl;
             cout << "Precision (N=20): " << pr20.first << endl;
             cout << "Recall (N=10): " << pr10.second << endl;
-            cout << "Recall (N=10): " << pr20.second << endl;
+            cout << "Recall (N=20): " << pr20.second << endl;
         }
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
         p10 = p10 / static_cast<double>(N);
         p20 = p20 / static_cast<double>(N);
         r10 = r20 / static_cast<double>(N);
@@ -275,7 +283,8 @@ int main(int argc, char **argv) {
         cout << "Precision (N=10): " << p10 << endl;
         cout << "Precision (N=20): " << p20 << endl;
         cout << "Recall (N=10): " << r10 << endl;
-        cout << "Recall (N=10): " << r20 << endl;
+        cout << "Recall (N=20): " << r20 << endl;
+        cout << "Time in seconds: " << elapsed_secs << endl;
     }
     return 0;
 }
