@@ -111,7 +111,6 @@ ENDIF()
 
 # Build target lib
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(include/dai)
 
 SET(EXTRA_LIBS dai)
 # SET(EXTRA_LIBS ${EXTRA_LIBS} dai)
