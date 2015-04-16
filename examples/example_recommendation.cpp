@@ -4,7 +4,8 @@
 #include <algorithm>    // std::max, min
 #include <dai/alldai.h>  // Include main libDAI header file
 #include <CImg.h>        // This example needs CImg to be installed
-#include <ctime>
+#include <map>
+#include <dai/utils/timer.h>
 
 using namespace dai;
 using namespace std;
@@ -247,7 +248,8 @@ int main(int argc, char **argv) {
         double p20 = 0;
         double r10 = 0;
         double r20 = 0;
-        clock_t begin = clock();
+        Timer timer;
+        timer.tic();
         for (int user=0; user<N; ++user) {
             cout << "building factor graph for user " << user << " out of " << N << endl;
             FactorGraph fg = data2fg(input_data, user);
@@ -273,8 +275,7 @@ int main(int argc, char **argv) {
             cout << "Recall (N=10): " << pr10.second << endl;
             cout << "Recall (N=20): " << pr20.second << endl;
         }
-        clock_t end = clock();
-        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        double elapsed_secs = timer.toc();
         p10 = p10 / static_cast<double>(N);
         p20 = p20 / static_cast<double>(N);
         r10 = r20 / static_cast<double>(N);

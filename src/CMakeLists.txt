@@ -1,4 +1,4 @@
-SET (dai_srcs
+SET(dai_srcs
     graph.cpp
     dag.cpp
     bipgraph.cpp
@@ -50,6 +50,7 @@ SET(dai_hdrs
     "${dai_include_dir}/weightedgraph.h"
     "${dai_include_dir}/cobwebgraph.h"
     "${dai_include_dir}/glc.h"
+    "${dai_include_dir}/utils/timer.h"
 )
 
 IF(WITH_BP)
