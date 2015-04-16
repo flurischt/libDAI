@@ -9,6 +9,7 @@ SET(dai_srcs
     properties.cpp
     util.cpp
     exceptions.cpp
+    exactinf.cpp
 )
 
 SET(dai_include_dir "../include/dai")
@@ -19,6 +20,7 @@ SET(dai_hdrs
     "${dai_include_dir}/dai_config.h"
     "${dai_include_dir}/doc.h"
     "${dai_include_dir}/enum.h"
+    "${dai_include_dir}/exactinf.h"
     "${dai_include_dir}/exceptions.h"
     "${dai_include_dir}/factor.h"
     "${dai_include_dir}/factorgraph.h"
@@ -42,7 +44,6 @@ IF(WITH_ADVANCED)
          "${dai_include_dir}/dag.h"
          "${dai_include_dir}/emalg.h"
          "${dai_include_dir}/evidence.h"
-         "${dai_include_dir}/exactinf.h"
          "${dai_include_dir}/io.h"
          "${dai_include_dir}/regiongraph.h"
     )
@@ -51,7 +52,6 @@ IF(WITH_ADVANCED)
          dag.cpp
          emalg.cpp
          evidence.cpp
-         exactinf.cpp
          io.cpp
          regiongraph.cpp
     )

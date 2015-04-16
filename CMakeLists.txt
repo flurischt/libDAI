@@ -110,17 +110,17 @@ IF(WITH_GLC)
   ADD_DEFINITIONS("-DDAI_WITH_GLC")
 ENDIF(WITH_GLC)
 
-IF(WITH_TESTS)
-  ENABLE_TESTING()
-  # Build target tests
-  ADD_SUBDIRECTORY(tests)
-ENDIF()
-
 # Build target lib
 ADD_SUBDIRECTORY(src)
 
 SET(EXTRA_LIBS dai)
 # SET(EXTRA_LIBS ${EXTRA_LIBS} dai)
+
+IF(WITH_TESTS)
+  ENABLE_TESTING()
+  # Build target tests
+  ADD_SUBDIRECTORY(tests)
+ENDIF()
 
 # Build target utils
 ADD_SUBDIRECTORY(utils)

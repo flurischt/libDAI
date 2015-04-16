@@ -23,8 +23,8 @@
 #include <string>
 #include <dai/daialg.h>
 #include <dai/properties.h>
+#include <dai/exactinf.h>
 #ifdef DAI_WITH_ADVANCED
-    #include <dai/exactinf.h>
     #include <dai/evidence.h>
     #include <dai/emalg.h>
 #endif
