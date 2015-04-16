@@ -1,11 +1,11 @@
 SET(dai_EXAMPLES
-example
-example_bipgraph
-example_varset
-example_permute
-example_sprinkler
-example_sprinkler_em
-)
+    example
+    example_bipgraph
+    example_varset
+    example_permute
+    example_sprinkler
+    example_sprinkler_em
+   )
 
 IF(WITH_GIBBS)
     SET(dai_EXAMPLES ${dai_EXAMPLES} example_sprinkler_gibbs)
@@ -23,13 +23,13 @@ INSTALL(TARGETS uai2010-aie-solver DESTINATION share/dai/examples)
 
 
 SET(dai_EXAMPLE_RESOURCES
-example_sprinkler.dot
-example_sprinkler.png
-sprinkler.em
-example_bipgraph.out
-example_permute.out
-example_varset.out
-)
+    example_sprinkler.dot
+    example_sprinkler.png
+    sprinkler.em
+    example_bipgraph.out
+    example_permute.out
+    example_varset.out
+   )
 
 IF(WITH_CIMG)
     FIND_PACKAGE(CImg)
