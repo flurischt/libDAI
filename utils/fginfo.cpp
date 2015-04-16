@@ -81,7 +81,6 @@ int main( int argc, char *argv[] ) {
         // Read factorgraph
         FactorGraph fg;
         char *infile = argv[1];
-        size_t maxstates = fromString<size_t>( argv[2] );
         fg.ReadFromFile( infile );
 
         // Output various statistics
@@ -93,9 +92,10 @@ int main( int argc, char *argv[] ) {
         cout << "Has negatives:         " << hasNegatives(fg.factors()) << endl;
         cout << "Binary variables?      " << fg.isBinary() << endl;
         cout << "Pairwise interactions? " << fg.isPairwise() << endl;
-        
+
         // Calculate treewidth using various heuristics
 #ifdef DAI_WITH_JTREE
+        size_t maxstates = fromString<size_t>( argv[2] );
         std::pair<size_t,BigInt> tw;
         cout << "Treewidth (MinNeighbors):     ";
         try {
@@ -107,7 +107,7 @@ int main( int argc, char *argv[] ) {
             else
                 cout << "an exception occurred" << endl;
         }
-        
+
         cout << "Treewidth (MinWeight):        ";
         try {
             tw = boundTreewidth(fg, &eliminationCost_MinWeight, maxstates );
@@ -118,7 +118,7 @@ int main( int argc, char *argv[] ) {
             else
                 cout << "an exception occurred" << endl;
         }
-        
+
         cout << "Treewidth (MinFill):          ";
         try {
             tw = boundTreewidth(fg, &eliminationCost_MinFill, maxstates );
@@ -141,7 +141,7 @@ int main( int argc, char *argv[] ) {
                 cout << "an exception occurred" << endl;
         }
 #endif
-        
+
         // Calculate total state space
         BigInt stsp = 1;
         for( size_t i = 0; i < fg.nrVars(); i++ )

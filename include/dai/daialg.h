@@ -19,9 +19,11 @@
 #include <vector>
 #include <dai/factorgraph.h>
 #include <dai/regiongraph.h>
-#include <dai/cobwebgraph.h>
 #include <dai/properties.h>
 
+#ifdef DAI_WITH_GLC
+#include <dai/cobwebgraph.h>
+#endif
 
 namespace dai {
 
@@ -180,7 +182,7 @@ class InfAlg {
     /// \name Managing parameters
     //@{
         /// Set parameters of this inference algorithm.
-        /** The parameters are set according to the PropertySet \a opts. 
+        /** The parameters are set according to the PropertySet \a opts.
          *  The values can be stored either as std::string or as the type of the corresponding MF::props member.
          */
         virtual void setProperties( const PropertySet &opts ) = 0;
@@ -265,14 +267,15 @@ typedef DAIAlg<FactorGraph> DAIAlgFG;
 /// Base class for inference algorithms that operate on a RegionGraph
 typedef DAIAlg<RegionGraph> DAIAlgRG;
 
+#ifdef DAI_WITH_GLC
 /// Base class for GLC that operates on CobwebGraph
 typedef DAIAlg<CobwebGraph> DAIAlgCG;
-
+#endif
 
 /// Calculates the marginal probability distribution for \a vs using inference algorithm \a obj.
 /** calcMarginal() works by clamping all variables in \a vs and calculating the partition sum for each clamped state.
  *  Therefore, it can be used in combination with any inference algorithm that can calculate/approximate partition sums.
- *  \param obj instance of inference algorithm to be used 
+ *  \param obj instance of inference algorithm to be used
  *  \param vs variables for which the marginal should be calculated
  *  \param reInit should be set to \c true if at least one of the possible clamped states would be invalid (leading to a factor graph with zero partition sum).
  */
@@ -280,13 +283,13 @@ Factor calcMarginal( const InfAlg& obj, const VarSet& vs, bool reInit );
 
 
 /// Calculates beliefs for all pairs of variables in \a vs using inference algorithm \a obj.
-/** calcPairBeliefs() works by 
+/** calcPairBeliefs() works by
  *  - clamping single variables in \a vs and calculating the partition sum and the single variable beliefs for each clamped state, if \a accurate == \c false;
  *  - clamping pairs of variables in \a vs and calculating the partition sum for each clamped state, if \a accurate == \c true.
  *
  *  Therefore, it can be used in combination with any inference algorithm that can calculate/approximate partition sums (and single variable beliefs, if
  *  \a accurate == \c true).
- *  \param obj instance of inference algorithm to be used 
+ *  \param obj instance of inference algorithm to be used
  *  \param vs variables for which the pair beliefs should be calculated
  *  \param reInit should be set to \c true if at least one of the possible clamped states would be invalid (leading to a factor graph with zero partition sum).
  *  \param accurate if \c true, uses a slower but more accurate approximation algorithm

@@ -17,8 +17,6 @@ SET(dai_srcs
     evidence.cpp
     emalg.cpp
     io.cpp
-    cobwebgraph.cpp
-    glc.cpp
 )
 
 SET(dai_include_dir "../include/dai")
@@ -48,8 +46,6 @@ SET(dai_hdrs
     "${dai_include_dir}/var.h"
     "${dai_include_dir}/varset.h"
     "${dai_include_dir}/weightedgraph.h"
-    "${dai_include_dir}/cobwebgraph.h"
-    "${dai_include_dir}/glc.h"
     "${dai_include_dir}/utils/timer.h"
 )
 
@@ -115,6 +111,15 @@ IF(WITH_DECMAP)
     SET(dai_hdrs ${dai_hdrs} "${dai_include_dir}/decmap.h")
     SET(dai_srcs ${dai_srcs} decmap.cpp)
 ENDIF(WITH_DECMAP)
+
+IF(WITH_GLC)
+    SET(dai_hdrs ${dai_hdrs}
+        "${dai_include_dir}/glc.h"
+        "${dai_include_dir}/cobwebgraph.h")
+    SET(dai_srcs ${dai_srcs}
+        glc.cpp
+        cobwebgraph.cpp)
+ENDIF(WITH_GLC)
 
 ADD_LIBRARY(dai ${dai_hdrs} ${dai_srcs})
 TARGET_LINK_LIBRARIES(dai ${EXTRA_LIBS})

@@ -196,6 +196,7 @@ int main( int argc, char *argv[] ) {
 
     return 0;
 #else
+    (void) argc, (void) argv;
     cout << "libDAI was configured without BP or JunctionTree (this can be changed in include/dai/dai_config.h)." << endl;
 #endif
 }

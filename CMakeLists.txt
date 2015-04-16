@@ -60,6 +60,7 @@ SET(WITH_MR OFF CACHE BOOL "Build with loop corrections as proposed by Montanari
 SET(WITH_GIBBS OFF CACHE BOOL "Build with Gibbs sampling (GIBBS)")
 SET(WITH_CBP OFF CACHE BOOL "Build with Conditioned Belief Propagation (CBT)")
 SET(WITH_DECMAP OFF CACHE BOOL "Build with MAP state by decimation (DECMAP)")
+SET(WITH_GLC OFF CACHE BOOL "Build with generalized loop corrections (GLC)")
 
 SET(WITH_MATLAB OFF CACHE BOOL "Build MatLab interface? (MatLab needs to be installed)")
 SET(WITH_CIMG ON CACHE BOOL "Build image segmentation example? (CImg needs to be installed)")
@@ -105,6 +106,9 @@ ENDIF(WITH_CBP)
 IF(WITH_DECMAP)
   ADD_DEFINITIONS("-DDAI_WITH_DECMAP")
 ENDIF(WITH_DECMAP)
+IF(WITH_GLC)
+  ADD_DEFINITIONS("-DDAI_WITH_GLC")
+ENDIF(WITH_GLC)
 
 IF(WITH_TESTS)
   ENABLE_TESTING()
