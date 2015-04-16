@@ -8,10 +8,13 @@
 
 /// \file
 /// \brief Allows the user to specify which algorithms will be built into libDAI
+/// \obsolete Choose compile options with CMake
 
 
 #ifndef __defined_libdai_config_h
 #define __defined_libdai_config_h
+
+#if 0
 
 #ifndef DAI_WITH_BP
 #define DAI_WITH_BP
@@ -65,5 +68,6 @@
 #define DAI_WITH_GLC
 #endif
 
+#endif
 
 #endif
