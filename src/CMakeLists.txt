@@ -1,57 +1,61 @@
 SET(dai_srcs
     graph.cpp
-    dag.cpp
     bipgraph.cpp
     varset.cpp
     daialg.cpp
     alldai.cpp
-    clustergraph.cpp
     factor.cpp
     factorgraph.cpp
     properties.cpp
-    regiongraph.cpp
     util.cpp
-    weightedgraph.cpp
     exceptions.cpp
     exactinf.cpp
-    evidence.cpp
-    emalg.cpp
-    io.cpp
-    cobwebgraph.cpp
-    glc.cpp
 )
 
 SET(dai_include_dir "../include/dai")
 SET(dai_hdrs
     "${dai_include_dir}/alldai.h"
     "${dai_include_dir}/bipgraph.h"
-    "${dai_include_dir}/clustergraph.h"
-    "${dai_include_dir}/dag.h"
     "${dai_include_dir}/daialg.h"
     "${dai_include_dir}/dai_config.h"
     "${dai_include_dir}/doc.h"
-    "${dai_include_dir}/emalg.h"
     "${dai_include_dir}/enum.h"
-    "${dai_include_dir}/evidence.h"
     "${dai_include_dir}/exactinf.h"
     "${dai_include_dir}/exceptions.h"
     "${dai_include_dir}/factor.h"
     "${dai_include_dir}/factorgraph.h"
     "${dai_include_dir}/graph.h"
     "${dai_include_dir}/index.h"
-    "${dai_include_dir}/io.h"
     "${dai_include_dir}/prob.h"
     "${dai_include_dir}/properties.h"
-    "${dai_include_dir}/regiongraph.h"
     "${dai_include_dir}/smallset.h"
     "${dai_include_dir}/util.h"
     "${dai_include_dir}/var.h"
     "${dai_include_dir}/varset.h"
-    "${dai_include_dir}/weightedgraph.h"
-    "${dai_include_dir}/cobwebgraph.h"
-    "${dai_include_dir}/glc.h"
     "${dai_include_dir}/utils/timer.h"
 )
+
+# Files used only for inference methods other than BP, FBP or TRWBP
+# TODO: fix this properly
+IF(WITH_ADVANCED)
+    ADD_DEFINITIONS("-DDAI_WITH_ADVANCED")
+    LIST(APPEND dai_hdrs
+         "${dai_include_dir}/clustergraph.h"
+         "${dai_include_dir}/dag.h"
+         "${dai_include_dir}/emalg.h"
+         "${dai_include_dir}/evidence.h"
+         "${dai_include_dir}/io.h"
+         "${dai_include_dir}/regiongraph.h"
+    )
+    LIST(APPEND dai_srcs
+         clustergraph.cpp
+         dag.cpp
+         emalg.cpp
+         evidence.cpp
+         io.cpp
+         regiongraph.cpp
+    )
+ENDIF(WITH_ADVANCED)
 
 IF(WITH_BP)
     SET(dai_hdrs ${dai_hdrs} "${dai_include_dir}/bp.h")
@@ -64,8 +68,12 @@ IF(WITH_FBP)
 ENDIF(WITH_FBP)
 
 IF(WITH_TRWBP)
-    SET(dai_hdrs ${dai_hdrs} "${dai_include_dir}/trwbp.h")
-    SET(dai_srcs ${dai_srcs} trwbp.cpp)
+    SET(dai_hdrs ${dai_hdrs}
+        "${dai_include_dir}/trwbp.h"
+        "${dai_include_dir}/weightedgraph.h"
+    )
+    SET(dai_srcs ${dai_srcs}
+        trwbp.cpp weightedgraph.cpp)
 ENDIF(WITH_TRWBP)
 
 IF(WITH_MF)
@@ -115,6 +123,15 @@ IF(WITH_DECMAP)
     SET(dai_hdrs ${dai_hdrs} "${dai_include_dir}/decmap.h")
     SET(dai_srcs ${dai_srcs} decmap.cpp)
 ENDIF(WITH_DECMAP)
+
+IF(WITH_GLC)
+    SET(dai_hdrs ${dai_hdrs}
+        "${dai_include_dir}/glc.h"
+        "${dai_include_dir}/cobwebgraph.h")
+    SET(dai_srcs ${dai_srcs}
+        glc.cpp
+        cobwebgraph.cpp)
+ENDIF(WITH_GLC)
 
 ADD_LIBRARY(dai ${dai_hdrs} ${dai_srcs})
 TARGET_LINK_LIBRARIES(dai ${EXTRA_LIBS})

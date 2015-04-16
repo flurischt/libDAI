@@ -21,6 +21,7 @@
 #include <string>
 #include <dai/daialg.h>
 #include <dai/factorgraph.h>
+#include <dai/weightedgraph.h>
 #include <dai/properties.h>
 #include <dai/enum.h>
 #include <dai/bp.h>
@@ -34,7 +35,7 @@ namespace dai {
  *  Propagation, but associates each factor with a scale parameter.
  *  which controls the divergence measure being minimized.
  *
- *  The messages \f$m_{I\to i}(x_i)\f$ are passed from factors \f$I\f$ to variables \f$i\f$. 
+ *  The messages \f$m_{I\to i}(x_i)\f$ are passed from factors \f$I\f$ to variables \f$i\f$.
  *  The update equation is given by:
  *    \f[ m_{I\to i}(x_i) \propto \sum_{x_{N_I\setminus\{i\}}} f_I(x_I)^{1/c_I} \prod_{j\in N_I\setminus\{i\}} m_{I\to j}^{c_I-1} \prod_{J\in N_j\setminus\{I\}} m_{J\to j}^{c_J} \f]
  *  After convergence, the variable beliefs are calculated by:
@@ -77,7 +78,7 @@ class TRWBP : public BP {
         /** There is an additional property "nrtrees" which allows to specify the
          *  number of random spanning trees used to set the scale parameters.
          *  \param fg Factor graph.
-         *  \param opts Parameters @see BP::Properties. 
+         *  \param opts Parameters @see BP::Properties.
          */
         TRWBP( const FactorGraph &fg, const PropertySet &opts ) : BP(fg, opts), _weight() {
             setProperties( opts );
