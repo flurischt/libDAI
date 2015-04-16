@@ -121,7 +121,8 @@ vector<vector<pair<int, int> > > extract_ratings(string file_name) {
     fin >> num_entries;
 
     for (int i = 0; i < num_entries; ++i) {
-        int user, movie, rating;
+        size_t user;
+        int movie, rating;
         long long time;
         fin >> user >> movie >> rating >> time;
         user--;
@@ -129,7 +130,7 @@ vector<vector<pair<int, int> > > extract_ratings(string file_name) {
         while (user >= ratings.size()) {
             ratings.push_back(vector<pair<int, int> >());
         }
-        ratings[user].push_back(make_pair<int, int>(movie, rating));
+        ratings[user].push_back(make_pair(movie, rating));
     }
     return ratings;
 }
@@ -152,7 +153,7 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
     // Reserve memory for the variables
     vars.reserve(num_users + num_movies);
     // Create a binary variable for each movie/person
-    for (size_t i = 0; i < num_users + num_movies; i++)
+    for (size_t i = 0; i < (size_t) (num_users + num_movies); i++)
         vars.push_back(Var(i, 2));
 
     for (size_t i = 0; i < votings.size(); ++i) {
@@ -223,6 +224,7 @@ pair<double, double> getPrecisionAndRecall(const vector<vector<pair<int, int> > 
 
 /// Main program
 int main(int argc, char **argv) {
+
     cimg_usage("This example shows how libDAI can be used for a simple recommendation task");
     const char *infname = cimg_option("-method", "BP[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]",
                                       "Inference method in format name[key1=val1,...,keyn=valn]");
@@ -236,7 +238,7 @@ int main(int argc, char **argv) {
         cout << "Solving the inference problem...please be patient!" << endl;
         doInference(fg, infname, maxiter, tol, m);
         cout << "Printing result: " << endl;
-        for (int i = 0; i < m.size(); ++i) {
+        for (size_t i = 0; i < m.size(); ++i) {
             cout << i << " : " << m[i] << endl;
         }
     } else {

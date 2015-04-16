@@ -55,13 +55,13 @@ class MR : public DAIAlgFG {
 
         /// Type used for managing a subset of neighbors
         typedef boost::dynamic_bitset<> sub_nb;
-        
+
         /// Magnetizations
         std::vector<Real> Mag;
-        
+
         /// Maximum difference encountered so far
         Real _maxdiff;
-        
+
         /// Number of iterations needed
         size_t _iters;
 
@@ -124,6 +124,7 @@ class MR : public DAIAlgFG {
         virtual Real run();
         virtual Real maxDiff() const { return _maxdiff; }
         virtual size_t Iterations() const { return _iters; }
+        virtual void setMaxIter( size_t /*maxiter*/ ) { }
         virtual void setProperties( const PropertySet &opts );
         virtual PropertySet getProperties() const;
         virtual std::string printProperties() const;
@@ -132,10 +133,10 @@ class MR : public DAIAlgFG {
     private:
         /// Initialize cors
         Real calcCavityCorrelations();
-        
+
         /// Iterate update equations for cavity fields
         void propagateCavityFields();
-        
+
         /// Calculate magnetizations
         void calcMagnetizations();
 
@@ -144,25 +145,25 @@ class MR : public DAIAlgFG {
          *  \param A subset of neighbors of variable \a i
          */
         Real _tJ(size_t i, sub_nb A);
-        
+
         /// Calculate \f$ \Omega^{(i)}_{j,l} \f$ as defined in [\ref MoR05] eqn. (2.15)
         Real Omega(size_t i, size_t _j, size_t _l);
-        
+
         /// Calculate \f$ T^{(i)}_A \f$ as defined in [\ref MoR05] eqn. (2.17) with \f$ A = \{l_1,l_2,\dots\} \f$
         /** \param i variable index
          *  \param A subset of neighbors of variable \a i
          */
         Real T(size_t i, sub_nb A);
-        
+
         /// Calculates \f$ T^{(i)}_j \f$ where \a j is the \a _j 'th neighbor of \a i
         Real T(size_t i, size_t _j);
-        
+
         /// Calculates \f$ \Gamma^{(i)}_{j,l_1l_2} \f$ as defined in [\ref MoR05] eqn. (2.16)
         Real Gamma(size_t i, size_t _j, size_t _l1, size_t _l2);
-        
+
         /// Calculates \f$ \Gamma^{(i)}_{l_1l_2} \f$ as defined in [\ref MoK07] on page 1141
         Real Gamma(size_t i, size_t _l1, size_t _l2);
-        
+
         /// Approximates moments of variables in \a A
         /** Calculate the moment of variables in \a A from M and cors, neglecting higher order cumulants,
          *  defined as the sum over all partitions of A into subsets of cardinality two at most of the
@@ -173,7 +174,7 @@ class MR : public DAIAlgFG {
          *  \param A subset of neighbors of variable \a i
          */
         Real appM(size_t i, sub_nb A);
-        
+
         /// Calculate sum over all even/odd subsets B of \a A of _tJ(j,B) appM(j,B)
         /** \param j variable index
          *  \param A subset of neighbors of variable \a j
