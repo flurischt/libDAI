@@ -28,7 +28,7 @@ namespace dai {
 /** Both Bayesian Networks and Markov random fields can be represented in a
  *  unifying representation, called <em>factor graph</em> [\ref KFL01],
  *  implemented in libDAI by the FactorGraph class.
- *  
+ *
  *  Consider a probability distribution over \f$N\f$ discrete random variables
  *  \f$x_0,x_1,\dots,x_{N-1}\f$ that factorizes as a product of \f$M\f$ factors, each of
  *  which depends on some subset of the variables:
@@ -39,7 +39,7 @@ namespace dai {
  *  Each factor \f$f_I\f$ is a function from an associated subset
  *  of variables \f$X_I \subset \{x_0,x_1,\dots,x_{N-1}\}\f$ to the nonnegative
  *  real numbers.
- * 
+ *
  *  For a Bayesian network, each factor corresponds to a (conditional)
  *  probability table, whereas for a Markov random field, each factor
  *  corresponds to a maximal clique of the undirected graph.
@@ -48,7 +48,7 @@ namespace dai {
  *  corresponding probability distribution. A factor graph is a bipartite graph,
  *  containing variable nodes and factor nodes, and an edge between a variable
  *  node and a factor node if the corresponding factor depends on that variable.
- *  In libDAI, this structure is represented by a BipartiteGraph. 
+ *  In libDAI, this structure is represented by a BipartiteGraph.
  *
  *  So basically, a FactorGraph consists of a BipartiteGraph, a vector of Var 's
  *  and a vector of TFactor 's.
@@ -56,12 +56,12 @@ namespace dai {
  *  \idea Alternative implementation of undo factor changes: the only things that have to be
  *  undone currently are setting a factor to 1 and setting a factor to a Kronecker delta. This
  *  could also be implemented in the TFactor itself, which could maintain its state
- *  (ones/delta/full) and act accordingly. Update: it seems that the proposed functionality 
+ *  (ones/delta/full) and act accordingly. Update: it seems that the proposed functionality
  *  would not be enough for CBP, for which it would make more sense to add more levels of
  *  backup/restore.
  *
  *  \todo Write a method that applies evidence (should we represent evidence as a map<Var,size_t> or as a map<size_t,size_t>?)
- */ 
+ */
 class FactorGraph {
     private:
         /// Stores the neighborhood structure
@@ -98,20 +98,20 @@ class FactorGraph {
     //@}
 
     /// \name Accessors and mutators
-    //@{ 
+    //@{
         /// Returns constant reference the \a i 'th variable
-        const Var& var( size_t i ) const { 
+        const Var& var( size_t i ) const {
             DAI_DEBASSERT( i < nrVars() );
-            return _vars[i]; 
+            return _vars[i];
         }
 
         /// Returns constant reference to all variables
         const std::vector<Var>& vars() const { return _vars; }
 
         /// Returns constant reference to \a I 'th factor
-        const Factor& factor( size_t I ) const { 
+        const Factor& factor( size_t I ) const {
             DAI_DEBASSERT( I < nrFactors() );
-            return _factors[I]; 
+            return _factors[I];
         }
         /// Returns constant reference to all factors
         const std::vector<Factor>& factors() const { return _factors; }
@@ -177,10 +177,10 @@ class FactorGraph {
 
         /// Returns the VarSet corresponding to a vector of variable indices
         VarSet inds2vars( const std::vector<size_t>& inds ) const {
-        	VarSet vs;
-        	for( std::vector<size_t>::const_iterator it = inds.begin(); it != inds.end(); it++ )
-        		vs.insert( var(*it) );
-        	return vs;
+         VarSet vs;
+         for( std::vector<size_t>::const_iterator it = inds.begin(); it != inds.end(); it++ )
+            vs.insert( var(*it) );
+         return vs;
         }
 
         /// Return all variables that occur in a factor involving the \a i 'th variable, itself included
@@ -219,7 +219,7 @@ class FactorGraph {
         /// Returns \c true if each variable has only two possible values
         bool isBinary() const;
 
-        /// Constructs the corresponding Markov graph 
+        /// Constructs the corresponding Markov graph
         /** \note The Markov graph has the variables as nodes and an edge
          *  between two variables if and only if the variables share a factor.
          */
@@ -287,7 +287,7 @@ class FactorGraph {
         /// Makes a backup of all factors connected to a set of variables
         /** \throw MULTIPLE_UNDO if a backup already exists
          */
-        void backupFactors( const VarSet& ns );
+        virtual void backupFactors( const VarSet& ns );
 
         /// Restores all factors connected to a set of variables from their backups
         void restoreFactors( const VarSet& ns );
@@ -368,7 +368,7 @@ class FactorGraph {
             ss << *this;
             return ss.str();
         }
-        
+
         /// Reads a factor graph from a string
         void fromString( const std::string& s ) {
             std::stringstream ss( s );
