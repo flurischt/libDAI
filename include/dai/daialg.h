@@ -18,9 +18,11 @@
 #include <iostream>
 #include <vector>
 #include <dai/factorgraph.h>
-#include <dai/regiongraph.h>
 #include <dai/properties.h>
 
+#ifdef DAI_WITH_ADVANCED
+#include <dai/regiongraph.h>
+#endif
 #ifdef DAI_WITH_GLC
 #include <dai/cobwebgraph.h>
 #endif
@@ -264,8 +266,10 @@ class DAIAlg : public InfAlg, public GRM {
 /// Base class for inference algorithms that operate on a FactorGraph
 typedef DAIAlg<FactorGraph> DAIAlgFG;
 
+#ifdef DAI_WITH_ADVANCED
 /// Base class for inference algorithms that operate on a RegionGraph
 typedef DAIAlg<RegionGraph> DAIAlgRG;
+#endif
 
 #ifdef DAI_WITH_GLC
 /// Base class for GLC that operates on CobwebGraph

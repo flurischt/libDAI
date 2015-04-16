@@ -112,6 +112,8 @@ ENDIF(WITH_GLC)
 
 IF(WITH_TESTS)
   ENABLE_TESTING()
+  # Build target tests
+  ADD_SUBDIRECTORY(tests)
 ENDIF()
 
 # Build target lib
@@ -119,9 +121,6 @@ ADD_SUBDIRECTORY(src)
 
 SET(EXTRA_LIBS dai)
 # SET(EXTRA_LIBS ${EXTRA_LIBS} dai)
-
-# Build target tests
-ADD_SUBDIRECTORY(tests)
 
 # Build target utils
 ADD_SUBDIRECTORY(utils)

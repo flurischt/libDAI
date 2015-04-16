@@ -19,10 +19,12 @@ namespace dai {
 using namespace std;
 
 
-class _builtinInfAlgs : public std::map<std::string, InfAlg *> { 
-    public: 
+class _builtinInfAlgs : public std::map<std::string, InfAlg *> {
+    public:
         _builtinInfAlgs() {
+#ifdef DAI_WITH_ADVANCED
             operator[]( ExactInf().name() ) = new ExactInf;
+#endif
 #ifdef DAI_WITH_BP
             operator[]( BP().name() ) = new BP;
 #endif

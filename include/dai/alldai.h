@@ -8,7 +8,7 @@
 
 /** \file
  *  \brief Main libDAI header file. It \#includes all other libDAI headers.
- * 
+ *
  *  \todo Replace VarSets by SmallSet<size_t> where appropriate, in order to minimize the use of FactorGraph::findVar().
  *
  *  \todo Improve SWIG interfaces and merge their build process with the main build process
@@ -23,9 +23,11 @@
 #include <string>
 #include <dai/daialg.h>
 #include <dai/properties.h>
-#include <dai/exactinf.h>
-#include <dai/evidence.h>
-#include <dai/emalg.h>
+#ifdef DAI_WITH_ADVANCED
+    #include <dai/exactinf.h>
+    #include <dai/evidence.h>
+    #include <dai/emalg.h>
+#endif
 #ifdef DAI_WITH_BP
     #include <dai/bp.h>
 #endif
@@ -78,10 +80,10 @@ std::map<std::string, InfAlg *>& builtinInfAlgs();
 
 
 /// Returns a set of names of all available inference algorithms
-/*  These are the names of the algorithms that were compiled in and can be 
- *  given to \ref newInfAlg and \ref newInfAlgFromString.  
+/*  These are the names of the algorithms that were compiled in and can be
+ *  given to \ref newInfAlg and \ref newInfAlgFromString.
  *  \return A set of strings, each one corresponding with the name of an available inference algorithm.
- *  \note The set is returned by value because it will be reasonably small 
+ *  \note The set is returned by value because it will be reasonably small
  *  enough and this function is expected to be called infrequently.
  */
 std::set<std::string> builtinInfAlgNames();
@@ -149,7 +151,7 @@ std::map<std::string,std::string> readAliasesFile( const std::string &filename )
 /** \example example_imagesegmentation.cpp
  *  This example shows how one can use approximate inference in factor graphs
  *  on a simple vision task: given two images, identify smooth regions where these
- *  two images differ more than some threshold. This can be used to seperate 
+ *  two images differ more than some threshold. This can be used to seperate
  *  foreground from background if one image contains the background and the other
  *  one the combination of background and foreground.
  *

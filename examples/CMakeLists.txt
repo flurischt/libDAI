@@ -1,35 +1,39 @@
-SET(dai_EXAMPLES
-    example
-    example_bipgraph
-    example_varset
-    example_permute
-    example_sprinkler
-    example_sprinkler_em
-   )
-
-IF(WITH_GIBBS)
-    SET(dai_EXAMPLES ${dai_EXAMPLES} example_sprinkler_gibbs)
-ENDIF()
-
-FOREACH(EXAMPLE ${dai_EXAMPLES})
-    ADD_EXECUTABLE(${EXAMPLE} ${EXAMPLE}.cpp)
-    TARGET_LINK_LIBRARIES(${EXAMPLE} ${EXTRA_LIBS})
-    INSTALL(TARGETS ${EXAMPLE} DESTINATION share/dai/examples)
-ENDFOREACH(EXAMPLE)
-
-ADD_EXECUTABLE(uai2010-aie-solver uai2010-aie-solver.cpp)
-TARGET_LINK_LIBRARIES(uai2010-aie-solver ${EXTRA_LIBS})
-INSTALL(TARGETS uai2010-aie-solver DESTINATION share/dai/examples)
+IF(WITH_ADVANCED)
+    SET(dai_EXAMPLES
+        example
+        example_bipgraph
+        example_varset
+        example_permute
+        example_sprinkler
+       )
 
 
-SET(dai_EXAMPLE_RESOURCES
-    example_sprinkler.dot
-    example_sprinkler.png
-    sprinkler.em
-    example_bipgraph.out
-    example_permute.out
-    example_varset.out
-   )
+    LIST(APPEND dai_EXAMPLES example_sprinkler_em)
+
+    IF(WITH_GIBBS)
+        SET(dai_EXAMPLES ${dai_EXAMPLES} example_sprinkler_gibbs)
+    ENDIF()
+
+    FOREACH(EXAMPLE ${dai_EXAMPLES})
+        ADD_EXECUTABLE(${EXAMPLE} ${EXAMPLE}.cpp)
+        TARGET_LINK_LIBRARIES(${EXAMPLE} ${EXTRA_LIBS})
+        INSTALL(TARGETS ${EXAMPLE} DESTINATION share/dai/examples)
+    ENDFOREACH(EXAMPLE)
+
+    ADD_EXECUTABLE(uai2010-aie-solver uai2010-aie-solver.cpp)
+    TARGET_LINK_LIBRARIES(uai2010-aie-solver ${EXTRA_LIBS})
+    INSTALL(TARGETS uai2010-aie-solver DESTINATION share/dai/examples)
+
+    SET(dai_EXAMPLE_RESOURCES
+        example_sprinkler.dot
+        example_sprinkler.png
+        sprinkler.em
+        example_bipgraph.out
+        example_permute.out
+        example_varset.out
+       )
+ENDIF(WITH_ADVANCED)
+
 
 IF(WITH_CIMG)
     FIND_PACKAGE(CImg)
