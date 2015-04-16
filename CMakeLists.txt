@@ -3,6 +3,7 @@ PROJECT (libdai)
 
 # The version number.
 SET(libdai_VERSION "0.3.1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 STRING(REGEX MATCHALL "[0-9]" libdai_VERSION_PARTS "${libdai_VERSION}")
 
