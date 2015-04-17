@@ -20,6 +20,7 @@ Factor createFactorRecommendation(const Var &n1, const Var &n2, Real alpha) {
         for (size_t j = 0; j < n2.states(); ++j) {
             state[n2] = j;
             size_t index = calcLinearState(var_set, state);
+
             if (i == j) {
                 fac.set(index, 0.5 + alpha);
             } else {
@@ -145,12 +146,16 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
             num_movies = max(num_movies, votings[i][votings[i].size() - 1].first);
         }
     }
+    // We add one to avoid the case where movies start counting at 1, leading to one additional movie.
+    num_movies++;
+
     Real alpha = 0.0001;
     int threshold = 4;
     vector<Var> vars;
     vector<Factor> factors;
 
     // Reserve memory for the variables
+    cout << "Estimated num_users/num_movies: " << num_users << "/" << num_movies << endl;
     vars.reserve(num_users + num_movies);
     // Create a binary variable for each movie/person
     for (size_t i = 0; i < (size_t) (num_users + num_movies); i++)
@@ -163,7 +168,7 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
             }
         }
     }
-
+    cout << "Factors created. Dealing with the user now..." << endl;
     // calculate some metrics for the user.
     int normalization_factor_p = 4;
     double sum = 0;
@@ -243,9 +248,9 @@ int main(int argc, char **argv) {
         }
     } else {
         cout << "reading data now..." << endl;
-        vector<vector<pair<int, int> > > input_data = extract_ratings("u1.base");
-        vector<vector<pair<int, int> > > test_data = extract_ratings("u1.test");
-        const int N = 5;
+        vector<vector<pair<int, int> > > input_data = extract_ratings("uV2New1.base");
+        vector<vector<pair<int, int> > > test_data = extract_ratings("uV2New1.test");
+        const int N = 1;
         double p10 = 0;
         double p20 = 0;
         double r10 = 0;
