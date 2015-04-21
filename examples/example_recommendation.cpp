@@ -234,66 +234,54 @@ int main(int argc, char **argv) {
     const char *infname = cimg_option("-method", "BP[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]",
                                       "Inference method in format name[key1=val1,...,keyn=valn]");
     const size_t maxiter = cimg_option("-maxiter", 100, "Maximum number of iterations for inference method");
-    const bool run_toy_example = cimg_option("-run_toy_example", 0, "Should we only run a small example?");
     const double tol = cimg_option("-tol", 1e-15, "Desired tolerance level for inference method");
 
-    if (run_toy_example) {
-        FactorGraph fg = example2fg();
+    cout << "reading data now..." << endl;
+    vector<vector<pair<int, int> > > input_data = extract_ratings("uV2New1.base");
+    vector<vector<pair<int, int> > > test_data = extract_ratings("uV2New1.test");
+    const int N = 1;
+    double p10 = 0;
+    double p20 = 0;
+    double r10 = 0;
+    double r20 = 0;
+    Timer timer;
+    timer.tic();
+    for (int user=0; user<N; ++user) {
+        cout << "building factor graph for user " << user << " out of " << N << endl;
+        FactorGraph fg = data2fg(input_data, user);
+
         vector<double> m; // Stores the final recommendations
         cout << "Solving the inference problem...please be patient!" << endl;
         doInference(fg, infname, maxiter, tol, m);
-        cout << "Printing result: " << endl;
-        for (size_t i = 0; i < m.size(); ++i) {
-            cout << i << " : " << m[i] << endl;
+        vector<pair<double, int> > ratings;
+        for (size_t i = input_data.size(); i < m.size(); ++i) {
+            // push back the negative so we can use the standard sorting.
+            ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
         }
-    } else {
-        cout << "reading data now..." << endl;
-        vector<vector<pair<int, int> > > input_data = extract_ratings("uV2New1.base");
-        vector<vector<pair<int, int> > > test_data = extract_ratings("uV2New1.test");
-        const int N = 1;
-        double p10 = 0;
-        double p20 = 0;
-        double r10 = 0;
-        double r20 = 0;
-        Timer timer;
-        timer.tic();
-        for (int user=0; user<N; ++user) {
-            cout << "building factor graph for user " << user << " out of " << N << endl;
-            FactorGraph fg = data2fg(input_data, user);
+        sort(ratings.begin(), ratings.end());
+        pair<double, double> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
+        pair<double, double> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
 
-            vector<double> m; // Stores the final recommendations
-            cout << "Solving the inference problem...please be patient!" << endl;
-            doInference(fg, infname, maxiter, tol, m);
-            vector<pair<double, int> > ratings;
-            for (size_t i = input_data.size(); i < m.size(); ++i) {
-                // push back the negative so we can use the standard sorting.
-                ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
-            }
-            sort(ratings.begin(), ratings.end());
-            pair<double, double> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
-            pair<double, double> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
-
-            p10 +=  pr10.first;
-            p20 +=  pr20.first;
-            r10 +=  pr10.second;
-            r20 +=  pr20.second;
-            cout << "Precision (N=10): " << pr10.first << endl;
-            cout << "Precision (N=20): " << pr20.first << endl;
-            cout << "Recall (N=10): " << pr10.second << endl;
-            cout << "Recall (N=20): " << pr20.second << endl;
-        }
-        double elapsed_secs = timer.toc();
-        p10 = p10 / static_cast<double>(N);
-        p20 = p20 / static_cast<double>(N);
-        r10 = r20 / static_cast<double>(N);
-        r20 = r20 / static_cast<double>(N);
-        cout << "Final estimated:" << endl;
-        cout << "Precision (N=10): " << p10 << endl;
-        cout << "Precision (N=20): " << p20 << endl;
-        cout << "Recall (N=10): " << r10 << endl;
-        cout << "Recall (N=20): " << r20 << endl;
-        cout << "Time in seconds: " << elapsed_secs << endl;
+        p10 +=  pr10.first;
+        p20 +=  pr20.first;
+        r10 +=  pr10.second;
+        r20 +=  pr20.second;
+        cout << "Precision (N=10): " << pr10.first << endl;
+        cout << "Precision (N=20): " << pr20.first << endl;
+        cout << "Recall (N=10): " << pr10.second << endl;
+        cout << "Recall (N=20): " << pr20.second << endl;
     }
+    double elapsed_secs = timer.toc();
+    p10 = p10 / static_cast<double>(N);
+    p20 = p20 / static_cast<double>(N);
+    r10 = r20 / static_cast<double>(N);
+    r20 = r20 / static_cast<double>(N);
+    cout << "Final estimated:" << endl;
+    cout << "Precision (N=10): " << p10 << endl;
+    cout << "Precision (N=20): " << p20 << endl;
+    cout << "Recall (N=10): " << r10 << endl;
+    cout << "Recall (N=20): " << r20 << endl;
+    cout << "Time in seconds: " << elapsed_secs << endl;
     return 0;
 }
 
