@@ -1,9 +1,0 @@
-mkdir build && cd build/
-cmake .. -DWITH_CIMG=ON
-make
-cd examples/
-./example_...
-
-# and to build it on osx:
-cmake .. -DWITH_CIMG=ON -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/4.9.2_1/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/4.9.2_1/bin/gcc-4.9
-# make sure that you have all needes libraries (cimg, isl etc). cmake will tell you your compiler is not working and you need to check the error log to see which libs are missing...
