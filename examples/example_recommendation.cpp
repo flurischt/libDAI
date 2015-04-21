@@ -234,6 +234,9 @@ int main(int argc, char **argv) {
     const size_t maxiter = cimg_option("-maxiter", 100, "Maximum number of iterations for inference method");
     const double tol = cimg_option("-tol", 1e-15, "Desired tolerance level for inference method");
 
+    // default cpufreq to 2.6Ghz
+    const long cpu_freq = cimg_option("-cpufreq", 26e+8, "CPU frequency to calculate runtime in seconds");
+
     cout << "reading data now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings("uV2New1.base");
     vector<vector<pair<int, int> > > test_data = extract_ratings("uV2New1.test");
@@ -288,6 +291,7 @@ int main(int argc, char **argv) {
     cout << "Recall (N=10): " << r10 << endl;
     cout << "Recall (N=20): " << r20 << endl;
     cout << "Measured cycles: " << measured_cycles << endl;
+    cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
     return 0;
 }
 
