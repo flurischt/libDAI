@@ -68,6 +68,9 @@ ADD_CUSTOM_COMMAND(TARGET example_recommendation POST_BUILD
                    COMMAND cp "${CMAKE_SOURCE_DIR}/examples/ml-100k/*"
                               "${CMAKE_CURRENT_BINARY_DIR}/"
                   )
-
+ADD_CUSTOM_COMMAND(TARGET example_recommendation POST_BUILD
+                   COMMAND cp "${CMAKE_SOURCE_DIR}/examples/recommendation_ref_files/*"
+                              "${CMAKE_CURRENT_BINARY_DIR}/"
+                  )
 
 INSTALL(FILES ${dai_EXAMPLE_RESOURCES} DESTINATION share/dai/examples)
