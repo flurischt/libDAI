@@ -1,10 +1,10 @@
 // basic file operations
 #include <iostream>
+#include <limits>
 #include <fstream>
 #include <algorithm>    // std::max, min
 #include <dai/alldai.h>  // Include main libDAI header file
 #include <CImg.h>        // This example needs CImg to be installed
-#include <map>
 #include <dai/utils/timer.h>
 
 using namespace dai;
@@ -224,6 +224,33 @@ pair<double, double> getPrecisionAndRecall(const vector<vector<pair<int, int> > 
     return make_pair<double, double>(v.size() / static_cast<double>(N), v.size() / static_cast<double>(wanted.size()));
 }
 
+// compares the calculated ratings to the reference file
+void verify_results(const string dataset, const double delta, vector<pair<double, int>> ratings){
+    ifstream fin;
+    string file_name = dataset + ".reference";
+    fin.open(file_name.c_str(), ifstream::in);
+    if(!fin.good())
+    {
+        cerr << "Test FAILED! Reference file " << dataset << ".reference cannot be opened." << endl;
+        exit(1);
+    }
+    double ref_d;
+    double ref_i;
+    size_t line = 1;
+    for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++,line++) {
+        fin >> ref_d;
+        fin >> ref_i;
+        if(fabs(ref_d - it->first) > delta || ref_i != it->second)
+        {
+            cerr << "TEST FAILED! Difference at line " << line << " found!" << endl;
+            cerr << "Expected: " << ref_d << " / " << ref_i << endl;
+            cerr << "Actual: " << it->first << " / " << it->second << endl;
+            exit(1);
+        }
+    }
+    cerr << "TEST SUCCESSFULL!" << endl;
+    fin.close();
+}
 
 /// Main program
 int main(int argc, char **argv) {
@@ -239,7 +266,10 @@ int main(int argc, char **argv) {
     const bool output_ratings = cimg_option("-printRatings", false, "output the calculated ratings to STDERR");
     const string dataset = cimg_option("-dataset", "uV2New1",
                                        "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
-
+    const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
+    //TODO why does std::numeric_limits<double>::epsilon() not work as delta?
+    const double delta = cimg_option("-testDelta", 1e-6,
+                                     "Max float difference after which the tests should fail");
 
     cout << "reading " << dataset << ".base now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings(dataset + ".base");
@@ -292,6 +322,8 @@ int main(int argc, char **argv) {
                 cerr << it->first << " " << it->second << endl;
             }
         }
+        if(run_tests)
+            verify_results(dataset, delta, ratings);
     }
     p10 = p10 / static_cast<double>(N);
     p20 = p20 / static_cast<double>(N);
