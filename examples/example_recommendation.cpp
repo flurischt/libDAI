@@ -236,6 +236,8 @@ int main(int argc, char **argv) {
 
     // default cpufreq to 2.6Ghz
     const long cpu_freq = cimg_option("-cpufreq", 26e+8, "CPU frequency to calculate runtime in seconds");
+    const bool output_ratings = cimg_option("-printRatings", false, "output the calculated ratings to STDERR");
+
 
     cout << "reading data now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings("uV2New1.base");
@@ -279,8 +281,16 @@ int main(int argc, char **argv) {
         cout << "Precision (N=20): " << pr20.first << endl;
         cout << "Recall (N=10): " << pr10.second << endl;
         cout << "Recall (N=20): " << pr20.second << endl;
+
+        if(output_ratings) {
+            // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
+            // you can create a reference file the following way:
+            //      ./example_recommendation > output.txt 2> ratings.txt
+            for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
+                cerr << it->first << " " << it->second << endl;
+            }
+        }
     }
-     timer.toc();
     p10 = p10 / static_cast<double>(N);
     p20 = p20 / static_cast<double>(N);
     r10 = r20 / static_cast<double>(N);
