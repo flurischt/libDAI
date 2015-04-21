@@ -237,11 +237,13 @@ int main(int argc, char **argv) {
     // default cpufreq to 2.6Ghz
     const long cpu_freq = cimg_option("-cpufreq", 26e+8, "CPU frequency to calculate runtime in seconds");
     const bool output_ratings = cimg_option("-printRatings", false, "output the calculated ratings to STDERR");
+    const string dataset = cimg_option("-dataset", "uV2New1",
+                                       "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
 
 
-    cout << "reading data now..." << endl;
-    vector<vector<pair<int, int> > > input_data = extract_ratings("uV2New1.base");
-    vector<vector<pair<int, int> > > test_data = extract_ratings("uV2New1.test");
+    cout << "reading " << dataset << ".base now..." << endl;
+    vector<vector<pair<int, int> > > input_data = extract_ratings(dataset + ".base");
+    vector<vector<pair<int, int> > > test_data = extract_ratings(dataset + ".test");
     const int N = 1;
     double p10 = 0;
     double p20 = 0;
@@ -250,7 +252,7 @@ int main(int argc, char **argv) {
     long measured_cycles = 0;
     Timer timer;
     for (int user=0; user<N; ++user) {
-        cout << "building factor graph for user " << user << " out of " << N << endl;
+        cout << "building factor graph for user " << user+1 << " out of " << N << endl;
         FactorGraph fg = data2fg(input_data, user);
 
         vector<double> m; // Stores the final recommendations
