@@ -73,14 +73,11 @@ FactorGraph example2fg() {
 }
 
 
-double doInference(FactorGraph &fg, string algOpts, size_t maxIter, double tol, vector<double> &m) {
-    // Construct inference algorithm
-    cout << "Inference algorithm: " << algOpts << endl;
-    cout << "Constructing inference algorithm object..." << endl;
+pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter, double tol, vector<double> &m) {
     InfAlg *ia = newInfAlgFromString(algOpts, fg);
 
     // Initialize inference algorithm
-    cout << "Initializing inference algorithm..." << endl;
+    //cout << "Initializing inference algorithm..." << endl;
     ia->init();
 
     // Initialize vector for storing the recommendations
@@ -91,8 +88,9 @@ double doInference(FactorGraph &fg, string algOpts, size_t maxIter, double tol, 
 
     // Iterate while maximum number of iterations has not been
     // reached and requested convergence level has not been reached
-    cout << "Starting inference algorithm..." << endl;
-    for (size_t iter = 0; iter < maxIter && maxDiff > tol; iter++) {
+    //cout << "Starting inference algorithm..." << endl;
+    size_t iter;
+    for (iter = 0; iter < maxIter && maxDiff > tol; iter++) {
         // Set recommendations to beliefs
         for (size_t i = 0; i < fg.nrVars(); i++)
             m[i] = ia->beliefV(i)[0];
@@ -102,15 +100,15 @@ double doInference(FactorGraph &fg, string algOpts, size_t maxIter, double tol, 
         maxDiff = ia->run();
 
         // Output progress
-        cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
+        //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
-    cout << "Finished inference algorithm" << endl;
+    //cout << "Finished inference algorithm" << endl;
 
     // Clean up inference algorithm
     delete ia;
 
-    // Return reached convergence level
-    return maxDiff;
+    // Return num of iterations and reached convergence level
+    return make_pair(++iter, maxDiff);
 }
 
 // vector of users, containing a vector of ratings. Each rating consists of a movie id (first) and the rating (second)
@@ -244,15 +242,23 @@ int main(int argc, char **argv) {
     double p20 = 0;
     double r10 = 0;
     double r20 = 0;
+    long measured_cycles = 0;
     Timer timer;
-    timer.tic();
     for (int user=0; user<N; ++user) {
         cout << "building factor graph for user " << user << " out of " << N << endl;
         FactorGraph fg = data2fg(input_data, user);
 
         vector<double> m; // Stores the final recommendations
+        cout << "Inference algorithm: " << infname << endl;
         cout << "Solving the inference problem...please be patient!" << endl;
-        doInference(fg, infname, maxiter, tol, m);
+        cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
+
+        timer.tic();
+        pair<size_t, double> result = doInference(fg, infname, maxiter, tol, m);
+        measured_cycles += timer.toc();
+
+        cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
+
         vector<pair<double, int> > ratings;
         for (size_t i = input_data.size(); i < m.size(); ++i) {
             // push back the negative so we can use the standard sorting.
@@ -271,7 +277,7 @@ int main(int argc, char **argv) {
         cout << "Recall (N=10): " << pr10.second << endl;
         cout << "Recall (N=20): " << pr20.second << endl;
     }
-    double elapsed_secs = timer.toc();
+     timer.toc();
     p10 = p10 / static_cast<double>(N);
     p20 = p20 / static_cast<double>(N);
     r10 = r20 / static_cast<double>(N);
@@ -281,7 +287,7 @@ int main(int argc, char **argv) {
     cout << "Precision (N=20): " << p20 << endl;
     cout << "Recall (N=10): " << r10 << endl;
     cout << "Recall (N=20): " << r20 << endl;
-    cout << "Time in seconds: " << elapsed_secs << endl;
+    cout << "Measured cycles: " << measured_cycles << endl;
     return 0;
 }
 
