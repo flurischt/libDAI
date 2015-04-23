@@ -165,44 +165,33 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
 }
 
 
+// TODO: Optimize
 Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i ) const {
     Factor Fprod( factor(I) );
     Prob &prod = Fprod.p();
-    if( props.logdomain )
-        prod.takeLog();
 
     // Calculate product of incoming messages and factor I
-    bforeach( const Neighbor &j, nbF(I) )
+    for(const Neighbor &j: nbF(I) ) {
         if( !(without_i && (j == i)) ) {
             // prod_j will be the product of messages coming into j
-            Prob prod_j( var(j).states(), props.logdomain ? 0.0 : 1.0 );
-            bforeach( const Neighbor &J, nbV(j) )
+            size_t vector_length = var(j).states();
+            vector<double> prod_j(vector_length, 1.0 );
+            for(const Neighbor &J: nbV(j) ) {
                 if( J != I ) { // for all J in nb(j) \ I
-                    if( props.logdomain )
-                        prod_j += message( j, J.iter );
-                    else
-                        prod_j *= message( j, J.iter );
+                    const Prob& m = message( j, J.iter );
+                    for (size_t i=0; i<vector_length; ++i) {
+                        prod_j[i] *= m._p[i];
+                    }
                 }
-
-            // multiply prod with prod_j
-            if( !DAI_BP_FAST ) {
-                // UNOPTIMIZED (SIMPLE TO READ, BUT SLOW) VERSION
-                if( props.logdomain )
-                    Fprod += Factor( var(j), prod_j );
-                else
-                    Fprod *= Factor( var(j), prod_j );
-            } else {
-                // OPTIMIZED VERSION
-                size_t _I = j.dual;
-                // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
-                const ind_t &ind = index(j, _I);
-
-                for( size_t r = 0; r < prod.size(); ++r )
-                    if( props.logdomain )
-                        prod.set( r, prod[r] + prod_j[ind[r]] );
-                    else
-                        prod.set( r, prod[r] * prod_j[ind[r]] );
             }
+            // multiply prod with prod_j
+            size_t _I = j.dual;
+            // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
+            const ind_t &ind = index(j, _I);
+            for(size_t r = 0; r < prod.size(); ++r ) {
+                prod._p[r] *= prod_j[ind[r]];
+            }
+        }
     }
     return prod;
 }
@@ -463,7 +452,7 @@ void BP::updateMessage( size_t i, size_t _I ) {
     }
 }
 
-
+// TODO: Optimize
 void BP::updateResidual( size_t i, size_t _I, Real r ) {
     EdgeProp* pEdge = &_edges[i][_I];
     pEdge->residual = r;

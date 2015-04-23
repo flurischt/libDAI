@@ -199,9 +199,11 @@ class TProb {
         /// Shorthand
         typedef TProb<T> this_type;
 
-    private:
         /// The data structure that stores the values
+        // This was private but for performance we make it public.
         container_type _p;
+    private:
+
 
     public:
     /// \name Constructors and destructors
