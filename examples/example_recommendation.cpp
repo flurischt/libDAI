@@ -1,6 +1,5 @@
 // basic file operations
 #include <iostream>
-#include <limits>
 #include <fstream>
 #include <algorithm>    // std::max, min
 #include <dai/alldai.h>  // Include main libDAI header file
@@ -267,8 +266,7 @@ int main(int argc, char **argv) {
     const string dataset = cimg_option("-dataset", "uV2New1",
                                        "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
     const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
-    //TODO why does std::numeric_limits<double>::epsilon() not work as delta?
-    const double delta = cimg_option("-testDelta", 1e-6,
+    const double delta = cimg_option("-testDelta", 1e-8,
                                      "Max float difference after which the tests should fail");
 
     cout << "reading " << dataset << ".base now..." << endl;
@@ -318,6 +316,7 @@ int main(int argc, char **argv) {
             // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
             // you can create a reference file the following way:
             //      ./example_recommendation > output.txt 2> ratings.txt
+            cerr.precision(15);
             for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
                 cerr << it->first << " " << it->second << endl;
             }
