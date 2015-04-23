@@ -178,9 +178,8 @@ Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i ) const 
             vector<double> prod_j(vector_length, 1.0 );
             for(const Neighbor &J: nbV(j) ) {
                 if( J != I ) { // for all J in nb(j) \ I
-                    const Prob& m = message( j, J.iter );
                     for (size_t i=0; i<vector_length; ++i) {
-                        prod_j[i] *= m._p[i];
+                        prod_j[i] *= _edges[j][J.iter].message._p[i];
                     }
                 }
             }
