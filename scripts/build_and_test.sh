@@ -8,5 +8,5 @@ cd $BUILD_DIR
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j8
 cd examples/
-./example_recommendation -dataset u1 -test -cpufreq 2300000000 > output.txt
+./example_recommendation -dataset u1 -numMeasurements 7 -test -cpufreq 2300000000 > output.txt
 cat output.txt

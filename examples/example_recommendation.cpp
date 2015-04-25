@@ -268,6 +268,7 @@ int main(int argc, char **argv) {
     const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
     const double delta = cimg_option("-testDelta", 1e-8,
                                      "Max float difference after which the tests should fail");
+    const int num_measurements = cimg_option("-numMeasurements", 1, "Run numMeasurements times and print median");
 
     cout << "reading " << dataset << ".base now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings(dataset + ".base");
@@ -279,60 +280,72 @@ int main(int argc, char **argv) {
     double r20 = 0;
     long measured_cycles = 0;
     Timer timer;
-    for (int user=0; user<N; ++user) {
-        cout << "building factor graph for user " << user+1 << " out of " << N << endl;
-        FactorGraph fg = data2fg(input_data, user);
+    vector<long> measurements;
+    for(int run=0;run<num_measurements;run++) {
+        p10 = 0;
+        p20 = 0;
+        r10 = 0;
+        r20 = 0;
+        measured_cycles = 0;
+        for (int user=0; user<N; ++user) {
+            cout << "building factor graph for user " << user+1 << " out of " << N << endl;
+            FactorGraph fg = data2fg(input_data, user);
 
-        vector<double> m; // Stores the final recommendations
-        cout << "Inference algorithm: " << infname << endl;
-        cout << "Solving the inference problem...please be patient!" << endl;
-        cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
+            vector<double> m; // Stores the final recommendations
+            cout << "Inference algorithm: " << infname << endl;
+            cout << "Solving the inference problem...please be patient!" << endl;
+            cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
 
-        timer.tic();
-        pair<size_t, double> result = doInference(fg, infname, maxiter, tol, m);
-        measured_cycles += timer.toc();
+            timer.tic();
+            pair<size_t, double> result = doInference(fg, infname, maxiter, tol, m);
+            measured_cycles += timer.toc();
 
-        cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
+            cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
 
-        vector<pair<double, int> > ratings;
-        for (size_t i = input_data.size(); i < m.size(); ++i) {
-            // push back the negative so we can use the standard sorting.
-            ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
-        }
-        sort(ratings.begin(), ratings.end());
-        pair<double, double> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
-        pair<double, double> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
-
-        p10 +=  pr10.first;
-        p20 +=  pr20.first;
-        r10 +=  pr10.second;
-        r20 +=  pr20.second;
-        cout << "Precision (N=10): " << pr10.first << endl;
-        cout << "Precision (N=20): " << pr20.first << endl;
-        cout << "Recall (N=10): " << pr10.second << endl;
-        cout << "Recall (N=20): " << pr20.second << endl;
-
-        if(output_ratings) {
-            // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
-            // you can create a reference file the following way:
-            //      ./example_recommendation > output.txt 2> ratings.txt
-            cerr.precision(15);
-            for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
-                cerr << it->first << " " << it->second << endl;
+            vector<pair<double, int> > ratings;
+            for (size_t i = input_data.size(); i < m.size(); ++i) {
+                // push back the negative so we can use the standard sorting.
+                ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
             }
+            sort(ratings.begin(), ratings.end());
+            pair<double, double> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
+            pair<double, double> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
+
+            p10 +=  pr10.first;
+            p20 +=  pr20.first;
+            r10 +=  pr10.second;
+            r20 +=  pr20.second;
+            cout << "Precision (N=10): " << pr10.first << endl;
+            cout << "Precision (N=20): " << pr20.first << endl;
+            cout << "Recall (N=10): " << pr10.second << endl;
+            cout << "Recall (N=20): " << pr20.second << endl;
+            measurements.push_back(measured_cycles);
+
+            if(output_ratings && run == num_measurements -1) {
+                // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
+                // you can create a reference file the following way:
+                //      ./example_recommendation > output.txt 2> ratings.txt
+                cerr.precision(15);
+                for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
+                    cerr << it->first << " " << it->second << endl;
+                }
+            }
+            if(run_tests)
+                verify_results(dataset, delta, ratings);
         }
-        if(run_tests)
-            verify_results(dataset, delta, ratings);
     }
     p10 = p10 / static_cast<double>(N);
     p20 = p20 / static_cast<double>(N);
     r10 = r20 / static_cast<double>(N);
     r20 = r20 / static_cast<double>(N);
+    sort(measurements.begin(), measurements.end());
+    measured_cycles = measurements[num_measurements / 2];
     cout << "Final estimated:" << endl;
     cout << "Precision (N=10): " << p10 << endl;
     cout << "Precision (N=20): " << p20 << endl;
     cout << "Recall (N=10): " << r10 << endl;
     cout << "Recall (N=20): " << r20 << endl;
+    cout << "Ran " << num_measurements << " times.\nMedian:" << endl;
     cout << "Measured cycles: " << measured_cycles << endl;
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
     return 0;
