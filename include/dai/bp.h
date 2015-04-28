@@ -25,6 +25,8 @@
 #include <dai/properties.h>
 #include <dai/enum.h>
 
+#include <boost/heap/fibonacci_heap.hpp>
+#include <boost/heap/binomial_heap.hpp>
 
 namespace dai {
 
@@ -80,9 +82,13 @@ class BP : public DAIAlgFG {
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
         /// Lookup table (only used for maximum-residual BP)
-        std::vector<std::vector<LutType::iterator> > _edge2lut;
+        std::vector<std::vector<LutType::iterator> > _edge2lutOld;
+        typedef std::pair<Real, std::pair<size_t, size_t>> heap_data;
+        typedef boost::heap::fibonacci_heap<heap_data>::handle_type heap_data_handle;
+        std::vector<std::vector<heap_data_handle> > _edge2lutNew;
         /// Lookup table (only used for maximum-residual BP)
         LutType _lut;
+        boost::heap::fibonacci_heap<heap_data> _lutNew;
         /// Maximum difference between variable beliefs encountered so far
         Real _maxdiff;
         /// Number of iterations needed
@@ -147,7 +153,7 @@ class BP : public DAIAlgFG {
     /// \name Constructors/destructors
     //@{
         /// Default constructor
-        BP() : DAIAlgFG(), _edges(), _edge2lut(), _lut(), _maxdiff(0.0), _iters(0U), _sentMessages(), _oldBeliefsV(), _oldBeliefsF(), _updateSeq(), props(), recordSentMessages(false) {}
+        BP() : DAIAlgFG(), _edges(), _edge2lutOld(), _lut(), _maxdiff(0.0), _iters(0U), _sentMessages(), _oldBeliefsV(), _oldBeliefsF(), _updateSeq(), props(), recordSentMessages(false) {}
 
         /// Construct from FactorGraph \a fg and PropertySet \a opts
         /** \param fg Factor graph.
@@ -159,9 +165,9 @@ class BP : public DAIAlgFG {
         }
 
         /// Copy constructor
-        BP( const BP &x ) : DAIAlgFG(x), _edges(x._edges), _edge2lut(x._edge2lut), _lut(x._lut), _maxdiff(x._maxdiff), _iters(x._iters), _sentMessages(x._sentMessages), _oldBeliefsV(x._oldBeliefsV), _oldBeliefsF(x._oldBeliefsF), _updateSeq(x._updateSeq), props(x.props), recordSentMessages(x.recordSentMessages) {
+        BP( const BP &x ) : DAIAlgFG(x), _edges(x._edges), _edge2lutOld(x._edge2lutOld), _lut(x._lut), _maxdiff(x._maxdiff), _iters(x._iters), _sentMessages(x._sentMessages), _oldBeliefsV(x._oldBeliefsV), _oldBeliefsF(x._oldBeliefsF), _updateSeq(x._updateSeq), props(x.props), recordSentMessages(x.recordSentMessages) {
             for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
-                _edge2lut[l->second.first][l->second.second] = l;
+                _edge2lutOld[l->second.first][l->second.second] = l;
         }
 
         /// Assignment operator
@@ -171,7 +177,7 @@ class BP : public DAIAlgFG {
                 _edges = x._edges;
                 _lut = x._lut;
                 for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
-                    _edge2lut[l->second.first][l->second.second] = l;
+                    _edge2lutOld[l->second.first][l->second.second] = l;
                 _maxdiff = x._maxdiff;
                 _iters = x._iters;
                 _sentMessages = x._sentMessages;
