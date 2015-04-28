@@ -307,6 +307,19 @@ int main(int argc, char **argv) {
                 // push back the negative so we can use the standard sorting.
                 ratings.push_back(make_pair<double, int>(-m[i], i - input_data.size() + 1));
             }
+
+            if(output_ratings && run == num_measurements -1) {
+                // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
+                // you can create a reference file the following way:
+                //      ./example_recommendation > output.txt 2> ratings.txt
+                cerr.precision(15);
+                for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
+                    cerr << it->first << " " << it->second << endl;
+                }
+            }
+            if(run_tests)
+                verify_results(dataset, delta, ratings);
+
             sort(ratings.begin(), ratings.end());
             pair<double, double> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
             pair<double, double> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
@@ -320,18 +333,6 @@ int main(int argc, char **argv) {
             cout << "Recall (N=10): " << pr10.second << endl;
             cout << "Recall (N=20): " << pr20.second << endl;
             measurements.push_back(measured_cycles);
-
-            if(output_ratings && run == num_measurements -1) {
-                // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
-                // you can create a reference file the following way:
-                //      ./example_recommendation > output.txt 2> ratings.txt
-                cerr.precision(15);
-                for(vector<pair<double, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
-                    cerr << it->first << " " << it->second << endl;
-                }
-            }
-            if(run_tests)
-                verify_results(dataset, delta, ratings);
         }
     }
     p10 = p10 / static_cast<double>(N);
