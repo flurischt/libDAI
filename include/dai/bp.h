@@ -27,6 +27,9 @@
 
 #include <boost/heap/fibonacci_heap.hpp>
 #include <boost/heap/binomial_heap.hpp>
+#include <boost/heap/pairing_heap.hpp>
+#include <boost/heap/skew_heap.hpp>
+#include <boost/heap/priority_queue.hpp>
 
 namespace dai {
 
@@ -84,11 +87,11 @@ class BP : public DAIAlgFG {
         /// Lookup table (only used for maximum-residual BP)
         std::vector<std::vector<LutType::iterator> > _edge2lutOld;
         typedef std::pair<Real, std::pair<size_t, size_t>> heap_data;
-        typedef boost::heap::fibonacci_heap<heap_data>::handle_type heap_data_handle;
+        typedef boost::heap::pairing_heap<heap_data, boost::heap::mutable_<true>>::handle_type heap_data_handle;
         std::vector<std::vector<heap_data_handle> > _edge2lutNew;
         /// Lookup table (only used for maximum-residual BP)
         LutType _lut;
-        boost::heap::fibonacci_heap<heap_data> _lutNew;
+        boost::heap::pairing_heap<heap_data, boost::heap::mutable_<true>> _lutNew;
         /// Maximum difference between variable beliefs encountered so far
         Real _maxdiff;
         /// Number of iterations needed
