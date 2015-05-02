@@ -84,7 +84,16 @@ class BP : public DAIAlgFG {
         std::vector<std::vector<EdgeProp> > _edges;
         // We store the product for each variable. Every time a message gets updated we also
         // update the corresponding product. We can then reuse the result and make our algorithm much faster.
-        std::vector<std::vector<double>> _oldProd;
+        std::vector<std::vector<Real> > _oldProd;
+
+        // _prod_j is used in calcIncomingMessageProduct only. Because this
+        // storage container is reused multiple times, caching it avoids
+        // superfluous calls to malloc and free.
+        // Background: "trivially-destructible" types std::vector<T>::clear()
+        // is constant in time, only the size-defining member is set to zero,
+        // the storage is NOT released!
+        // Reference: http://www.cplusplus.com/reference/vector/vector/clear/
+        mutable std::vector<Real> _prod_j;
 
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
