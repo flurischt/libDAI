@@ -114,6 +114,11 @@ pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter
 vector<vector<pair<int, int> > > extract_ratings(string file_name) {
     ifstream fin;
     fin.open(file_name.c_str(), ifstream::in);
+    if (!fin.is_open())
+    {
+        cerr << "Could not open file: " << file_name << endl;
+        exit(1);
+    }
     vector<vector<pair<int, int> > > ratings;
     int num_entries;
     fin >> num_entries;
@@ -229,7 +234,7 @@ void verify_results(const string dataset, const double delta, vector<pair<double
     ifstream fin;
     string file_name = dataset + ".reference";
     fin.open(file_name.c_str(), ifstream::in);
-    if(!fin.good())
+    if(!fin.is_open())
     {
         cerr << "Test FAILED! Reference file " << dataset << ".reference cannot be opened." << endl;
         exit(1);
