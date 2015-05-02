@@ -31,11 +31,6 @@ namespace dai {
 
 using namespace std;
 
-
-#define DAI_BP_FAST 1
-/// \todo Make DAI_BP_FAST a compile-time choice, as it is a memory/speed tradeoff
-
-
 void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("tol") );
     DAI_ASSERT( opts.hasKey("logdomain") );
@@ -118,11 +113,9 @@ void BP::construct() {
             newEP.message = Prob( var(i).states() );
             newEP.newMessage = Prob( var(i).states() );
 
-            if( DAI_BP_FAST ) {
                 newEP.index.reserve( factor(I).nrStates() );
                 for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
                     newEP.index.push_back( k );
-            }
 
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
@@ -232,14 +225,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         // Marginalize onto i
-        if( !DAI_BP_FAST ) {
-            // UNOPTIMIZED (SIMPLE TO READ, BUT SLOW) VERSION
-            if( props.inference == Properties::InfType::SUMPROD )
-                marg = Fprod.marginal( var(i) ).p();
-            else
-                marg = Fprod.maxMarginal( var(i) ).p();
-        } else {
-            // OPTIMIZED VERSION
             marg = Prob( var(i).states(), 0.0 );
             // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
             const ind_t ind = index(i,_I);
@@ -251,7 +236,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
                     if( prod[r] > marg[ind[r]] )
                         marg.set( ind[r], prod[r] );
             marg.normalize();
-        }
 
     // Store result
     if( props.logdomain )
