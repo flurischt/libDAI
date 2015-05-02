@@ -134,7 +134,7 @@ void BP::construct() {
     _oldBeliefsF.reserve( nrFactors() );
     for( size_t I = 0; I < nrFactors(); ++I )
         _oldBeliefsF.push_back( Factor( factor(I).vars() ) );
-    
+
     // create update sequence
     _updateSeq.clear();
     _updateSeq.reserve( nrEdges() );
@@ -185,7 +185,7 @@ Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const {
                 }
             }
             // Now let us divide by that message.
-            for (int k=0; k<_oldProd[j.node].size(); ++k) {
+            for (size_t k=0; k<_oldProd[j.node].size(); ++k) {
                 prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
             }
 
@@ -234,7 +234,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
             else
                 marg = Fprod.maxMarginal( var(i) ).p();
         } else {
-            // OPTIMIZED VERSION 
+            // OPTIMIZED VERSION
             marg = Prob( var(i).states(), 0.0 );
             // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
             const ind_t ind = index(i,_I);
@@ -433,7 +433,7 @@ void BP::init( const VarSet &ns ) {
 
 
 void BP::updateMessage( size_t i, size_t _I ) {
-    for (int j=0; j<_oldProd[i].size(); ++j) {
+    for (size_t j=0; j<_oldProd[i].size(); ++j) {
         _oldProd[i][j] =  _edges[i][_I].newMessage._p[j] * _oldProd[i][j] / _edges[i][_I].message._p[j];
     }
 
