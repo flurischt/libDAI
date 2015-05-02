@@ -118,6 +118,7 @@ class BP : public DAIAlgFG {
              *  - SEQFIX sequential updates using a fixed sequence
              *  - SEQRND sequential updates using a random sequence
              *  - SEQMAX maximum-residual updates [\ref EMK06]
+             * \obsolete BPFast uses always SEQMAX.
              */
             DAI_ENUM(UpdateType,SEQFIX,SEQRND,SEQMAX,PARALL);
 
@@ -142,9 +143,6 @@ class BP : public DAIAlgFG {
 
             /// Damping constant (0.0 means no damping, 1.0 is maximum damping)
             Real damping;
-
-            /// Message update schedule
-            UpdateType updates;
 
         } props;
 

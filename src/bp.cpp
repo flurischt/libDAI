@@ -36,7 +36,6 @@ void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("updates") );
 
     props.tol = opts.getStringAs<Real>("tol");
-    props.updates = opts.getStringAs<Properties::UpdateType>("updates");
 
     if( opts.hasKey("maxiter") )
         props.maxiter = opts.getStringAs<size_t>("maxiter");
@@ -63,7 +62,6 @@ PropertySet BP::getProperties() const {
     opts.set( "maxiter", props.maxiter );
     opts.set( "maxtime", props.maxtime );
     opts.set( "verbose", props.verbose );
-    opts.set( "updates", props.updates );
     opts.set( "damping", props.damping );
     return opts;
 }
@@ -76,7 +74,6 @@ string BP::printProperties() const {
     s << "maxiter=" << props.maxiter << ",";
     s << "maxtime=" << props.maxtime << ",";
     s << "verbose=" << props.verbose << ",";
-    s << "updates=" << props.updates << ",";
     s << "damping=" << props.damping << "]";
     return s.str();
 }
@@ -88,16 +85,13 @@ void BP::construct() {
     _edges.reserve( nrVars() );
     _oldProd.clear();
     _edge2lutNew.clear();
-    if( props.updates == Properties::UpdateType::SEQMAX )
         _edge2lutNew.reserve( nrVars() );
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
         _oldProd.push_back(vector<double>(var(i).states(), 1));
-        if( props.updates == Properties::UpdateType::SEQMAX ) {
             _edge2lutNew.push_back( vector<heap_data_handle>() );
             _edge2lutNew[i].reserve( nbV(i).size() );
-        }
         for( const Neighbor &I : nbV(i) ) {
             EdgeProp newEP;
             newEP.message = Prob( var(i).states() );
@@ -109,7 +103,6 @@ void BP::construct() {
 
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
-            if( props.updates == Properties::UpdateType::SEQMAX )
                 _edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
         }
     }
@@ -139,7 +132,6 @@ void BP::init() {
         for( const Neighbor &I : nbV(i) ) {
             message( i, I.iter ).fill( c );
             newMessage( i, I.iter ).fill( c );
-            if( props.updates == Properties::UpdateType::SEQMAX )
                 updateResidual( i, I.iter, 0.0 );
         }
     }
@@ -226,7 +218,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         newMessage(i,_I) = marg;
 
     // Update the residual if necessary
-    if( props.updates == Properties::UpdateType::SEQMAX )
         updateResidual( i, _I , dist( newMessage( i, _I ), message( i, _I ), DISTLINF ) );
 }
 
@@ -245,7 +236,6 @@ Real BP::run() {
     // been reached or until the maximum belief difference is smaller than tolerance
     Real maxDiff = INFINITY;
     for( ; _iters < props.maxiter && maxDiff > props.tol && (toc() - tic) < props.maxtime; _iters++ ) {
-        if( props.updates == Properties::UpdateType::SEQMAX ) {
             if( _iters == 0 ) {
                 // do the first pass
                 for( size_t i = 0; i < nrVars(); ++i )
@@ -273,7 +263,6 @@ Real BP::run() {
                     }
                 }
             }
-        }
 
         // calculate new beliefs and compare with old ones
         maxDiff = -INFINITY;
@@ -380,7 +369,6 @@ void BP::init( const VarSet &ns ) {
             Real val = 1.0;
             message( ni, I.iter ).fill( val );
             newMessage( ni, I.iter ).fill( val );
-            if( props.updates == Properties::UpdateType::SEQMAX )
                 updateResidual( ni, I.iter, 0.0 );
         }
     }
@@ -398,11 +386,9 @@ void BP::updateMessage( size_t i, size_t _I ) {
         _sentMessages.push_back(make_pair(i,_I));
     if( props.damping == 0.0 ) {
         message(i,_I) = newMessage(i,_I);
-        if( props.updates == Properties::UpdateType::SEQMAX )
             updateResidual( i, _I, 0.0 );
     } else {
             message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
-        if( props.updates == Properties::UpdateType::SEQMAX )
             updateResidual( i, _I, dist( newMessage(i,_I), message(i,_I), DISTLINF ) );
     }
 }
