@@ -184,6 +184,7 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
         double like = max(0.1, min(0.9, 0.5 + (votings[user][i].second - mean) / (stdev * normalization_factor_p)));
         //cout << votings[user][i].second << " to " << like << endl;
         fac.set(0, like);
+        fac.set(1, 1-like);
         factors.push_back(fac);
     }
 
