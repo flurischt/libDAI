@@ -283,7 +283,7 @@ class TProb {
     /// \name Get/set individual entries
     //@{
         /// Gets \a i 'th entry
-        T get( size_t i ) const { 
+        T get( size_t i ) const {
 #ifdef DAI_DEBUG
             return _p.at(i);
 #else
@@ -538,6 +538,16 @@ class TProb {
                 *this /= Z;
             return Z;
         }
+
+        T normalizeFast() {
+            T Z = 0.;
+            for (size_t i = 0; i < _p.size(); ++i)
+                Z += _p[i];
+            for (T& val : _p)
+                val /= Z;
+            return Z;
+        }
+
     //@}
 
     /// \name Operations with scalars
