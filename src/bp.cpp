@@ -19,6 +19,12 @@
 #include <dai/util.h>
 #include <dai/properties.h>
 
+//#define DAI_VERBOSE
+#ifdef DAI_VERBOSE
+#   define DAI_LOG(MESSAGE) do { std::cout << MESSAGE << std::endl; } while(0)
+#else
+#   define DAI_LOG(MESSAGE)
+#endif
 
 namespace dai {
 
@@ -189,8 +195,7 @@ Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const {
                 prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
             }
 
-            if (_debugOutput > 1)
-                cout << "Product of incoming messages into " << j << " is " << prod_j << endl;
+            DAI_LOG("Product of incoming messages into " << j << " is " << prod_j);
 
             // TODO: If we understand this we might be able to get rid of this whole function call and use _oldProd directly.
             // multiply prod with prod_j
@@ -218,13 +223,8 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         Factor Fprod( factor(I) );
         Prob &prod = Fprod.p();
         prod = calcIncomingMessageProduct( I, true, i);
-        if (_debugOutput > 0)
-            cout << "calcNewMessage " << I << " <-> " << i << endl;
 
-        if( props.logdomain ) {
-            prod -= prod.max();
-            prod.takeExp();
-        }
+    DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         // Marginalize onto i
         if( !DAI_BP_FAST ) {
@@ -288,8 +288,7 @@ Real BP::run() {
                 // update the message with the largest residual
                 size_t i, _I;
                 findMaxResidual( i, _I );
-                if (_debugOutput > 0)
-                    cout << "updating message from " << i << " to " << _I << endl;
+                DAI_LOG("updating message from " << i << " to " << _I);
                 updateMessage( i, _I );
 
                 // I->i has been updated, which means that residuals for all
