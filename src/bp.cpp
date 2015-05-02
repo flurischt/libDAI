@@ -149,7 +149,6 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
 // TODO: Optimize (in progress)
 void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const {
 
-
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
@@ -159,15 +158,11 @@ void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t
             _prod_j.reserve(_oldProd[j.node].size());
             _prod_j.clear();
 
-            // We need to find out which message we should not take into the product.
-            // TODO: In the future we can try to pass this value as a parameter or compute it in a faster way.
-            size_t Iiter = -1;
-            for(const Neighbor &J: nbV(j)) {
-                if( J == I ) {
-                    Iiter = J.iter;
-                    break;
-                }
-            }
+            // The message that should not go into the product is the one from that
+            // node that that message will be sent to. Conveniently, the value is
+            // already available: j.dual.
+            size_t Iiter = j.dual;
+
             // Now let us divide by that message.
             for (size_t k=0; k<_oldProd[j.node].size(); ++k) {
                 _prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
