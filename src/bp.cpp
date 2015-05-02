@@ -19,16 +19,17 @@
 #include <dai/util.h>
 #include <dai/properties.h>
 
+//#define DAI_VERBOSE
+#ifdef DAI_VERBOSE
+#   define DAI_LOG(MESSAGE) do { std::cout << MESSAGE << std::endl; } while(0)
+#else
+#   define DAI_LOG(MESSAGE)
+#endif
 
 namespace dai {
 
 
 using namespace std;
-
-
-#define DAI_BP_FAST 1
-/// \todo Make DAI_BP_FAST a compile-time choice, as it is a memory/speed tradeoff
-
 
 void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("tol") );
@@ -112,11 +113,9 @@ void BP::construct() {
             newEP.message = Prob( var(i).states() );
             newEP.newMessage = Prob( var(i).states() );
 
-            if( DAI_BP_FAST ) {
                 newEP.index.reserve( factor(I).nrStates() );
                 for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
                     newEP.index.push_back( k );
-            }
 
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
@@ -189,8 +188,7 @@ Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const {
                 prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
             }
 
-            if (_debugOutput > 1)
-                cout << "Product of incoming messages into " << j << " is " << prod_j << endl;
+            DAI_LOG("Product of incoming messages into " << j << " is " << prod_j);
 
             // TODO: If we understand this we might be able to get rid of this whole function call and use _oldProd directly.
             // multiply prod with prod_j
@@ -212,29 +210,21 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     size_t I = nbV(i,_I);
 
     Prob marg;
+
+    // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
+    // TODO: investigate further, can this still be useful?
+#if 0
     if( factor(I).vars().size() == 1 ) // optimization
         marg = factor(I).p();
     else {
+#endif
         Factor Fprod( factor(I) );
         Prob &prod = Fprod.p();
         prod = calcIncomingMessageProduct( I, true, i);
-        if (_debugOutput > 0)
-            cout << "calcNewMessage " << I << " <-> " << i << endl;
 
-        if( props.logdomain ) {
-            prod -= prod.max();
-            prod.takeExp();
-        }
+    DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         // Marginalize onto i
-        if( !DAI_BP_FAST ) {
-            // UNOPTIMIZED (SIMPLE TO READ, BUT SLOW) VERSION
-            if( props.inference == Properties::InfType::SUMPROD )
-                marg = Fprod.marginal( var(i) ).p();
-            else
-                marg = Fprod.maxMarginal( var(i) ).p();
-        } else {
-            // OPTIMIZED VERSION
             marg = Prob( var(i).states(), 0.0 );
             // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
             const ind_t ind = index(i,_I);
@@ -246,8 +236,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
                     if( prod[r] > marg[ind[r]] )
                         marg.set( ind[r], prod[r] );
             marg.normalize();
-        }
-    }
 
     // Store result
     if( props.logdomain )
@@ -288,8 +276,7 @@ Real BP::run() {
                 // update the message with the largest residual
                 size_t i, _I;
                 findMaxResidual( i, _I );
-                if (_debugOutput > 0)
-                    cout << "updating message from " << i << " to " << _I << endl;
+                DAI_LOG("updating message from " << i << " to " << _I);
                 updateMessage( i, _I );
 
                 // I->i has been updated, which means that residuals for all
