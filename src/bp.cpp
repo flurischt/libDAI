@@ -208,7 +208,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     const ind_t ind = index(i,_I);
     for( size_t r = 0; r < prod.size(); ++r )
         marg.set( ind[r], marg[ind[r]] + prod[r] );
-    marg.normalize();
+    marg.normalizeFast();
 
     // Store result
     newMessage(i,_I) = marg;
