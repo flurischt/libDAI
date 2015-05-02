@@ -217,9 +217,14 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     size_t I = nbV(i,_I);
 
     Prob marg;
+
+    // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
+    // TODO: investigate further, can this still be useful?
+#if 0
     if( factor(I).vars().size() == 1 ) // optimization
         marg = factor(I).p();
     else {
+#endif
         Factor Fprod( factor(I) );
         Prob &prod = Fprod.p();
         prod = calcIncomingMessageProduct( I, true, i);
@@ -247,7 +252,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
                         marg.set( ind[r], prod[r] );
             marg.normalize();
         }
-    }
 
     // Store result
     if( props.logdomain )
