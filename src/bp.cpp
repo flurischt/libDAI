@@ -198,8 +198,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 #endif
 
     // calculate updated message I->i
-    Factor Fprod( factor(I) );
-    Prob &prod = Fprod.p();
+    Prob prod = Prob(_factors[I].p());
     calcIncomingMessageProduct(prod, I, true, i);
     DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
