@@ -146,8 +146,6 @@ class BP : public DAIAlgFG {
             /// Message update schedule
             UpdateType updates;
 
-            /// Inference variant
-            InfType inference;
         } props;
 
         /// Specifies whether the history of message updates should be recorded

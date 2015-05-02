@@ -54,10 +54,6 @@ void BP::setProperties( const PropertySet &opts ) {
         props.damping = opts.getStringAs<Real>("damping");
     else
         props.damping = 0.0;
-    if( opts.hasKey("inference") )
-        props.inference = opts.getStringAs<Properties::InfType>("inference");
-    else
-        props.inference = Properties::InfType::SUMPROD;
 }
 
 
@@ -69,7 +65,6 @@ PropertySet BP::getProperties() const {
     opts.set( "verbose", props.verbose );
     opts.set( "updates", props.updates );
     opts.set( "damping", props.damping );
-    opts.set( "inference", props.inference );
     return opts;
 }
 
@@ -82,8 +77,7 @@ string BP::printProperties() const {
     s << "maxtime=" << props.maxtime << ",";
     s << "verbose=" << props.verbose << ",";
     s << "updates=" << props.updates << ",";
-    s << "damping=" << props.damping << ",";
-    s << "inference=" << props.inference << "]";
+    s << "damping=" << props.damping << "]";
     return s.str();
 }
 
@@ -224,13 +218,8 @@ void BP::calcNewMessage( size_t i, size_t _I) {
             marg = Prob( var(i).states(), 0.0 );
             // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
             const ind_t ind = index(i,_I);
-            if( props.inference == Properties::InfType::SUMPROD )
                 for( size_t r = 0; r < prod.size(); ++r )
                     marg.set( ind[r], marg[ind[r]] + prod[r] );
-            else
-                for( size_t r = 0; r < prod.size(); ++r )
-                    if( prod[r] > marg[ind[r]] )
-                        marg.set( ind[r], prod[r] );
             marg.normalize();
 
     // Store result
