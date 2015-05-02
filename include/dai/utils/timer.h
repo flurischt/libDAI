@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sys/time.h>
 
 /*
  * Sample code from lecture FNC

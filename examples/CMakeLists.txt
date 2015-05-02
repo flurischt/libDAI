@@ -34,33 +34,6 @@ IF(WITH_ADVANCED)
        )
 ENDIF(WITH_ADVANCED)
 
-
-IF(WITH_CIMG)
-    FIND_PACKAGE(CImg)
-    IF(NEW_CIMG)
-        ADD_DEFINITIONS("-DNEW_CIMG")
-    ENDIF()
-
-    INCLUDE_DIRECTORIES("${CIMG_INCLUDE_DIRS}")
-    SET(EXTRA_LIBS ${EXTRA_LIBS} ${CIMG_LIBRARIES})
-
-    SET(dai_EXAMPLE_RESOURCES ${dai_EXAMPLE_RESOURCES}
-        example_img_in1.jpg
-        example_img_in2.jpg
-    )
-
-    ADD_EXECUTABLE(example_imagesegmentation example_imagesegmentation.cpp)
-    TARGET_LINK_LIBRARIES(example_imagesegmentation ${EXTRA_LIBS})
-    INSTALL(TARGETS example_imagesegmentation DESTINATION share/dai/examples)
-
-    # For convenience, copy default input images into binary directory
-    ADD_CUSTOM_COMMAND(TARGET example_imagesegmentation POST_BUILD
-                       COMMAND cp "${CMAKE_SOURCE_DIR}/examples/example_img_in*.jpg"
-                                  "${CMAKE_CURRENT_BINARY_DIR}/"
-                      )
-
-ENDIF()
-
 ADD_EXECUTABLE(example_recommendation example_recommendation.cpp)
 TARGET_LINK_LIBRARIES(example_recommendation ${EXTRA_LIBS})
 INSTALL(TARGETS example_recommendation DESTINATION share/dai/examples)

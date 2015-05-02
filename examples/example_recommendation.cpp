@@ -3,7 +3,6 @@
 #include <fstream>
 #include <algorithm>    // std::max, min
 #include <dai/alldai.h>  // Include main libDAI header file
-#include <CImg.h>        // This example needs CImg to be installed
 #include <dai/utils/timer.h>
 
 using namespace dai;
@@ -253,22 +252,17 @@ void verify_results(const string dataset, const double delta, vector<pair<double
 
 /// Main program
 int main(int argc, char **argv) {
-
-    cimg_usage("This example shows how libDAI can be used for a simple recommendation task");
-    const char *infname = cimg_option("-method", "BP[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]",
-                                      "Inference method in format name[key1=val1,...,keyn=valn]");
-    const size_t maxiter = cimg_option("-maxiter", 100, "Maximum number of iterations for inference method");
-    const double tol = cimg_option("-tol", 1e-15, "Desired tolerance level for inference method");
+    const char *infname = "BP[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]";
+    const size_t maxiter =  100;
+    const double tol = 1e-15;
 
     // default cpufreq to 2.6Ghz
-    const long cpu_freq = cimg_option("-cpufreq", 26e+8, "CPU frequency to calculate runtime in seconds");
-    const bool output_ratings = cimg_option("-printRatings", false, "output the calculated ratings to STDERR");
-    const string dataset = cimg_option("-dataset", "uV2New1",
-                                       "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
-    const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
-    const double delta = cimg_option("-testDelta", 1e-8,
-                                     "Max float difference after which the tests should fail");
-    const int num_measurements = cimg_option("-numMeasurements", 1, "Run numMeasurements times and print median");
+    const long cpu_freq =26e+8;
+    const bool output_ratings = false;
+    const string dataset ="u1";
+    const bool run_tests = false;
+    const double delta = 1e-8;
+    const int num_measurements =  1;
 
     cout << "reading " << dataset << ".base now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings(dataset + ".base");
