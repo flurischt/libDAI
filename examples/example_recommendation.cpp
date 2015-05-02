@@ -46,23 +46,21 @@ FactorGraph example2fg() {
 
     factors.push_back(createFactorRecommendation(vars[0], vars[N], alpha));
     factors.push_back(createFactorRecommendation(vars[0], vars[N + 1], alpha));
-    factors.push_back(createFactorRecommendation(vars[0], vars[N + 2], alpha));
-    factors.push_back(createFactorRecommendation(vars[0], vars[N + 3], alpha));
+    factors.push_back(createFactorRecommendation(vars[1], vars[N], alpha));
     factors.push_back(createFactorRecommendation(vars[1], vars[N + 1], alpha));
     factors.push_back(createFactorRecommendation(vars[1], vars[N + 2], alpha));
-    factors.push_back(createFactorRecommendation(vars[1], vars[N + 3], alpha));
-    factors.push_back(createFactorRecommendation(vars[2], vars[N + 2], alpha));
+    factors.push_back(createFactorRecommendation(vars[2], vars[N + 1], alpha));
     factors.push_back(createFactorRecommendation(vars[2], vars[N + 3], alpha));
-    factors.push_back(createFactorRecommendation(vars[3], vars[N + 1], alpha));
     factors.push_back(createFactorRecommendation(vars[3], vars[N + 2], alpha));
     factors.push_back(createFactorRecommendation(vars[3], vars[N + 3], alpha));
-    factors.push_back(createFactorRecommendation(vars[4], vars[N + 1], alpha));
-    factors.push_back(createFactorRecommendation(vars[4], vars[N + 2], alpha));
     factors.push_back(createFactorRecommendation(vars[4], vars[N + 3], alpha));
-    Factor fac1(vars[2]);
+    factors.push_back(createFactorRecommendation(vars[4], vars[N + 4], alpha));
+    Factor fac1(vars[5]);
     fac1.set(0, 0.9);
-    Factor fac2(vars[3]);
+    fac1.set(1, 0.1);
+    Factor fac2(vars[6]);
     fac2.set(0, 0.9);
+    fac2.set(1, 0.1);
     factors.push_back(fac1);
     factors.push_back(fac2);
 
@@ -274,7 +272,7 @@ int main(int argc, char **argv) {
     const string dataset = cimg_option("-dataset", "uV2New1",
                                        "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
     const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
-    const double delta = cimg_option("-testDelta", 1e-8,
+    const double delta = cimg_option("-testDelta", 1e-12,
                                      "Max float difference after which the tests should fail");
     const int num_measurements = cimg_option("-numMeasurements", 1, "Run numMeasurements times and print median");
 
@@ -297,8 +295,8 @@ int main(int argc, char **argv) {
         measured_cycles = 0;
         for (int user=0; user<N; ++user) {
             cout << "building factor graph for user " << user+1 << " out of " << N << endl;
+            //FactorGraph fg  = example2fg();
             FactorGraph fg = data2fg(input_data, user);
-
             vector<double> m; // Stores the final recommendations
             cout << "Inference algorithm: BP. Options: " << options << endl;
             cout << "Solving the inference problem...please be patient!" << endl;
@@ -309,6 +307,11 @@ int main(int argc, char **argv) {
             measured_cycles += timer.toc();
 
             cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
+
+            // Debug output with all the values:
+            // for (size_t i = 0; i < m.size(); ++i) {
+            //    cout << i << " with " << m[i] << endl;
+            // }
 
             vector<pair<double, int> > ratings;
             for (size_t i = input_data.size(); i < m.size(); ++i) {
@@ -359,4 +362,3 @@ int main(int argc, char **argv) {
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
     return 0;
 }
-
