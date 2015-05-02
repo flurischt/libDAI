@@ -33,11 +33,9 @@ using namespace std;
 
 void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("tol") );
-    DAI_ASSERT( opts.hasKey("logdomain") );
     DAI_ASSERT( opts.hasKey("updates") );
 
     props.tol = opts.getStringAs<Real>("tol");
-    props.logdomain = opts.getStringAs<bool>("logdomain");
     props.updates = opts.getStringAs<Properties::UpdateType>("updates");
 
     if( opts.hasKey("maxiter") )
@@ -69,7 +67,6 @@ PropertySet BP::getProperties() const {
     opts.set( "maxiter", props.maxiter );
     opts.set( "maxtime", props.maxtime );
     opts.set( "verbose", props.verbose );
-    opts.set( "logdomain", props.logdomain );
     opts.set( "updates", props.updates );
     opts.set( "damping", props.damping );
     opts.set( "inference", props.inference );
@@ -84,7 +81,6 @@ string BP::printProperties() const {
     s << "maxiter=" << props.maxiter << ",";
     s << "maxtime=" << props.maxtime << ",";
     s << "verbose=" << props.verbose << ",";
-    s << "logdomain=" << props.logdomain << ",";
     s << "updates=" << props.updates << ",";
     s << "damping=" << props.damping << ",";
     s << "inference=" << props.inference << "]";
@@ -144,7 +140,7 @@ void BP::construct() {
 
 
 void BP::init() {
-    Real c = props.logdomain ? 0.0 : 1.0;
+    Real c = 1.0;
     for( size_t i = 0; i < nrVars(); ++i ) {
         bforeach( const Neighbor &I, nbV(i) ) {
             message( i, I.iter ).fill( c );
@@ -238,9 +234,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
             marg.normalize();
 
     // Store result
-    if( props.logdomain )
-        newMessage(i,_I) = marg.log();
-    else
         newMessage(i,_I) = marg;
 
     // Update the residual if necessary
@@ -330,11 +323,8 @@ Real BP::run() {
 
 
 void BP::calcBeliefV( size_t i, Prob &p ) const {
-    p = Prob( var(i).states(), props.logdomain ? 0.0 : 1.0 );
+    p = Prob( var(i).states(), 1.0);
     bforeach( const Neighbor &I, nbV(i) )
-        if( props.logdomain )
-            p += newMessage( i, I.iter );
-        else
             p *= newMessage( i, I.iter );
 }
 
@@ -342,11 +332,6 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
 Factor BP::beliefV( size_t i ) const {
     Prob p;
     calcBeliefV( i, p );
-
-    if( props.logdomain ) {
-        p -= p.max();
-        p.takeExp();
-    }
     p.normalize();
 
     return( Factor( var(i), p ) );
@@ -356,11 +341,6 @@ Factor BP::beliefV( size_t i ) const {
 Factor BP::beliefF( size_t I ) const {
     Prob p;
     calcBeliefF( I, p );
-
-    if( props.logdomain ) {
-        p -= p.max();
-        p.takeExp();
-    }
     p.normalize();
 
     return( Factor( factor(I).vars(), p ) );
@@ -408,7 +388,7 @@ void BP::init( const VarSet &ns ) {
     for( VarSet::const_iterator n = ns.begin(); n != ns.end(); ++n ) {
         size_t ni = findVar( *n );
         bforeach( const Neighbor &I, nbV( ni ) ) {
-            Real val = props.logdomain ? 0.0 : 1.0;
+            Real val = 1.0;
             message( ni, I.iter ).fill( val );
             newMessage( ni, I.iter ).fill( val );
             if( props.updates == Properties::UpdateType::SEQMAX )
@@ -432,9 +412,6 @@ void BP::updateMessage( size_t i, size_t _I ) {
         if( props.updates == Properties::UpdateType::SEQMAX )
             updateResidual( i, _I, 0.0 );
     } else {
-        if( props.logdomain )
-            message(i,_I) = (message(i,_I) * props.damping) + (newMessage(i,_I) * (1.0 - props.damping));
-        else
             message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
         if( props.updates == Properties::UpdateType::SEQMAX )
             updateResidual( i, _I, dist( newMessage(i,_I), message(i,_I), DISTLINF ) );
