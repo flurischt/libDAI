@@ -43,7 +43,7 @@ FactorGraph createFG( const GraphAL &G, FactorType ft, size_t states, const Prop
 
     // Get inverse temperature
     Real beta = 1.0;
-    if( ft != FactorType::ISINGGAUSS && ft != FactorType::ISINGUNIFORM ) 
+    if( ft != FactorType::ISINGGAUSS && ft != FactorType::ISINGUNIFORM )
         beta = props.getAs<Real>("beta");
 
     // Get properties for Ising factors
@@ -67,7 +67,7 @@ FactorGraph createFG( const GraphAL &G, FactorType ft, size_t states, const Prop
         max_h = props.getAs<Real>("max_th");
         max_J = props.getAs<Real>("max_w");
     }
-    
+
     // Create variables
     vector<Var> vars;
     vars.reserve( N );
@@ -79,7 +79,7 @@ FactorGraph createFG( const GraphAL &G, FactorType ft, size_t states, const Prop
     factors.reserve( G.nrEdges() + N );
     // Pairwise factors
     for( size_t i = 0; i < N; i++ )
-        bforeach( const Neighbor &j, G.nb(i) )
+        for( const Neighbor &j : G.nb(i) )
             if( i < j ) {
                 if( ft == FactorType::POTTS )
                     factors.push_back( createFactorPotts( vars[i], vars[j], beta ) );
@@ -389,9 +389,9 @@ int main( int argc, char *argv[] ) {
             cout << "This program is part of libDAI - http://www.libdai.org/" << endl << endl;
             cout << "Usage: ./createfg [options]" << endl << endl;
             cout << "Creates a factor graph according to the specified options." << endl << endl;
-            
+
             cout << endl << opts << endl;
-            
+
             cout << "The following factor graph types with pairwise interactions can be created:" << endl;
             cout << "\t'FULL':   fully connected graph of <N> variables" << endl;
             cout << "\t'DREG':   random regular graph of <N> variables where each variable is connected with <d> others" << endl;
@@ -414,7 +414,7 @@ int main( int argc, char *argv[] ) {
 
             cout << "EXPGAUSS factors (the default) are created by drawing all log-factor entries" << endl;
             cout << "independently from a Gaussian with mean 0 and standard deviation <beta>." << endl << endl;
-            
+
             cout << "In case of pairwise interactions, one can also choose POTTS factors, for which" << endl;
             cout << "the log-factors are simply delta functions multiplied by the strength <beta>." << endl << endl;
 

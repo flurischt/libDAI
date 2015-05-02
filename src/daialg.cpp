@@ -224,7 +224,7 @@ std::vector<size_t> findMaximum( const InfAlg& obj ) {
             }
             scheduledFactors.push( firstUnvisitedFactor );
         }
-            
+
         size_t I = scheduledFactors.top();
         scheduledFactors.pop();
         if( visitedFactors[I] )
@@ -244,7 +244,7 @@ std::vector<size_t> findMaximum( const InfAlg& obj ) {
             // First, calculate whether this state is consistent with variables that
             // have been assigned already
             bool allowedState = true;
-            bforeach( const Neighbor &j, obj.fg().nbF(I) )
+            for( const Neighbor &j : obj.fg().nbF(I) )
                 if( visitedVars[j.node] && maximum[j.node] != s(obj.fg().var(j.node)) ) {
                     allowedState = false;
                     break;
@@ -264,7 +264,7 @@ std::vector<size_t> findMaximum( const InfAlg& obj ) {
         DAI_ASSERT( obj.fg().factor(I).p()[maxState] != 0.0 );
 
         // Decode the argmax
-        bforeach( const Neighbor &j, obj.fg().nbF(I) ) {
+        for( const Neighbor &j : obj.fg().nbF(I) ) {
             if( visitedVars[j.node] ) {
                 // We have already visited j earlier - hopefully our state is consistent
                 if( maximum[j.node] != maxState( obj.fg().var(j.node) ) )
@@ -273,7 +273,7 @@ std::vector<size_t> findMaximum( const InfAlg& obj ) {
                 // We found a consistent state for variable j
                 visitedVars[j.node] = true;
                 maximum[j.node] = maxState( obj.fg().var(j.node) );
-                bforeach( const Neighbor &J, obj.fg().nbV(j) )
+                for( const Neighbor &J : obj.fg().nbV(j) )
                     if( !visitedFactors[J] )
                         scheduledFactors.push(J);
             }

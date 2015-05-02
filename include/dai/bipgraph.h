@@ -53,7 +53,7 @@ class BipartiteGraph {
         /// Used internally by isTree()
         struct levelType {
             /// Indices of nodes of type 1
-            std::vector<size_t> ind1;       
+            std::vector<size_t> ind1;
             /// Indices of nodes of type 2
             std::vector<size_t> ind2;
         };
@@ -308,10 +308,10 @@ class BipartiteGraph {
             for( size_t n1 = 0; n1 < nrNodes1(); n1++ ) {
                 if( nb1(n1).size() != x.nb1(n1).size() )
                     return false;
-                bforeach( const Neighbor &n2, nb1(n1) )
+                for( const Neighbor &n2 : nb1(n1) )
                     if( !x.hasEdge( n1, n2 ) )
                         return false;
-                bforeach( const Neighbor &n2, x.nb1(n1) )
+                for( const Neighbor &n2 : x.nb1(n1) )
                     if( !hasEdge( n1, n2 ) )
                         return false;
             }

@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( ConstructorsTest ) {
     BOOST_CHECK_EQUAL( G2.isTree(), false );
     G2.checkConsistency();
     BOOST_CHECK( !(G2 == G0) );
-    
+
     std::vector<Edge> edges;
     edges.push_back( Edge( 0, 1 ) );
     edges.push_back( Edge( 1, 2 ) );
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
         BOOST_CHECK( G.isConnected() );
         BOOST_CHECK_EQUAL( G.isTree(), N < 3 );
         for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-            bforeach( const Neighbor &n2, G.nb(n1) ) {
+            for( const Neighbor &n2 : G.nb(n1) ) {
                 BOOST_CHECK( G.hasEdge( n1, n2 ) );
                 BOOST_CHECK( G.hasEdge( n2, n1 ) );
             }
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
             BOOST_CHECK( G.isConnected() );
             BOOST_CHECK_EQUAL( G.isTree(), (N1 <= 1) || (N2 <= 1) );
             for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-                bforeach( const Neighbor &n2, G.nb(n1) ) {
+                for( const Neighbor &n2 : G.nb(n1) ) {
                     BOOST_CHECK( G.hasEdge( n1, n2 ) );
                     BOOST_CHECK( G.hasEdge( n2, n1 ) );
                 }
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
                     }
             }
             G.checkConsistency();
-            
+
             G = createGraphGrid( N1, N2, true );
             BOOST_CHECK_EQUAL( G.nrNodes(), N1 * N2 );
             if( N1 == 0 || N2 == 0 )
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
             BOOST_CHECK( G.isConnected() );
             BOOST_CHECK_EQUAL( G.isTree(), (G.nrNodes() <= 2) );
             for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-                bforeach( const Neighbor &n2, G.nb(n1) ) {
+                for( const Neighbor &n2 : G.nb(n1) ) {
                     BOOST_CHECK( G.hasEdge( n1, n2 ) );
                     BOOST_CHECK( G.hasEdge( n2, n1 ) );
                 }
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
                 BOOST_CHECK( G.isConnected() );
                 BOOST_CHECK_EQUAL( G.isTree(), (G.nrNodes() == 0) || (N1 <= 1 && N2 <= 1) || (N1 <= 1 && N3 <= 1) || (N2 <= 1 && N3 <= 1) );
                 for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-                    bforeach( const Neighbor &n2, G.nb(n1) ) {
+                    for( const Neighbor &n2 : G.nb(n1) ) {
                         BOOST_CHECK( G.hasEdge( n1, n2 ) );
                         BOOST_CHECK( G.hasEdge( n2, n1 ) );
                     }
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
                         }
                 }
                 G.checkConsistency();
-                
+
                 G = createGraphGrid3D( N1, N2, N3, true );
                 BOOST_CHECK_EQUAL( G.nrNodes(), N1 * N2 * N3 );
                 if( N1 == 0 || N2 == 0 || N3 == 0 )
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
                 BOOST_CHECK( G.isConnected() );
                 BOOST_CHECK_EQUAL( G.isTree(), (G.nrNodes() <= 2) );
                 for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-                    bforeach( const Neighbor &n2, G.nb(n1) ) {
+                    for( const Neighbor &n2 : G.nb(n1) ) {
                         BOOST_CHECK( G.hasEdge( n1, n2 ) );
                         BOOST_CHECK( G.hasEdge( n2, n1 ) );
                     }
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
         BOOST_CHECK( G.isConnected() );
         BOOST_CHECK_EQUAL( G.isTree(), N <= 2 );
         for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-            bforeach( const Neighbor &n2, G.nb(n1) ) {
+            for( const Neighbor &n2 : G.nb(n1) ) {
                 BOOST_CHECK( G.hasEdge( n1, n2 ) );
                 BOOST_CHECK( G.hasEdge( n2, n1 ) );
             }
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
         BOOST_CHECK( G.isConnected() );
         BOOST_CHECK( G.isTree() );
         for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
-            bforeach( const Neighbor &n2, G.nb(n1) ) {
+            for( const Neighbor &n2 : G.nb(n1) ) {
                 BOOST_CHECK( G.hasEdge( n1, n2 ) );
                 BOOST_CHECK( G.hasEdge( n2, n1 ) );
             }
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE( QueriesAndCreationTest ) {
                 BOOST_CHECK_EQUAL( G.nrEdges(), d * N / 2 );
                 for( size_t n1 = 0; n1 < G.nrNodes(); n1++ ) {
                     BOOST_CHECK_EQUAL( G.nb(n1).size(), d );
-                    bforeach( const Neighbor &n2, G.nb(n1) ) {
+                    for( const Neighbor &n2 : G.nb(n1) ) {
                         BOOST_CHECK( G.hasEdge( n1, n2 ) );
                         BOOST_CHECK( G.hasEdge( n2, n1 ) );
                     }

@@ -140,9 +140,6 @@ class BP : public DAIAlgFG {
             /// Tolerance for convergence test
             Real tol;
 
-            /// Whether updates should be done in logarithmic domain or not
-            bool logdomain;
-
             /// Damping constant (0.0 means no damping, 1.0 is maximum damping)
             Real damping;
 

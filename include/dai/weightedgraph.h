@@ -138,7 +138,7 @@ class GraphEL : public std::set<UEdge> {
         /// Construct from GraphAL
         GraphEL( const GraphAL& G ) {
             for( size_t n1 = 0; n1 < G.nrNodes(); n1++ )
-                bforeach( const Neighbor n2, G.nb(n1) )
+                for( const Neighbor n2 : G.nb(n1) )
                     if( n1 < n2 )
                         insert( UEdge( n1, n2 ) );
         }
@@ -150,7 +150,7 @@ template<class T> class WeightedGraph : public std::map<UEdge, T> {};
 
 
 /// Represents a rooted tree, implemented as a vector of directed edges
-/** By convention, the edges are stored such that they point away from 
+/** By convention, the edges are stored such that they point away from
  *  the root and such that edges nearer to the root come before edges
  *  farther away from the root.
  */
