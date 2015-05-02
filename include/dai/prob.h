@@ -743,6 +743,11 @@ template<typename T> T dist( const TProb<T> &p, const TProb<T> &q, ProbDistType 
     }
 }
 
+template<typename T> T distFast( const TProb<T> &p, const TProb<T> &q) {
+    return p.innerProduct( q, (T)0, fo_max<T>(), fo_absdiff<T>() );
+}
+
+
 
 /// Writes a TProb<T> to an output stream
 /** \relates TProb

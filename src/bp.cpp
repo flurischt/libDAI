@@ -187,7 +187,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 
     // load
     size_t I = _G.nb1(i)[_I].node;
-    Prob marg;
 
     // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
     // TODO: investigate further, can this still be useful?
@@ -203,18 +202,16 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
     // Marginalize onto i
-    marg = Prob( var(i).states(), 0.0 );
+    Prob &marg = newMessage(i,_I);
+    std::fill(marg._p.begin(), marg._p.end(), 0.0);
     // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
     const ind_t ind = index(i,_I);
     for( size_t r = 0; r < prod.size(); ++r )
         marg.set( ind[r], marg[ind[r]] + prod[r] );
     marg.normalizeFast();
 
-    // Store result
-    newMessage(i,_I) = marg;
-
     // Update the residual if necessary
-    updateResidual( i, _I , dist( newMessage( i, _I ), message( i, _I ), DISTLINF ) );
+    updateResidual( i, _I , distFast( newMessage( i, _I ), message( i, _I ) ) );
 }
 
 
@@ -264,12 +261,12 @@ Real BP::run() {
         maxDiff = -INFINITY;
         for( size_t i = 0; i < nrVars(); ++i ) {
             Factor b( beliefV(i) );
-            maxDiff = std::max( maxDiff, dist( b, _oldBeliefsV[i], DISTLINF ) );
+            maxDiff = std::max( maxDiff, distFast( b.p(), _oldBeliefsV[i].p() ) );
             _oldBeliefsV[i] = b;
         }
         for( size_t I = 0; I < nrFactors(); ++I ) {
             Factor b( beliefF(I) );
-            maxDiff = std::max( maxDiff, dist( b, _oldBeliefsF[I], DISTLINF ) );
+            maxDiff = std::max( maxDiff, distFast( b.p(), _oldBeliefsF[I].p() ) );
             _oldBeliefsF[I] = b;
         }
 
@@ -386,7 +383,7 @@ void BP::updateMessage( size_t i, size_t _I ) {
         updateResidual( i, _I, 0.0 );
     } else {
         message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
-        updateResidual( i, _I, dist( newMessage(i,_I), message(i,_I), DISTLINF ) );
+        updateResidual( i, _I, distFast( newMessage(i,_I), message(i,_I) ) );
     }
 }
 
