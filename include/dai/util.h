@@ -19,7 +19,6 @@
 #include <set>
 #include <map>
 #include <iostream>
-#include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
@@ -42,10 +41,6 @@
 #else
     #include <tr1/unordered_map> // only present in modern GCC distributions
 #endif
-
-
-/// An alias to the BOOST_FOREACH macro from the boost::bforeach library
-#define bforeach BOOST_FOREACH
 
 #ifdef DAI_DEBUG
 /// \brief "Print variable". Prints the text of an expression, followed by its value (only if DAI_DEBUG is defined)
@@ -80,7 +75,7 @@
     #define NAN (std::numeric_limits<Real>::quiet_NaN())
 
     #if defined(_MSC_VER)
-      // Disable unsafe warning (use of the function 'strcpy' instead of 
+      // Disable unsafe warning (use of the function 'strcpy' instead of
       // 'strcpy_s' for portability reasons;
       #pragma warning( disable : 4996 )
       // Workaround for the char16_t type defined in Matlab and MSVC 2010
@@ -126,7 +121,7 @@ inline Real exp( Real x ) {
 
 /// Returns \a x to the power \a y
 /** We use the convention that division by zero yields zero;
- *  for powers, this means that if \a x == 0.0 and \a y < 0.0, we 
+ *  for powers, this means that if \a x == 0.0 and \a y < 0.0, we
  *  return 0.0 instead of generating an error.
  */
 inline Real pow( Real x, Real y ) {
@@ -240,7 +235,7 @@ std::vector<T> concat( const std::vector<T>& u, const std::vector<T>& v ) {
 
 /// Split a string into tokens delimited by one of the characters in \a delim
 /** \param s the string to be split into tokens
- *  \param singleDelim if \c true, any single delimiter forms a boundary between two tokens; 
+ *  \param singleDelim if \c true, any single delimiter forms a boundary between two tokens;
  *         if \c false, a maximal group of consecutive delimiters forms a boundary between two tokens
  *  \param delim delimiter characters
  */

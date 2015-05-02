@@ -39,8 +39,8 @@ typedef std::pair<PropertyKey, PropertyValue> Property;
 
 
 /// Writes a Property object (key-value pair) to an output stream
-/** \note Not all value types are automatically supported; if a type is unknown, an 
- *  UNKNOWN_PROPERTY_TYPE exception is thrown. Adding support for a new type can 
+/** \note Not all value types are automatically supported; if a type is unknown, an
+ *  UNKNOWN_PROPERTY_TYPE exception is thrown. Adding support for a new type can
  *  be done by changing this function body.
  */
 std::ostream& operator<< ( std::ostream & os, const Property &p );
@@ -49,7 +49,7 @@ std::ostream& operator<< ( std::ostream & os, const Property &p );
 /// Represents a set of properties, mapping keys (of type PropertyKey) to values (of type PropertyValue)
 /** Properties are used for specifying parameters of algorithms in a convenient way, where the values of
  *  the parameters can be of different types (e.g., strings, doubles, integers, enums). A PropertySet is
- *  an attempt to mimic the functionality of a Python dictionary object in C++, using the boost::any class. 
+ *  an attempt to mimic the functionality of a Python dictionary object in C++, using the boost::any class.
  *
  *  A PropertySet can be converted to and from a string, using the following format:
  *
@@ -66,7 +66,7 @@ std::ostream& operator<< ( std::ostream & os, const Property &p );
  *  Also, a PropertySet provides functionality for converting the representation of
  *  individual values from some arbitrary type to and from std::string.
  *
- *  \note Not all types are automatically supported; if a type is unknown, an UNKNOWN_PROPERTY_TYPE 
+ *  \note Not all types are automatically supported; if a type is unknown, an UNKNOWN_PROPERTY_TYPE
  *  exception is thrown. Adding support for a new type can be done in the body of the
  *  operator<<(std::ostream &, const Property &).
  */
@@ -90,15 +90,15 @@ class PropertySet : private std::map<PropertyKey, PropertyValue> {
     /// \name Setting property keys/values
     //@{
         /// Sets a property (a key \a key with a corresponding value \a val)
-        PropertySet& set( const PropertyKey& key, const PropertyValue& val ) { 
-            this->operator[](key) = val; 
-            return *this; 
+        PropertySet& set( const PropertyKey& key, const PropertyValue& val ) {
+            this->operator[](key) = val;
+            return *this;
         }
 
         /// Set properties according to \a newProps, overriding properties that already exist with new values
         PropertySet& set( const PropertySet& newProps ) {
             const std::map<PropertyKey, PropertyValue> *m = &newProps;
-            bforeach(value_type i, *m)
+            for(value_type i : *m)
                 set( i.first, i.second );
             return *this;
         }
@@ -109,9 +109,9 @@ class PropertySet : private std::map<PropertyKey, PropertyValue> {
 PropertySet p()("method","BP")("verbose",1)("tol",1e-9)
             \endcode
          */
-        PropertySet operator()( const PropertyKey& key, const PropertyValue& val ) const { 
-            PropertySet copy = *this; 
-            return copy.set(key,val); 
+        PropertySet operator()( const PropertyKey& key, const PropertyValue& val ) const {
+            PropertySet copy = *this;
+            return copy.set(key,val);
         }
 
         /// Sets a property (a key \a key with a corresponding value \a val, which is first converted from \a ValueType to string)
@@ -134,7 +134,7 @@ PropertySet p()("method","BP")("verbose",1)("tol",1e-9)
          *  \throw IMPOSSIBLE_TYPECAST if the type cast cannot be done
          */
         template<typename ValueType>
-        void convertTo( const PropertyKey& key ) { 
+        void convertTo( const PropertyKey& key ) {
             PropertyValue val = get(key);
             if( val.type() != typeid(ValueType) ) {
                 DAI_ASSERT( val.type() == typeid(std::string) );
@@ -167,9 +167,9 @@ PropertySet p()("method","BP")("verbose",1)("tol",1e-9)
         }
 
         /// Check if a property with the given \a key is defined
-        bool hasKey( const PropertyKey& key ) const { 
-            PropertySet::const_iterator x = find(key); 
-            return (x != this->end()); 
+        bool hasKey( const PropertyKey& key ) const {
+            PropertySet::const_iterator x = find(key);
+            return (x != this->end());
         }
 
         /// Returns a set containing all keys
@@ -215,7 +215,7 @@ PropertySet p()("method","BP")("verbose",1)("tol",1e-9)
          *  \throw IMPOSSIBLE_TYPECAST if the type cast cannot be done
          */
         template<typename ValueType>
-        ValueType getStringAs( const PropertyKey& key ) const { 
+        ValueType getStringAs( const PropertyKey& key ) const {
             PropertyValue val = get(key);
             if( val.type() == typeid(ValueType) ) {
                 return boost::any_cast<ValueType>(val);
@@ -254,7 +254,7 @@ PropertySet p()("method","BP")("verbose",1)("tol",1e-9)
          *  \throw MALFORMED_PROPERTY if the string is not in the expected format
          */
         friend std::istream& operator>> ( std::istream& is, PropertySet& ps );
-        
+
         /// Reads a PropertySet from a string
         void fromString( const std::string& s ) {
             std::stringstream ss( s );

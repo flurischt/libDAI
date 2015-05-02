@@ -104,7 +104,7 @@ void BP::construct() {
             _edge2lutNew.push_back( vector<heap_data_handle>() );
             _edge2lutNew[i].reserve( nbV(i).size() );
         }
-        bforeach( const Neighbor &I, nbV(i) ) {
+        for( const Neighbor &I : nbV(i) ) {
             EdgeProp newEP;
             newEP.message = Prob( var(i).states() );
             newEP.newMessage = Prob( var(i).states() );
@@ -134,7 +134,7 @@ void BP::construct() {
     _updateSeq.clear();
     _updateSeq.reserve( nrEdges() );
     for( size_t I = 0; I < nrFactors(); I++ )
-        bforeach( const Neighbor &i, nbF(I) )
+        for( const Neighbor &i : nbF(I) )
             _updateSeq.push_back( Edge( i, i.dual ) );
 }
 
@@ -142,7 +142,7 @@ void BP::construct() {
 void BP::init() {
     Real c = 1.0;
     for( size_t i = 0; i < nrVars(); ++i ) {
-        bforeach( const Neighbor &I, nbV(i) ) {
+        for( const Neighbor &I : nbV(i) ) {
             message( i, I.iter ).fill( c );
             newMessage( i, I.iter ).fill( c );
             if( props.updates == Properties::UpdateType::SEQMAX )
@@ -274,9 +274,9 @@ Real BP::run() {
 
                 // I->i has been updated, which means that residuals for all
                 // J->j with J in nb[i]\I and j in nb[J]\i have to be updated
-                bforeach( const Neighbor &J, nbV(i) ) {
+                for( const Neighbor &J: nbV(i) ) {
                     if( J.iter != _I ) {
-                        bforeach( const Neighbor &j, nbF(J) ) {
+                        for( const Neighbor &j: nbF(J) ) {
                             size_t _J = j.dual;
                             if( j != i )
                                 calcNewMessage( j, _J);
@@ -324,7 +324,7 @@ Real BP::run() {
 
 void BP::calcBeliefV( size_t i, Prob &p ) const {
     p = Prob( var(i).states(), 1.0);
-    bforeach( const Neighbor &I, nbV(i) )
+    for ( const Neighbor &I : nbV(i) )
             p *= newMessage( i, I.iter );
 }
 
@@ -387,7 +387,7 @@ Real BP::logZ() const {
 void BP::init( const VarSet &ns ) {
     for( VarSet::const_iterator n = ns.begin(); n != ns.end(); ++n ) {
         size_t ni = findVar( *n );
-        bforeach( const Neighbor &I, nbV( ni ) ) {
+        for( const Neighbor &I : nbV( ni ) ) {
             Real val = 1.0;
             message( ni, I.iter ).fill( val );
             newMessage( ni, I.iter ).fill( val );
