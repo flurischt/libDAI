@@ -82,6 +82,12 @@ class BP : public DAIAlgFG {
         };
         /// Stores all edge properties
         std::vector<std::vector<EdgeProp> > _edges;
+        // We store the product for each variable. Every time a message gets updated we also
+        // update the corresponding product. We can then reuse the result and make our algorithm much faster.
+        std::vector<std::vector<double>> _oldProd;
+        // For convenience we define a debug output parameter here. Set it to 1 or higher, if you want a lot of
+        // output in your console.
+        const int _debugOutput = 0;
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
         /// Lookup table (only used for maximum-residual BP)
@@ -178,6 +184,7 @@ class BP : public DAIAlgFG {
             if( this != &x ) {
                 DAIAlgFG::operator=( x );
                 _edges = x._edges;
+                _oldProd = x._oldProd;
                 _lut = x._lut;
                 for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
                     _edge2lutOld[l->second.first][l->second.second] = l;
@@ -252,9 +259,9 @@ class BP : public DAIAlgFG {
         /** If \a without_i == \c true, the message coming from variable \a i is omitted from the product
          *  \note This function is used by calcNewMessage() and calcBeliefF()
          */
-        virtual Prob calcIncomingMessageProduct( size_t I, bool without_i, size_t i ) const;
+        virtual Prob calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const;
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
-        virtual void calcNewMessage( size_t i, size_t _I );
+        virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message
         void updateMessage( size_t i, size_t _I );
         /// Set the residual (difference between new and old message) for the edge between variable \a i and its \a _I 'th neighbor to \a r

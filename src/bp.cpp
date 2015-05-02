@@ -95,12 +95,14 @@ void BP::construct() {
     // create edge properties
     _edges.clear();
     _edges.reserve( nrVars() );
+    _oldProd.clear();
     _edge2lutNew.clear();
     if( props.updates == Properties::UpdateType::SEQMAX )
         _edge2lutNew.reserve( nrVars() );
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
+        _oldProd.push_back(vector<double>(var(i).states(), 1));
         if( props.updates == Properties::UpdateType::SEQMAX ) {
             _edge2lutNew.push_back( vector<heap_data_handle>() );
             _edge2lutNew[i].reserve( nbV(i).size() );
@@ -163,23 +165,34 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
 }
 
 
-// TODO: Optimize
-Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i ) const {
+// TODO: Optimize (in progress)
+Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const {
     Factor Fprod( factor(I) );
     Prob &prod = Fprod.p();
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
             // prod_j will be the product of messages coming into j
-            const size_t vector_length = var(j).states();
-            vector<double> prod_j(vector_length, 1.0);
+            vector<double> prod_j;
+            prod_j.reserve(_oldProd[j.node].size());
+            // We need to find out which message we should not take into the product.
+            // TODO: In the future we can try to pass this value as a parameter or compute it in a faster way.
+            size_t Iiter = -1;
             for(const Neighbor &J: nbV(j)) {
-                if( J != I ) { // for all J in nb(j) \ I
-                    for (size_t i=0; i<vector_length; ++i) {
-                        prod_j[i] *= _edges[j][J.iter].message._p[i];
-                    }
+                if( J == I ) {
+                    Iiter = J.iter;
+                    break;
                 }
             }
+            // Now let us divide by that message.
+            for (int k=0; k<_oldProd[j.node].size(); ++k) {
+                prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
+            }
+
+            if (_debugOutput > 1)
+                cout << "Product of incoming messages into " << j << " is " << prod_j << endl;
+
+            // TODO: If we understand this we might be able to get rid of this whole function call and use _oldProd directly.
             // multiply prod with prod_j
             size_t _I = j.dual;
             // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
@@ -189,11 +202,12 @@ Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i ) const 
             }
         }
     }
+
     return prod;
 }
 
 
-void BP::calcNewMessage( size_t i, size_t _I ) {
+void BP::calcNewMessage( size_t i, size_t _I) {
     // calculate updated message I->i
     size_t I = nbV(i,_I);
 
@@ -203,7 +217,9 @@ void BP::calcNewMessage( size_t i, size_t _I ) {
     else {
         Factor Fprod( factor(I) );
         Prob &prod = Fprod.p();
-        prod = calcIncomingMessageProduct( I, true, i );
+        prod = calcIncomingMessageProduct( I, true, i);
+        if (_debugOutput > 0)
+            cout << "calcNewMessage " << I << " <-> " << i << endl;
 
         if( props.logdomain ) {
             prod -= prod.max();
@@ -263,14 +279,17 @@ Real BP::run() {
             if( _iters == 0 ) {
                 // do the first pass
                 for( size_t i = 0; i < nrVars(); ++i )
-                  bforeach( const Neighbor &I, nbV(i) )
-                      calcNewMessage( i, I.iter );
+                  for( const Neighbor &I : nbV(i) ) {
+                      calcNewMessage( i, I.iter);
+                  }
             }
             // Maximum-Residual BP [\ref EMK06]
             for( size_t t = 0; t < _updateSeq.size(); ++t ) {
                 // update the message with the largest residual
                 size_t i, _I;
                 findMaxResidual( i, _I );
+                if (_debugOutput > 0)
+                    cout << "updating message from " << i << " to " << _I << endl;
                 updateMessage( i, _I );
 
                 // I->i has been updated, which means that residuals for all
@@ -280,28 +299,10 @@ Real BP::run() {
                         bforeach( const Neighbor &j, nbF(J) ) {
                             size_t _J = j.dual;
                             if( j != i )
-                                calcNewMessage( j, _J );
+                                calcNewMessage( j, _J);
                         }
                     }
                 }
-            }
-        } else if( props.updates == Properties::UpdateType::PARALL ) {
-            // Parallel updates
-            for( size_t i = 0; i < nrVars(); ++i )
-                bforeach( const Neighbor &I, nbV(i) )
-                    calcNewMessage( i, I.iter );
-
-            for( size_t i = 0; i < nrVars(); ++i )
-                bforeach( const Neighbor &I, nbV(i) )
-                    updateMessage( i, I.iter );
-        } else {
-            // Sequential updates
-            if( props.updates == Properties::UpdateType::SEQRND )
-                random_shuffle( _updateSeq.begin(), _updateSeq.end(), rnd );
-
-            bforeach( const Edge &e, _updateSeq ) {
-                calcNewMessage( e.first, e.second );
-                updateMessage( e.first, e.second );
             }
         }
 
@@ -432,6 +433,11 @@ void BP::init( const VarSet &ns ) {
 
 
 void BP::updateMessage( size_t i, size_t _I ) {
+    for (int j=0; j<_oldProd[i].size(); ++j) {
+        _oldProd[i][j] =  _edges[i][_I].newMessage._p[j] * _oldProd[i][j] / _edges[i][_I].message._p[j];
+    }
+
+
     if( recordSentMessages )
         _sentMessages.push_back(make_pair(i,_I));
     if( props.damping == 0.0 ) {
@@ -448,7 +454,7 @@ void BP::updateMessage( size_t i, size_t _I ) {
     }
 }
 
-// TODO: Optimize
+// TODO: Optimize: We are using a heap now but this is not faster then the multimap solution. So we might have to revert to it.
 void BP::updateResidual( size_t i, size_t _I, Real r ) {
     EdgeProp* pEdge = &_edges[i][_I];
     pEdge->residual = r;
