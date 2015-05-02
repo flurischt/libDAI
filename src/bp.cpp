@@ -95,15 +95,15 @@ void BP::construct() {
     // create edge properties
     _edges.clear();
     _edges.reserve( nrVars() );
-    _edge2lut.clear();
+    _edge2lutNew.clear();
     if( props.updates == Properties::UpdateType::SEQMAX )
-        _edge2lut.reserve( nrVars() );
+        _edge2lutNew.reserve( nrVars() );
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
         if( props.updates == Properties::UpdateType::SEQMAX ) {
-            _edge2lut.push_back( vector<LutType::iterator>() );
-            _edge2lut[i].reserve( nbV(i).size() );
+            _edge2lutNew.push_back( vector<heap_data_handle>() );
+            _edge2lutNew[i].reserve( nbV(i).size() );
         }
         bforeach( const Neighbor &I, nbV(i) ) {
             EdgeProp newEP;
@@ -119,7 +119,7 @@ void BP::construct() {
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
             if( props.updates == Properties::UpdateType::SEQMAX )
-                _edge2lut[i].push_back( _lut.insert( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))) );
+                _edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
         }
     }
 
@@ -157,11 +157,9 @@ void BP::init() {
 
 
 void BP::findMaxResidual( size_t &i, size_t &_I ) {
-    DAI_ASSERT( !_lut.empty() );
-    LutType::const_iterator largestEl = _lut.end();
-    --largestEl;
-    i  = largestEl->second.first;
-    _I = largestEl->second.second;
+    DAI_ASSERT( !_lutNew.empty() );
+    i  = _lutNew.top().second.first;
+    _I = _lutNew.top().second.second;
 }
 
 
@@ -456,8 +454,7 @@ void BP::updateResidual( size_t i, size_t _I, Real r ) {
     pEdge->residual = r;
 
     // rearrange look-up table (delete and reinsert new key)
-    _lut.erase( _edge2lut[i][_I] );
-    _edge2lut[i][_I] = _lut.insert( make_pair( r, make_pair(i, _I) ) );
+    _lutNew.update(_edge2lutNew[i][_I], make_pair( r, make_pair(i, _I) ));
 }
 
 
