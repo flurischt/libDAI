@@ -250,7 +250,7 @@ class BP : public DAIAlgFG {
         /** If \a without_i == \c true, the message coming from variable \a i is omitted from the product
          *  \note This function is used by calcNewMessage() and calcBeliefF()
          */
-        virtual Prob calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const;
+        virtual void calcIncomingMessageProduct( Prob &prod, size_t I, bool without_i, size_t i) const;
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
         virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message
@@ -263,7 +263,7 @@ class BP : public DAIAlgFG {
         virtual void calcBeliefV( size_t i, Prob &p ) const;
         /// Calculates unnormalized belief of factor \a I
         virtual void calcBeliefF( size_t I, Prob &p ) const {
-            p = calcIncomingMessageProduct( I, false, 0 );
+            calcIncomingMessageProduct(p, I, false, 0 );
         }
 
         /// Helper function for constructors
