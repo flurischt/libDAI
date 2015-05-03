@@ -155,9 +155,8 @@ void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t
             // _prod_j will contain the product of messages coming into j
             // This will be a no-op if size() is smaller than the current capacity.
             // Clear won't free any memory for std::vector<Real>.
-            _prod_j.reserve(_oldProd[j.node].size());
             _prod_j.clear();
-
+            _prod_j.reserve(_oldProd[j.node].size());
             // The message that should not go into the product is the one from that
             // node that that message will be sent to. Conveniently, the value is
             // already available: j.dual.
