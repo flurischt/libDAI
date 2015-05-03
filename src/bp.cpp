@@ -84,14 +84,18 @@ void BP::construct() {
     _edges.clear();
     _edges.reserve( nrVars() );
     _oldProd.clear();
-    _edge2lutNew.clear();
-    _edge2lutNew.reserve( nrVars() );
+    //_edge2lutNew.clear();
+    //_edge2lutNew.reserve( nrVars() );
+    _edge2lut.resize( nrVars() );
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
         _oldProd.push_back(vector<double>(var(i).states(), 1));
-        _edge2lutNew.push_back( vector<heap_data_handle>() );
-        _edge2lutNew[i].reserve( nbV(i).size() );
+        //_edge2lutNew.push_back( vector<heap_data_handle>() );
+        //_edge2lutNew[i].reserve( nbV(i).size() );
+        ResidualPair maxRes(make_pair(-std::numeric_limits<Real>::max(),
+                                      make_pair(0,0)));
+
         for( const Neighbor &I : nbV(i) ) {
             EdgeProp newEP;
             newEP.message = Prob( var(i).states() );
@@ -101,9 +105,15 @@ void BP::construct() {
             for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
                 newEP.index.push_back( k );
 
+            if (newEP.residual > maxRes.first)
+                maxRes = ResidualPair(make_pair(newEP.residual,
+                                                make_pair(i, _edges[i].size()-1)));
+
+
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
-            _edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
+            _edge2lut[i] = _lut.insert(maxRes);
+            //_edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
         }
     }
 
@@ -132,7 +142,7 @@ void BP::init() {
         for( const Neighbor &I : nbV(i) ) {
             message( i, I.iter ).fill( c );
             newMessage( i, I.iter ).fill( c );
-            updateResidual( i, I.iter, 0.0 );
+            updateResidual( i, I.iter, 0.0, true );
         }
     }
     _iters = 0;
@@ -141,8 +151,12 @@ void BP::init() {
 
 void BP::findMaxResidual( size_t &i, size_t &_I ) {
     DAI_ASSERT( !_lutNew.empty() );
-    i  = _lutNew.top().second.first;
-    _I = _lutNew.top().second.second;
+//    i  = _lutNew.top().second.first;
+//    _I = _lutNew.top().second.second;
+    LutType::const_reverse_iterator largestEl = _lut.rbegin();
+    i  = largestEl->second.first;
+    _I = largestEl->second.second;
+
 }
 
 
@@ -216,7 +230,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     }
 
     // Update the residual if necessary
-    updateResidual( i, _I , distFast( newMessage( i, _I ), message( i, _I ) ) );
+    updateResidual( i, _I , distFast( newMessage( i, _I ), message( i, _I ) ), false );
 }
 
 
@@ -370,7 +384,7 @@ void BP::init( const VarSet &ns ) {
             Real val = 1.0;
             message( ni, I.iter ).fill( val );
             newMessage( ni, I.iter ).fill( val );
-            updateResidual( ni, I.iter, 0.0 );
+            updateResidual( ni, I.iter, 0.0, true);
         }
     }
     _iters = 0;
@@ -387,20 +401,24 @@ void BP::updateMessage( size_t i, size_t _I ) {
         _sentMessages.push_back(make_pair(i,_I));
     if( props.damping == 0.0 ) {
         message(i,_I) = newMessage(i,_I);
-        updateResidual( i, _I, 0.0 );
+        updateResidual( i, _I, 0.0, true );
     } else {
         message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
-        updateResidual( i, _I, distFast( newMessage(i,_I), message(i,_I) ) );
+        updateResidual( i, _I, distFast( newMessage(i,_I), message(i,_I) ), false);
     }
 }
 
 // TODO: Optimize: We are using a heap now but this is not faster then the multimap solution. So we might have to revert to it.
-void BP::updateResidual( size_t i, size_t _I, Real r ) {
+void BP::updateResidual( size_t i, size_t _I, Real r, bool reset ) {
     EdgeProp* pEdge = &_edges[i][_I];
     pEdge->residual = r;
 
     // rearrange look-up table (delete and reinsert new key)
-    _lutNew.update(_edge2lutNew[i][_I], make_pair( r, make_pair(i, _I) ));
+    if (_edge2lut[i]->first < r || reset)
+    {
+        _lut.erase( _edge2lut[i] );
+        _edge2lut[i] = _lut.insert( make_pair( r, make_pair(i, _I) ) );
+    }
 }
 
 
