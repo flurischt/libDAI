@@ -196,8 +196,16 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 #endif
 
     // calculate updated message I->i
-    Prob prod = Prob(_factors[I].p());
-    calcIncomingMessageProduct(prod, I, true, i);
+
+    // The capacity of _prod is not changed here. malloc/free will be called
+    // very rarely. However, this can be further improved, because
+    //  _factors[I].p().size() cleanly toggles between 2 and 4:
+    // TODO: create two containers _prod4 and _prod2 and cleverly call
+    // calcNewMessage() with either one as argument.
+    if (_prod.size() != _factors[I].p().size())
+        _prod.resize(_factors[I].p().size());
+    std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
+    calcIncomingMessageProduct(_prod, I, true, i);
     DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
     // Marginalize onto i
@@ -205,8 +213,8 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     std::fill(marg._p.begin(), marg._p.end(), 0.0);
     // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
     const ind_t ind = index(i,_I);
-    for( size_t r = 0; r < prod.size(); ++r )
-        marg.set( ind[r], marg[ind[r]] + prod[r] );
+    for( size_t r = 0; r < _prod.size(); ++r )
+        marg.set( ind[r], marg[ind[r]] + _prod[r] );
     marg.normalizeFast();
 
     // Update the residual if necessary

@@ -95,6 +95,10 @@ class BP : public DAIAlgFG {
         // Reference: http://www.cplusplus.com/reference/vector/vector/clear/
         mutable std::vector<Real> _prod_j;
 
+        // Storage container used in calcNewMessage that does not need to be
+        // recreated each time. _prod.size() toggles between 2 and 4.
+        Prob _prod;
+
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
         /// Lookup table (only used for maximum-residual BP)
