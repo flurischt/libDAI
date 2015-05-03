@@ -322,6 +322,9 @@ void BipartiteGraph::checkConsistency() const {
             DAI_ASSERT( n2.dual < nb2(n2).size() );
             DAI_ASSERT( nb2(n2, n2.dual) == n1 );
             iter++;
+#ifdef DAI_PERF
+            (void) n2;
+#endif
         }
     }
     for( size_t n2 = 0; n2 < N2; n2++ ) {
@@ -332,6 +335,9 @@ void BipartiteGraph::checkConsistency() const {
             DAI_ASSERT( n1.dual < nb1(n1).size() );
             DAI_ASSERT( nb1(n1, n1.dual) == n2 );
             iter++;
+#ifdef DAI_PERF
+            (void) n1;
+#endif
         }
     }
 }

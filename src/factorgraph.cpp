@@ -403,7 +403,9 @@ void FactorGraph::clampVar( size_t i, const vector<size_t> &is, bool backup ) {
 
 
 void FactorGraph::clampFactor( size_t I, const vector<size_t> &is, bool backup ) {
+#ifndef DAI_PERF
     size_t st = factor(I).nrStates();
+#endif
     Factor newF( factor(I).vars(), (Real)0 );
 
     for( size_t i : is ) {
