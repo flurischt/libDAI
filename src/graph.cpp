@@ -225,6 +225,9 @@ void GraphAL::checkConsistency() const {
             DAI_ASSERT( n2.dual < nb(n2).size() );
             DAI_ASSERT( nb(n2, n2.dual) == n1 );
             iter++;
+#ifdef DAI_PERF
+            (void) n2;
+#endif
         }
     }
 }

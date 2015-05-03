@@ -26,8 +26,8 @@
 /// Used by DAI_THROW
 #define DAI_TOSTRING(x) DAI_QUOTE(x)
 
-/// Macro that simplifies throwing an exception with a useful default error message. 
-/** The error message consists of a description of the exception, the source 
+/// Macro that simplifies throwing an exception with a useful default error message.
+/** The error message consists of a description of the exception, the source
  *  code file and line number where the exception has been thrown.
  *  \param cod Corresponds to one of the enum values of dai::Exception::Code
  *
@@ -57,7 +57,11 @@
 #define DAI_THROWE(cod,msg) throw dai::Exception(dai::Exception::cod, __FILE__, FUNCTION_NAME, DAI_TOSTRING(__LINE__), msg)
 
 /// Assertion mechanism, similar to the standard assert() macro. It is always active, even if NDEBUG is defined
+#ifndef DAI_PERF
 #define DAI_ASSERT(condition) ((condition) ? ((void)0) : DAI_THROWE(ASSERTION_FAILED, std::string("Assertion \"" #condition "\" failed")))
+#else
+#define DAI_ASSERT(condition)
+#endif
 
 // Assertion only if DAI_DEBUG is defined
 #ifdef DAI_DEBUG
@@ -107,7 +111,7 @@ class Exception : public std::runtime_error {
 
         /// Constructor
         Exception( Code code, const char *filename, const char *function, const char *line, const std::string& detailedMsg ) :
-            std::runtime_error(ErrorStrings[code] + (detailedMsg.empty() ? "" : (": " + detailedMsg)) + " [File " + filename + ", line " + line + ", function: " + function + "]"), 
+            std::runtime_error(ErrorStrings[code] + (detailedMsg.empty() ? "" : (": " + detailedMsg)) + " [File " + filename + ", line " + line + ", function: " + function + "]"),
             _errorcode(code), _detailedMsg(detailedMsg), _filename(filename), _function(function), _line(line) {}
 
         /// Destructor
@@ -145,7 +149,7 @@ class Exception : public std::runtime_error {
 
         /// Contains the detailed message of this exception, if any
         std::string _detailedMsg;
-        
+
         /// Contains the filename where this exception was thrown
         std::string _filename;
 
