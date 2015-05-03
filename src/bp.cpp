@@ -166,7 +166,7 @@ void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t
             for(size_t r = 0; r < prod.size(); ++r) {
 
                 // Let's divide by that message that should not go into the product.
-                double prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
+                Real prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
 
                 // And multiply it with the target.
                 prod._p[r] *= prod_jk;
@@ -199,6 +199,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
             _prod.resize(_factors[I].p().size());
         std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
         calcIncomingMessageProduct(_prod, I, true, i);
+
         DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         // Marginalize onto i
@@ -207,7 +208,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
         const ind_t ind = index(i,_I);
         for( size_t r = 0; r < _prod.size(); ++r )
-            marg.set( ind[r], marg[ind[r]] + _prod[r] );
+            marg._p[ind[r]] = marg[ind[r]] + _prod[r];
         marg.normalizeFast();
     }
 
