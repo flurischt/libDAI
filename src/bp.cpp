@@ -152,29 +152,24 @@ void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
-            // _prod_j will contain the product of messages coming into j
-            // This will be a no-op if size() is smaller than the current capacity.
-            // Clear won't free any memory for std::vector<Real>.
-            _prod_j.clear();
-            _prod_j.reserve(_oldProd[j.node].size());
+
+            // TODO: the calculation in this loop got very cryptic.
+            // One might want to have some explanations at some point...
+
             // The message that should not go into the product is the one from that
             // node that that message will be sent to. Conveniently, the value is
             // already available: j.dual.
             size_t _I = j.dual;
 
-            // Now let us divide by that message.
-            for (size_t k=0; k<_oldProd[j.node].size(); ++k) {
-                _prod_j.push_back(_oldProd[j.node][k] / _edges[j][_I].message._p[k]);
-            }
-
-            DAI_LOG("Product of incoming messages into " << j << " is " << _prod_j);
-
-            // TODO: If we understand this we might be able to get rid of this whole function call and use _oldProd directly.
-            // multiply prod with _prod_j
             // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
             const ind_t &ind = index(j, _I);
             for(size_t r = 0; r < prod.size(); ++r) {
-                prod._p[r] *= _prod_j[ind[r]];
+
+                // Let's divide by that message that should not go into the product.
+                double prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
+
+                // And multiply it with the target.
+                prod._p[r] *= prod_jk;
             }
         }
     }

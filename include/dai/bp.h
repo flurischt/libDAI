@@ -86,15 +86,6 @@ class BP : public DAIAlgFG {
         // update the corresponding product. We can then reuse the result and make our algorithm much faster.
         std::vector<std::vector<Real> > _oldProd;
 
-        // _prod_j is used in calcIncomingMessageProduct only. Because this
-        // storage container is reused multiple times, caching it avoids
-        // superfluous calls to malloc and free.
-        // Background: "trivially-destructible" types std::vector<T>::clear()
-        // is constant in time, only the size-defining member is set to zero,
-        // the storage is NOT released!
-        // Reference: http://www.cplusplus.com/reference/vector/vector/clear/
-        mutable std::vector<Real> _prod_j;
-
         // Storage container used in calcNewMessage that does not need to be
         // recreated each time. _prod.size() toggles between 2 and 4.
         Prob _prod;
