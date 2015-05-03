@@ -185,8 +185,11 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     // TODO: investigate further, can this still be useful?
     // UPDATE: image segmentation example doesn't converge if this "optimization"
     // is removed. I don't fully get it though. NJU
-    if( factor(I).vars().size() == 1 ) // optimization
-        newMessage(i,_I) = factor(I).p();
+    if( _factors[I].vars().size() == 1 ) {    // optimization
+        std::copy(_factors[I].p().begin(),
+                  _factors[I].p().end(),
+                  newMessage(i,_I)._p.begin());
+    }
     else {
         // calculate updated message I->i
 
