@@ -317,12 +317,12 @@ Factor BP::beliefV( size_t i ) const {
 
 
 Factor BP::beliefF( size_t I ) const {
-    Factor Fprod( factor(I) );
-    Prob &p = Fprod.p();
+    Factor fac( factor(I) );
+    Prob &p = fac.p();
     calcBeliefF( I, p );
     p.normalize();
 
-    return( Factor( factor(I).vars(), p ) );
+    return fac;
 }
 
 
