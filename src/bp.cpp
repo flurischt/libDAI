@@ -209,7 +209,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         Prob &marg = newMessage(i,_I);
         std::fill(marg._p.begin(), marg._p.end(), 0.0);
         // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
-        const ind_t ind = index(i,_I);
+        const ind_t& ind = index(i,_I);
         for( size_t r = 0; r < _prod.size(); ++r )
             marg._p[ind[r]] = marg[ind[r]] + _prod[r];
         marg.normalizeFast();
