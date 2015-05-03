@@ -185,8 +185,11 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     // TODO: investigate further, can this still be useful?
     // UPDATE: image segmentation example doesn't converge if this "optimization"
     // is removed. I don't fully get it though. NJU
-    if( factor(I).vars().size() == 1 ) // optimization
-        newMessage(i,_I) = factor(I).p();
+    if( _factors[I].vars().size() == 1 ) {    // optimization
+        std::copy(_factors[I].p().begin(),
+                  _factors[I].p().end(),
+                  newMessage(i,_I)._p.begin());
+    }
     else {
         // calculate updated message I->i
 
@@ -206,7 +209,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         Prob &marg = newMessage(i,_I);
         std::fill(marg._p.begin(), marg._p.end(), 0.0);
         // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
-        const ind_t ind = index(i,_I);
+        const ind_t& ind = index(i,_I);
         for( size_t r = 0; r < _prod.size(); ++r )
             marg._p[ind[r]] = marg[ind[r]] + _prod[r];
         marg.normalizeFast();
@@ -296,28 +299,30 @@ Real BP::run() {
 
 
 void BP::calcBeliefV( size_t i, Prob &p ) const {
-    p = Prob( var(i).states(), 1.0);
+    p.resize(var(i).states());
+    std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
             p *= newMessage( i, I.iter );
 }
 
 
 Factor BP::beliefV( size_t i ) const {
-    Prob p;
-    calcBeliefV( i, p );
-    p.normalize();
+    calcBeliefV( i, _probTemp );
+    _probTemp.normalize();
 
-    return( Factor( var(i), p ) );
+    // Factor is created each time. Could be avoided...
+    // Currently not a bottleneck, so no need to change InfAlg interface.
+    return( Factor( var(i), _probTemp ) );
 }
 
 
 Factor BP::beliefF( size_t I ) const {
-    Factor Fprod( factor(I) );
-    Prob &p = Fprod.p();
+    Factor fac( factor(I) );
+    Prob &p = fac.p();
     calcBeliefF( I, p );
     p.normalize();
 
-    return( Factor( factor(I).vars(), p ) );
+    return fac;
 }
 
 
