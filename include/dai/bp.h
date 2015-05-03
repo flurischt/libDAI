@@ -90,6 +90,9 @@ class BP : public DAIAlgFG {
         // recreated each time. _prod.size() toggles between 2 and 4.
         Prob _prod;
 
+        // Buffer for simple calculations.
+        mutable Prob _probTemp;
+
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
         /// Lookup table (only used for maximum-residual BP)

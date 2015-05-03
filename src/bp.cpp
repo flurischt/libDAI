@@ -299,18 +299,20 @@ Real BP::run() {
 
 
 void BP::calcBeliefV( size_t i, Prob &p ) const {
-    p = Prob( var(i).states(), 1.0);
+    p.resize(var(i).states());
+    std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
             p *= newMessage( i, I.iter );
 }
 
 
 Factor BP::beliefV( size_t i ) const {
-    Prob p;
-    calcBeliefV( i, p );
-    p.normalize();
+    calcBeliefV( i, _probTemp );
+    _probTemp.normalize();
 
-    return( Factor( var(i), p ) );
+    // Factor is created each time. Could be avoided...
+    // Currently not a bottleneck, so no need to change InfAlg interface.
+    return( Factor( var(i), _probTemp ) );
 }
 
 
