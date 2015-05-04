@@ -71,12 +71,16 @@ FactorGraph example2fg() {
 }
 
 
-pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter, double tol, vector<double> &m) {
-    InfAlg *ia = newInfAlgFromString(algOpts, fg);
+pair<size_t, double> doInference(FactorGraph &fg,
+                                 const string &options,
+                                 size_t maxIter,
+                                 double tol,
+                                 vector<double> &m) {
+    BP bp(fg, options);
 
     // Initialize inference algorithm
     //cout << "Initializing inference algorithm..." << endl;
-    ia->init();
+    bp.init();
 
     // Initialize vector for storing the recommendations
     m = vector<double>(fg.nrVars(), 0.0);
@@ -91,11 +95,11 @@ pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter
     for (iter = 0; iter < maxIter && maxDiff > tol; iter++) {
         // Set recommendations to beliefs
         for (size_t i = 0; i < fg.nrVars(); i++)
-            m[i] = ia->beliefV(i)[0];
+            m[i] = bp.beliefV(i)[0];
 
         // Perform the requested inference algorithm for only one step
-        ia->setMaxIter(iter + 1);
-        maxDiff = ia->run();
+        bp.setMaxIter(iter + 1);
+        maxDiff = bp.run();
 
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
@@ -103,7 +107,6 @@ pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter
     //cout << "Finished inference algorithm" << endl;
 
     // Clean up inference algorithm
-    delete ia;
 
     // Return num of iterations and reached convergence level
     return make_pair(++iter, maxDiff);
@@ -113,6 +116,11 @@ pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter
 vector<vector<pair<int, int> > > extract_ratings(string file_name) {
     ifstream fin;
     fin.open(file_name.c_str(), ifstream::in);
+    if (!fin.is_open())
+    {
+        cerr << "Could not open file: " << file_name << endl;
+        exit(1);
+    }
     vector<vector<pair<int, int> > > ratings;
     int num_entries;
     fin >> num_entries;
@@ -183,6 +191,7 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
         double like = max(0.1, min(0.9, 0.5 + (votings[user][i].second - mean) / (stdev * normalization_factor_p)));
         //cout << votings[user][i].second << " to " << like << endl;
         fac.set(0, like);
+        fac.set(1, 1-like);
         factors.push_back(fac);
     }
 
@@ -227,7 +236,7 @@ void verify_results(const string dataset, const double delta, vector<pair<double
     ifstream fin;
     string file_name = dataset + ".reference";
     fin.open(file_name.c_str(), ifstream::in);
-    if(!fin.good())
+    if(!fin.is_open())
     {
         cerr << "Test FAILED! Reference file " << dataset << ".reference cannot be opened." << endl;
         exit(1);
@@ -252,9 +261,9 @@ void verify_results(const string dataset, const double delta, vector<pair<double
 
 /// Main program
 int main(int argc, char **argv) {
-    const char *infname = "BP[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]";
     const size_t maxiter =  100;
     const double tol = 1e-15;
+    const string options("[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]");
 
     // default cpufreq to 2.6Ghz
     const long cpu_freq =26e+8;
@@ -286,12 +295,12 @@ int main(int argc, char **argv) {
             FactorGraph fg = data2fg(input_data, user);
 
             vector<double> m; // Stores the final recommendations
-            cout << "Inference algorithm: " << infname << endl;
+            cout << "Inference algorithm: BP. Options: " << options << endl;
             cout << "Solving the inference problem...please be patient!" << endl;
             cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
 
             timer.tic();
-            pair<size_t, double> result = doInference(fg, infname, maxiter, tol, m);
+            pair<size_t, double> result = doInference(fg, options, maxiter, tol, m);
             measured_cycles += timer.toc();
 
             cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;

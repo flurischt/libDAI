@@ -63,7 +63,7 @@ namespace dai {
  *  \todo Write a method that applies evidence (should we represent evidence as a map<Var,size_t> or as a map<size_t,size_t>?)
  */
 class FactorGraph {
-    private:
+    protected:
         /// Stores the neighborhood structure
         BipartiteGraph           _G;
         /// Stores the variables

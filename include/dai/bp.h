@@ -38,12 +38,12 @@ namespace dai {
 /** The Loopy Belief Propagation algorithm uses message passing
  *  to approximate marginal probability distributions ("beliefs") for variables
  *  and factors (more precisely, for the subset of variables depending on the factor).
- *  There are two variants, the sum-product algorithm (corresponding to 
- *  finite temperature) and the max-product algorithm (corresponding to 
+ *  There are two variants, the sum-product algorithm (corresponding to
+ *  finite temperature) and the max-product algorithm (corresponding to
  *  zero temperature).
  *
- *  The messages \f$m_{I\to i}(x_i)\f$ are passed from factors \f$I\f$ to variables \f$i\f$. 
- *  In case of the sum-product algorith, the update equation is: 
+ *  The messages \f$m_{I\to i}(x_i)\f$ are passed from factors \f$I\f$ to variables \f$i\f$.
+ *  In case of the sum-product algorith, the update equation is:
  *    \f[ m_{I\to i}(x_i) \propto \sum_{x_{N_I\setminus\{i\}}} f_I(x_I) \prod_{j\in N_I\setminus\{i\}} \prod_{J\in N_j\setminus\{I\}} m_{J\to j}\f]
  *  and in case of the max-product algorithm:
  *    \f[ m_{I\to i}(x_i) \propto \max_{x_{N_I\setminus\{i\}}} f_I(x_I) \prod_{j\in N_I\setminus\{i\}} \prod_{J\in N_j\setminus\{I\}} m_{J\to j}\f]
@@ -57,12 +57,12 @@ namespace dai {
  *  The logarithm of the partition sum is calculated by:
  *    \f[ \log Z = \sum_i (1 - |N_i|) \sum_{x_i} b_i(x_i) \log b_i(x_i) - \sum_I \sum_{x_I} b_I(x_I) \log \frac{b_I(x_I)}{f_I(x_I)} \f]
  *
- *  For the max-product algorithm, a heuristic way of finding the MAP state (the 
+ *  For the max-product algorithm, a heuristic way of finding the MAP state (the
  *  joint configuration of all variables which has maximum probability) is provided
  *  by the findMaximum() method, which can be called after convergence.
  *
  *  \note There are two implementations, an optimized one (the default) which caches IndexFor objects,
- *  and a slower, less complicated one which is easier to maintain/understand. The slower one can be 
+ *  and a slower, less complicated one which is easier to maintain/understand. The slower one can be
  *  enabled by defining DAI_BP_FAST as false in the source file.
  */
 class BP : public DAIAlgFG {
@@ -85,9 +85,6 @@ class BP : public DAIAlgFG {
         // We store the product for each variable. Every time a message gets updated we also
         // update the corresponding product. We can then reuse the result and make our algorithm much faster.
         std::vector<std::vector<double>> _oldProd;
-        // For convenience we define a debug output parameter here. Set it to 1 or higher, if you want a lot of
-        // output in your console.
-        const int _debugOutput = 0;
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
         /// Lookup table (only used for maximum-residual BP)
