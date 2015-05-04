@@ -148,35 +148,34 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
 
 // TODO: Optimize (in progress)
 void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const {
+
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
-            // prod_j will be the product of messages coming into j
-            vector<double> prod_j;
-            prod_j.reserve(_oldProd[j.node].size());
-            // We need to find out which message we should not take into the product.
-            // TODO: In the future we can try to pass this value as a parameter or compute it in a faster way.
-            size_t Iiter = -1;
-            for(const Neighbor &J: nbV(j)) {
-                if( J == I ) {
-                    Iiter = J.iter;
-                    break;
-                }
-            }
+            // _prod_j will contain the product of messages coming into j
+            // This will be a no-op if size() is smaller than the current capacity.
+            // Clear won't free any memory for std::vector<Real>.
+            _prod_j.clear();
+            _prod_j.reserve(_oldProd[j.node].size());
+            // The message that should not go into the product is the one from that
+            // node that that message will be sent to. Conveniently, the value is
+            // already available: j.dual.
+            size_t Iiter = j.dual;
+
             // Now let us divide by that message.
             for (size_t k=0; k<_oldProd[j.node].size(); ++k) {
-                prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
+                _prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
             }
 
-            DAI_LOG("Product of incoming messages into " << j << " is " << prod_j);
+            DAI_LOG("Product of incoming messages into " << j << " is " << _prod_j);
 
             // TODO: If we understand this we might be able to get rid of this whole function call and use _oldProd directly.
-            // multiply prod with prod_j
+            // multiply prod with _prod_j
             size_t _I = j.dual;
             // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
             const ind_t &ind = index(j, _I);
             for(size_t r = 0; r < prod.size(); ++r) {
-                prod._p[r] *= prod_j[ind[r]];
+                prod._p[r] *= _prod_j[ind[r]];
             }
         }
     }
@@ -187,7 +186,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 
     // load
     size_t I = _G.nb1(i)[_I].node;
-    Prob marg;
 
     // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
     // TODO: investigate further, can this still be useful?
@@ -198,24 +196,29 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 #endif
 
     // calculate updated message I->i
-    Factor Fprod( factor(I) );
-    Prob &prod = Fprod.p();
-    calcIncomingMessageProduct(prod, I, true, i);
+
+    // The capacity of _prod is not changed here. malloc/free will be called
+    // very rarely. However, this can be further improved, because
+    //  _factors[I].p().size() cleanly toggles between 2 and 4:
+    // TODO: create two containers _prod4 and _prod2 and cleverly call
+    // calcNewMessage() with either one as argument.
+    if (_prod.size() != _factors[I].p().size())
+        _prod.resize(_factors[I].p().size());
+    std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
+    calcIncomingMessageProduct(_prod, I, true, i);
     DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
     // Marginalize onto i
-    marg = Prob( var(i).states(), 0.0 );
+    Prob &marg = newMessage(i,_I);
+    std::fill(marg._p.begin(), marg._p.end(), 0.0);
     // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
     const ind_t ind = index(i,_I);
-    for( size_t r = 0; r < prod.size(); ++r )
-        marg.set( ind[r], marg[ind[r]] + prod[r] );
-    marg.normalize();
-
-    // Store result
-    newMessage(i,_I) = marg;
+    for( size_t r = 0; r < _prod.size(); ++r )
+        marg.set( ind[r], marg[ind[r]] + _prod[r] );
+    marg.normalizeFast();
 
     // Update the residual if necessary
-    updateResidual( i, _I , dist( newMessage( i, _I ), message( i, _I ), DISTLINF ) );
+    updateResidual( i, _I , distFast( newMessage( i, _I ), message( i, _I ) ) );
 }
 
 
@@ -265,12 +268,12 @@ Real BP::run() {
         maxDiff = -INFINITY;
         for( size_t i = 0; i < nrVars(); ++i ) {
             Factor b( beliefV(i) );
-            maxDiff = std::max( maxDiff, dist( b, _oldBeliefsV[i], DISTLINF ) );
+            maxDiff = std::max( maxDiff, distFast( b.p(), _oldBeliefsV[i].p() ) );
             _oldBeliefsV[i] = b;
         }
         for( size_t I = 0; I < nrFactors(); ++I ) {
             Factor b( beliefF(I) );
-            maxDiff = std::max( maxDiff, dist( b, _oldBeliefsF[I], DISTLINF ) );
+            maxDiff = std::max( maxDiff, distFast( b.p(), _oldBeliefsF[I].p() ) );
             _oldBeliefsF[I] = b;
         }
 
@@ -387,7 +390,7 @@ void BP::updateMessage( size_t i, size_t _I ) {
         updateResidual( i, _I, 0.0 );
     } else {
         message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
-        updateResidual( i, _I, dist( newMessage(i,_I), message(i,_I), DISTLINF ) );
+        updateResidual( i, _I, distFast( newMessage(i,_I), message(i,_I) ) );
     }
 }
 

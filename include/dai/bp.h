@@ -84,7 +84,21 @@ class BP : public DAIAlgFG {
         std::vector<std::vector<EdgeProp> > _edges;
         // We store the product for each variable. Every time a message gets updated we also
         // update the corresponding product. We can then reuse the result and make our algorithm much faster.
-        std::vector<std::vector<double>> _oldProd;
+        std::vector<std::vector<Real> > _oldProd;
+
+        // _prod_j is used in calcIncomingMessageProduct only. Because this
+        // storage container is reused multiple times, caching it avoids
+        // superfluous calls to malloc and free.
+        // Background: "trivially-destructible" types std::vector<T>::clear()
+        // is constant in time, only the size-defining member is set to zero,
+        // the storage is NOT released!
+        // Reference: http://www.cplusplus.com/reference/vector/vector/clear/
+        mutable std::vector<Real> _prod_j;
+
+        // Storage container used in calcNewMessage that does not need to be
+        // recreated each time. _prod.size() toggles between 2 and 4.
+        Prob _prod;
+
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
         /// Lookup table (only used for maximum-residual BP)
@@ -249,7 +263,7 @@ class BP : public DAIAlgFG {
         /** If \a without_i == \c true, the message coming from variable \a i is omitted from the product
          *  \note This function is used by calcNewMessage() and calcBeliefF()
          */
-        virtual void calcIncomingMessageProduct( Prob &prod, size_t I, bool without_i, size_t i) const;
+        virtual void calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const;
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
         virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message
@@ -262,7 +276,7 @@ class BP : public DAIAlgFG {
         virtual void calcBeliefV( size_t i, Prob &p ) const;
         /// Calculates unnormalized belief of factor \a I
         virtual void calcBeliefF( size_t I, Prob &p ) const {
-            calcIncomingMessageProduct(p, I, false, 0 );
+            calcIncomingMessageProduct(p, I, false, 0);
         }
 
         /// Helper function for constructors
