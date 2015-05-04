@@ -21,7 +21,7 @@ GraphAL& GraphAL::addEdge( size_t n1, size_t n2, bool check ) {
     bool exists = false;
     if( check ) {
         // Check whether the edge already exists
-        bforeach( const Neighbor &n, nb(n1) )
+        for( const Neighbor &n : nb(n1) )
             if( n == n2 ) {
                 exists = true;
                 break;
@@ -50,7 +50,7 @@ void GraphAL::eraseNode( size_t n ) {
                 nb(n2).erase( nb(n2).begin() + iter );
             } else {
                 // update this entry and the corresponding dual of the neighboring node
-                if( m.node > n ) 
+                if( m.node > n )
                     m.node--;
                 nb( m.node, m.dual ).dual = iter;
                 m.iter = iter++;
@@ -95,7 +95,7 @@ void GraphAL::eraseEdge( size_t n1, size_t n2 ) {
 
 SmallSet<size_t> GraphAL::nbSet( size_t n ) const {
     SmallSet<size_t> result;
-    bforeach( const Neighbor &m, nb(n) )
+    for( const Neighbor &m : nb(n) )
         result |= m;
     return result;
 }
@@ -112,10 +112,10 @@ bool GraphAL::isConnected() const {
         do {
             found_new_nodes = false;
 
-            // For all nodes, check if they are connected with the (growing) component
+            // For all nodes : check if they are connected with the (growing) component
             for( size_t n1 = 0; n1 < nrNodes(); n1++ )
                 if( !incomponent[n1] ) {
-                    bforeach( const Neighbor &n2, nb(n1) ) {
+                    for( const Neighbor &n2 : nb(n1) ) {
                         if( incomponent[n2] ) {
                             found_new_nodes = true;
                             incomponent[n1] = true;
@@ -134,15 +134,15 @@ bool GraphAL::isConnected() const {
         return all_connected;
 
         // BGL implementation is slower...
-    /*  using namespace boost;
-        typedef adjacency_list< vecS, vecS, undirectedS, property<vertex_distance_t, int> > boostGraphAL;
+        /*  using namespace boost;
+        typedef adjacency_list< vecS : vecS : undirectedS, property<vertex_distance_t, int> > boostGraphAL;
         typedef pair<size_t, size_t> E;
 
         // Copy graph structure into boostGraphAL object
         vector<E> edges;
         edges.reserve( nrEdges() );
         for( size_t n1 = 0; n1 < nrNodes(); n1++ )
-            bforeach( const Neighbor &n2, nb(n1) )
+            for( const Neighbor &n2, nb(n1) )
                 if( n1 < n2 )
                     edges.push_back( E( n1, n2 ) );
         boostGraphAL g( edges.begin(), edges.end(), nrNodes() );
@@ -175,7 +175,7 @@ bool GraphAL::isTree() const {
             // (without backtracking), aborting if a cycle is detected
             for( size_t e = 0; e < prevLevel.size(); e++ ) {
                 size_t n2 = prevLevel[e].first; // for all nodes n2 in the previous level
-                bforeach( const Neighbor &n1, nb(n2) ) { // for all neighbors n1 of n2
+                for( const Neighbor &n1 : nb(n2) ) { // for all neighbors n1 of n2
                     if( n1 != prevLevel[e].second ) { // no backtracking allowed
                         for( size_t l = 0; l < levels.size() && !foundCycle; l++ )
                             for( size_t f = 0; f < levels[l].size() && !foundCycle; f++ )
@@ -184,7 +184,7 @@ bool GraphAL::isTree() const {
                                     foundCycle = true;
                         if( !foundCycle )
                             // add n1 (and its parent n2) to current level
-                            levels.back().push_back( Edge( n1, n2 ) ); 
+                            levels.back().push_back( Edge( n1, n2 ) );
                     }
                     if( foundCycle )
                         break;
@@ -208,7 +208,7 @@ void GraphAL::printDot( std::ostream& os ) const {
     for( size_t n = 0; n < nrNodes(); n++ )
         os << "\tx" << n << ";" << endl;
     for( size_t n1 = 0; n1 < nrNodes(); n1++ )
-        bforeach( const Neighbor &n2, nb(n1) )
+        for( const Neighbor &n2 : nb(n1) )
             if( n1 < n2 )
                 os << "\tx" << n1 << " -- x" << n2 << ";" << endl;
     os << "}" << endl;
@@ -219,7 +219,7 @@ void GraphAL::checkConsistency() const {
     size_t N = nrNodes();
     for( size_t n1 = 0; n1 < N; n1++ ) {
         size_t iter = 0;
-        bforeach( const Neighbor &n2, nb(n1) ) {
+        for( const Neighbor &n2 : nb(n1) ) {
             DAI_ASSERT( n2.iter == iter );
             DAI_ASSERT( n2.node < N );
             DAI_ASSERT( n2.dual < nb(n2).size() );

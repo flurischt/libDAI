@@ -29,7 +29,7 @@ namespace dai {
 /** Most graphs that libDAI deals with are sparse. Therefore,
  *  a fast and memory-efficient way of representing the structure
  *  of a sparse graph is needed. A frequently used operation that
- *  also needs to be fast is switching between viewing node \a a as a 
+ *  also needs to be fast is switching between viewing node \a a as a
  *  neighbor of node \a b, and node \a b as a neighbor of node \a a.
  *  The Neighbor struct solves both of these problems.
  *
@@ -37,31 +37,31 @@ namespace dai {
  *  node in the graph the set of its neighbors. In practice, this set
  *  of neighbors is stored using the Neighbors type, which is simply a
  *  std::vector<\link Neighbor \endlink>. The Neighbor struct contains
- *  the label of the neighboring node (the \c node member) and 
- *  additional information which allows to access a node as a neighbor 
- *  of its neighbor (the \c dual member). For convenience, each Neighbor 
- *  structure also stores its index in the Neighbors vector that it is 
+ *  the label of the neighboring node (the \c node member) and
+ *  additional information which allows to access a node as a neighbor
+ *  of its neighbor (the \c dual member). For convenience, each Neighbor
+ *  structure also stores its index in the Neighbors vector that it is
  *  part of (the \c iter member).
  *
  *  By convention, variable identifiers naming indices into a vector
- *  of neighbors are prefixed with an underscore ("_"). The neighbor list 
+ *  of neighbors are prefixed with an underscore ("_"). The neighbor list
  *  which they point into is then understood from the context.
  *
  *  Let us denote the \a _j 'th neighbor of node \a i by <tt>nb(i,_j)</tt>,
- *  which is of the Neighbor type. Here, \a i is the "absolute" index of 
- *  node \a i, but \a _j is understood as a "relative" index, giving node 
+ *  which is of the Neighbor type. Here, \a i is the "absolute" index of
+ *  node \a i, but \a _j is understood as a "relative" index, giving node
  *  \a j 's entry in the Neighbors <tt>nb(i)</tt> of node \a i. The absolute
- *  index of \a _j, which would be denoted \a j, can be recovered from the 
- *  \c node member, <tt>nb(i,_j).node</tt>. The \c iter member 
- *  <tt>nb(i,_j).iter</tt> gives the relative index \a _j, and the \c dual 
- *  member <tt>nb(i,_j).dual</tt> gives the "dual" relative index, i.e., 
+ *  index of \a _j, which would be denoted \a j, can be recovered from the
+ *  \c node member, <tt>nb(i,_j).node</tt>. The \c iter member
+ *  <tt>nb(i,_j).iter</tt> gives the relative index \a _j, and the \c dual
+ *  member <tt>nb(i,_j).dual</tt> gives the "dual" relative index, i.e.,
  *  the index of \a i in \a j 's neighbor list.
  *
  *  Iteration over edges can be easily accomplished:
  *  \code
  *  for( size_t i = 0; i < nrNodes(); ++i ) {
  *      size_t _j = 0;
- *      bforeach( const Neighbor &j, nb(i) ) {
+ *      for( const Neighbor &j : nb(i) ) {
  *          assert( j == nb(i,j.iter) );
  *          assert( nb(j.node,j.dual).node == i );
  *          assert( _j = j.iter );
@@ -101,14 +101,14 @@ typedef std::pair<size_t,size_t> Edge;
 
 
 /// Represents the neighborhood structure of nodes in an undirected graph.
-/** A graph has nodes connected by edges. Nodes are indexed by an unsigned integer. 
+/** A graph has nodes connected by edges. Nodes are indexed by an unsigned integer.
  *  If there are nrNodes() nodes, they are numbered 0,1,2,...,nrNodes()-1. An edge
  *  between node \a n1 and node \a n2 is represented by a Edge(\a n1,\a n2).
  *
  *  GraphAL is implemented as a sparse adjacency list, i.e., it stores for each node a list of
  *  its neighboring nodes. The list of neighboring nodes is implemented as a vector of Neighbor
- *  structures (accessible by the nb() method). Thus, each node has an associated variable of 
- *  type GraphAL::Neighbors, which is a vector of Neighbor structures, describing its 
+ *  structures (accessible by the nb() method). Thus, each node has an associated variable of
+ *  type GraphAL::Neighbors, which is a vector of Neighbor structures, describing its
  *  neighboring nodes.
  */
 class GraphAL {
@@ -272,7 +272,7 @@ class GraphAL {
         void checkConsistency() const;
 
         /// Comparison operator which returns true if two graphs are identical
-        /** \note Two graphs are called identical if they have the same number 
+        /** \note Two graphs are called identical if they have the same number
          *  of nodes and the same edges (i.e., \a x has an edge between nodes
          *  \a n1 and \a n2 if and only if \c *this has an edge between nodes \a n1 and \a n2).
          */
@@ -282,10 +282,10 @@ class GraphAL {
             for( size_t n1 = 0; n1 < nrNodes(); n1++ ) {
                 if( nb(n1).size() != x.nb(n1).size() )
                     return false;
-                bforeach( const Neighbor &n2, nb(n1) )
+                for( const Neighbor &n2 : nb(n1) )
                     if( !x.hasEdge( n1, n2 ) )
                         return false;
-                bforeach( const Neighbor &n2, x.nb(n1) )
+                for( const Neighbor &n2 : x.nb(n1) )
                     if( !hasEdge( n1, n2 ) )
                         return false;
             }

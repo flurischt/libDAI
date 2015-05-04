@@ -33,12 +33,9 @@ using namespace std;
 
 void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("tol") );
-    DAI_ASSERT( opts.hasKey("logdomain") );
     DAI_ASSERT( opts.hasKey("updates") );
 
     props.tol = opts.getStringAs<Real>("tol");
-    props.logdomain = opts.getStringAs<bool>("logdomain");
-    props.updates = opts.getStringAs<Properties::UpdateType>("updates");
 
     if( opts.hasKey("maxiter") )
         props.maxiter = opts.getStringAs<size_t>("maxiter");
@@ -56,10 +53,6 @@ void BP::setProperties( const PropertySet &opts ) {
         props.damping = opts.getStringAs<Real>("damping");
     else
         props.damping = 0.0;
-    if( opts.hasKey("inference") )
-        props.inference = opts.getStringAs<Properties::InfType>("inference");
-    else
-        props.inference = Properties::InfType::SUMPROD;
 }
 
 
@@ -69,10 +62,7 @@ PropertySet BP::getProperties() const {
     opts.set( "maxiter", props.maxiter );
     opts.set( "maxtime", props.maxtime );
     opts.set( "verbose", props.verbose );
-    opts.set( "logdomain", props.logdomain );
-    opts.set( "updates", props.updates );
     opts.set( "damping", props.damping );
-    opts.set( "inference", props.inference );
     return opts;
 }
 
@@ -84,10 +74,7 @@ string BP::printProperties() const {
     s << "maxiter=" << props.maxiter << ",";
     s << "maxtime=" << props.maxtime << ",";
     s << "verbose=" << props.verbose << ",";
-    s << "logdomain=" << props.logdomain << ",";
-    s << "updates=" << props.updates << ",";
-    s << "damping=" << props.damping << ",";
-    s << "inference=" << props.inference << "]";
+    s << "damping=" << props.damping << "]";
     return s.str();
 }
 
@@ -98,29 +85,25 @@ void BP::construct() {
     _edges.reserve( nrVars() );
     _oldProd.clear();
     _edge2lutNew.clear();
-    if( props.updates == Properties::UpdateType::SEQMAX )
-        _edge2lutNew.reserve( nrVars() );
+    _edge2lutNew.reserve( nrVars() );
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
         _oldProd.push_back(vector<double>(var(i).states(), 1));
-        if( props.updates == Properties::UpdateType::SEQMAX ) {
-            _edge2lutNew.push_back( vector<heap_data_handle>() );
-            _edge2lutNew[i].reserve( nbV(i).size() );
-        }
-        bforeach( const Neighbor &I, nbV(i) ) {
+        _edge2lutNew.push_back( vector<heap_data_handle>() );
+        _edge2lutNew[i].reserve( nbV(i).size() );
+        for( const Neighbor &I : nbV(i) ) {
             EdgeProp newEP;
             newEP.message = Prob( var(i).states() );
             newEP.newMessage = Prob( var(i).states() );
 
-                newEP.index.reserve( factor(I).nrStates() );
-                for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
-                    newEP.index.push_back( k );
+            newEP.index.reserve( factor(I).nrStates() );
+            for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
+                newEP.index.push_back( k );
 
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
-            if( props.updates == Properties::UpdateType::SEQMAX )
-                _edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
+            _edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
         }
     }
 
@@ -138,19 +121,18 @@ void BP::construct() {
     _updateSeq.clear();
     _updateSeq.reserve( nrEdges() );
     for( size_t I = 0; I < nrFactors(); I++ )
-        bforeach( const Neighbor &i, nbF(I) )
+        for( const Neighbor &i : nbF(I) )
             _updateSeq.push_back( Edge( i, i.dual ) );
 }
 
 
 void BP::init() {
-    Real c = props.logdomain ? 0.0 : 1.0;
+    Real c = 1.0;
     for( size_t i = 0; i < nrVars(); ++i ) {
-        bforeach( const Neighbor &I, nbV(i) ) {
+        for( const Neighbor &I : nbV(i) ) {
             message( i, I.iter ).fill( c );
             newMessage( i, I.iter ).fill( c );
-            if( props.updates == Properties::UpdateType::SEQMAX )
-                updateResidual( i, I.iter, 0.0 );
+            updateResidual( i, I.iter, 0.0 );
         }
     }
     _iters = 0;
@@ -165,9 +147,7 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
 
 
 // TODO: Optimize (in progress)
-Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const {
-    Factor Fprod( factor(I) );
-    Prob &prod = Fprod.p();
+void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const {
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
@@ -200,15 +180,13 @@ Prob BP::calcIncomingMessageProduct( size_t I, bool without_i, size_t i) const {
             }
         }
     }
-
-    return prod;
 }
 
 
 void BP::calcNewMessage( size_t i, size_t _I) {
-    // calculate updated message I->i
-    size_t I = nbV(i,_I);
 
+    // load
+    size_t I = _G.nb1(i)[_I].node;
     Prob marg;
 
     // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
@@ -218,34 +196,26 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         marg = factor(I).p();
     else {
 #endif
-        Factor Fprod( factor(I) );
-        Prob &prod = Fprod.p();
-        prod = calcIncomingMessageProduct( I, true, i);
 
+    // calculate updated message I->i
+    Factor Fprod( factor(I) );
+    Prob &prod = Fprod.p();
+    calcIncomingMessageProduct(prod, I, true, i);
     DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
-        // Marginalize onto i
-            marg = Prob( var(i).states(), 0.0 );
-            // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
-            const ind_t ind = index(i,_I);
-            if( props.inference == Properties::InfType::SUMPROD )
-                for( size_t r = 0; r < prod.size(); ++r )
-                    marg.set( ind[r], marg[ind[r]] + prod[r] );
-            else
-                for( size_t r = 0; r < prod.size(); ++r )
-                    if( prod[r] > marg[ind[r]] )
-                        marg.set( ind[r], prod[r] );
-            marg.normalize();
+    // Marginalize onto i
+    marg = Prob( var(i).states(), 0.0 );
+    // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
+    const ind_t ind = index(i,_I);
+    for( size_t r = 0; r < prod.size(); ++r )
+        marg.set( ind[r], marg[ind[r]] + prod[r] );
+    marg.normalize();
 
     // Store result
-    if( props.logdomain )
-        newMessage(i,_I) = marg.log();
-    else
-        newMessage(i,_I) = marg;
+    newMessage(i,_I) = marg;
 
     // Update the residual if necessary
-    if( props.updates == Properties::UpdateType::SEQMAX )
-        updateResidual( i, _I , dist( newMessage( i, _I ), message( i, _I ), DISTLINF ) );
+    updateResidual( i, _I , dist( newMessage( i, _I ), message( i, _I ), DISTLINF ) );
 }
 
 
@@ -263,31 +233,29 @@ Real BP::run() {
     // been reached or until the maximum belief difference is smaller than tolerance
     Real maxDiff = INFINITY;
     for( ; _iters < props.maxiter && maxDiff > props.tol && (toc() - tic) < props.maxtime; _iters++ ) {
-        if( props.updates == Properties::UpdateType::SEQMAX ) {
-            if( _iters == 0 ) {
-                // do the first pass
-                for( size_t i = 0; i < nrVars(); ++i )
-                  for( const Neighbor &I : nbV(i) ) {
-                      calcNewMessage( i, I.iter);
-                  }
-            }
-            // Maximum-Residual BP [\ref EMK06]
-            for( size_t t = 0; t < _updateSeq.size(); ++t ) {
-                // update the message with the largest residual
-                size_t i, _I;
-                findMaxResidual( i, _I );
-                DAI_LOG("updating message from " << i << " to " << _I);
-                updateMessage( i, _I );
+        if( _iters == 0 ) {
+            // do the first pass
+            for( size_t i = 0; i < nrVars(); ++i )
+                for( const Neighbor &I : nbV(i) ) {
+                    calcNewMessage( i, I.iter);
+                }
+        }
+        // Maximum-Residual BP [\ref EMK06]
+        for( size_t t = 0; t < _updateSeq.size(); ++t ) {
+            // update the message with the largest residual
+            size_t i, _I;
+            findMaxResidual( i, _I );
+            DAI_LOG("updating message from " << i << " to " << _I);
+            updateMessage( i, _I );
 
-                // I->i has been updated, which means that residuals for all
-                // J->j with J in nb[i]\I and j in nb[J]\i have to be updated
-                bforeach( const Neighbor &J, nbV(i) ) {
-                    if( J.iter != _I ) {
-                        bforeach( const Neighbor &j, nbF(J) ) {
-                            size_t _J = j.dual;
-                            if( j != i )
-                                calcNewMessage( j, _J);
-                        }
+            // I->i has been updated, which means that residuals for all
+            // J->j with J in nb[i]\I and j in nb[J]\i have to be updated
+            for( const Neighbor &J: nbV(i) ) {
+                if( J.iter != _I ) {
+                    for( const Neighbor &j: nbF(J) ) {
+                        size_t _J = j.dual;
+                        if( j != i )
+                            calcNewMessage( j, _J);
                     }
                 }
             }
@@ -330,11 +298,8 @@ Real BP::run() {
 
 
 void BP::calcBeliefV( size_t i, Prob &p ) const {
-    p = Prob( var(i).states(), props.logdomain ? 0.0 : 1.0 );
-    bforeach( const Neighbor &I, nbV(i) )
-        if( props.logdomain )
-            p += newMessage( i, I.iter );
-        else
+    p = Prob( var(i).states(), 1.0);
+    for ( const Neighbor &I : nbV(i) )
             p *= newMessage( i, I.iter );
 }
 
@@ -342,11 +307,6 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
 Factor BP::beliefV( size_t i ) const {
     Prob p;
     calcBeliefV( i, p );
-
-    if( props.logdomain ) {
-        p -= p.max();
-        p.takeExp();
-    }
     p.normalize();
 
     return( Factor( var(i), p ) );
@@ -354,13 +314,9 @@ Factor BP::beliefV( size_t i ) const {
 
 
 Factor BP::beliefF( size_t I ) const {
-    Prob p;
+    Factor Fprod( factor(I) );
+    Prob &p = Fprod.p();
     calcBeliefF( I, p );
-
-    if( props.logdomain ) {
-        p -= p.max();
-        p.takeExp();
-    }
     p.normalize();
 
     return( Factor( factor(I).vars(), p ) );
@@ -407,12 +363,11 @@ Real BP::logZ() const {
 void BP::init( const VarSet &ns ) {
     for( VarSet::const_iterator n = ns.begin(); n != ns.end(); ++n ) {
         size_t ni = findVar( *n );
-        bforeach( const Neighbor &I, nbV( ni ) ) {
-            Real val = props.logdomain ? 0.0 : 1.0;
+        for( const Neighbor &I : nbV( ni ) ) {
+            Real val = 1.0;
             message( ni, I.iter ).fill( val );
             newMessage( ni, I.iter ).fill( val );
-            if( props.updates == Properties::UpdateType::SEQMAX )
-                updateResidual( ni, I.iter, 0.0 );
+            updateResidual( ni, I.iter, 0.0 );
         }
     }
     _iters = 0;
@@ -429,15 +384,10 @@ void BP::updateMessage( size_t i, size_t _I ) {
         _sentMessages.push_back(make_pair(i,_I));
     if( props.damping == 0.0 ) {
         message(i,_I) = newMessage(i,_I);
-        if( props.updates == Properties::UpdateType::SEQMAX )
-            updateResidual( i, _I, 0.0 );
+        updateResidual( i, _I, 0.0 );
     } else {
-        if( props.logdomain )
-            message(i,_I) = (message(i,_I) * props.damping) + (newMessage(i,_I) * (1.0 - props.damping));
-        else
-            message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
-        if( props.updates == Properties::UpdateType::SEQMAX )
-            updateResidual( i, _I, dist( newMessage(i,_I), message(i,_I), DISTLINF ) );
+        message(i,_I) = (message(i,_I) ^ props.damping) * (newMessage(i,_I) ^ (1.0 - props.damping));
+        updateResidual( i, _I, dist( newMessage(i,_I), message(i,_I), DISTLINF ) );
     }
 }
 
