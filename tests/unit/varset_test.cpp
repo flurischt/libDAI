@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( QueriesTest ) {
     BOOST_CHECK_EQUAL( x.size(), 2 );
 
     BOOST_CHECK( !x.empty() );
-    
+
     x.elements()[0] = v3;
     x.elements()[1] = v4;
     std::vector<Var> v;
@@ -829,6 +829,6 @@ BOOST_AUTO_TEST_CASE( StateTest ) {
             s++;
         }
 
-    for( s = 0; s < X.nrStates(); s++ )
+    for( s = 0; s < BigInt_size_t(X.nrStates()); s++ )
         BOOST_CHECK_EQUAL( calcLinearState(X, calcState(X,s)), s );
 }
