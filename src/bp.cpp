@@ -152,30 +152,24 @@ void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
-            // _prod_j will contain the product of messages coming into j
-            // This will be a no-op if size() is smaller than the current capacity.
-            // Clear won't free any memory for std::vector<Real>.
-            _prod_j.clear();
-            _prod_j.reserve(_oldProd[j.node].size());
+
+            // TODO: the calculation in this loop got very cryptic.
+            // One might want to have some explanations at some point...
+
             // The message that should not go into the product is the one from that
             // node that that message will be sent to. Conveniently, the value is
             // already available: j.dual.
-            size_t Iiter = j.dual;
-
-            // Now let us divide by that message.
-            for (size_t k=0; k<_oldProd[j.node].size(); ++k) {
-                _prod_j.push_back(_oldProd[j.node][k] / _edges[j][Iiter].message._p[k]);
-            }
-
-            DAI_LOG("Product of incoming messages into " << j << " is " << _prod_j);
-
-            // TODO: If we understand this we might be able to get rid of this whole function call and use _oldProd directly.
-            // multiply prod with _prod_j
             size_t _I = j.dual;
+
             // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
             const ind_t &ind = index(j, _I);
             for(size_t r = 0; r < prod.size(); ++r) {
-                prod._p[r] *= _prod_j[ind[r]];
+
+                // Let's divide by that message that should not go into the product.
+                Real prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
+
+                // And multiply it with the target.
+                prod._p[r] *= prod_jk;
             }
         }
     }
@@ -189,33 +183,37 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 
     // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
     // TODO: investigate further, can this still be useful?
-#if 0
-    if( factor(I).vars().size() == 1 ) // optimization
-        marg = factor(I).p();
+    // UPDATE: image segmentation example doesn't converge if this "optimization"
+    // is removed. I don't fully get it though. NJU
+    if( _factors[I].vars().size() == 1 ) {    // optimization
+        std::copy(_factors[I].p().begin(),
+                  _factors[I].p().end(),
+                  newMessage(i,_I)._p.begin());
+    }
     else {
-#endif
+        // calculate updated message I->i
 
-    // calculate updated message I->i
+        // The capacity of _prod is not changed here. malloc/free will be called
+        // very rarely. However, this can be further improved, because
+        //  _factors[I].p().size() cleanly toggles between 2 and 4:
+        // TODO: create two containers _prod4 and _prod2 and cleverly call
+        // calcNewMessage() with either one as argument.
+        if (_prod.size() != _factors[I].p().size())
+            _prod.resize(_factors[I].p().size());
+        std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
+        calcIncomingMessageProduct(_prod, I, true, i);
 
-    // The capacity of _prod is not changed here. malloc/free will be called
-    // very rarely. However, this can be further improved, because
-    //  _factors[I].p().size() cleanly toggles between 2 and 4:
-    // TODO: create two containers _prod4 and _prod2 and cleverly call
-    // calcNewMessage() with either one as argument.
-    if (_prod.size() != _factors[I].p().size())
-        _prod.resize(_factors[I].p().size());
-    std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
-    calcIncomingMessageProduct(_prod, I, true, i);
-    DAI_LOG("calcNewMessage " << I << " <-> " << i);
+        DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
-    // Marginalize onto i
-    Prob &marg = newMessage(i,_I);
-    std::fill(marg._p.begin(), marg._p.end(), 0.0);
-    // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
-    const ind_t ind = index(i,_I);
-    for( size_t r = 0; r < _prod.size(); ++r )
-        marg.set( ind[r], marg[ind[r]] + _prod[r] );
-    marg.normalizeFast();
+        // Marginalize onto i
+        Prob &marg = newMessage(i,_I);
+        std::fill(marg._p.begin(), marg._p.end(), 0.0);
+        // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
+        const ind_t& ind = index(i,_I);
+        for( size_t r = 0; r < _prod.size(); ++r )
+            marg._p[ind[r]] = marg[ind[r]] + _prod[r];
+        marg.normalizeFast();
+    }
 
     // Update the residual if necessary
     updateResidual( i, _I , distFast( newMessage( i, _I ), message( i, _I ) ) );
@@ -301,28 +299,30 @@ Real BP::run() {
 
 
 void BP::calcBeliefV( size_t i, Prob &p ) const {
-    p = Prob( var(i).states(), 1.0);
+    p.resize(var(i).states());
+    std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
             p *= newMessage( i, I.iter );
 }
 
 
 Factor BP::beliefV( size_t i ) const {
-    Prob p;
-    calcBeliefV( i, p );
-    p.normalize();
+    calcBeliefV( i, _probTemp );
+    _probTemp.normalize();
 
-    return( Factor( var(i), p ) );
+    // Factor is created each time. Could be avoided...
+    // Currently not a bottleneck, so no need to change InfAlg interface.
+    return( Factor( var(i), _probTemp ) );
 }
 
 
 Factor BP::beliefF( size_t I ) const {
-    Factor Fprod( factor(I) );
-    Prob &p = Fprod.p();
+    Factor fac( factor(I) );
+    Prob &p = fac.p();
     calcBeliefF( I, p );
     p.normalize();
 
-    return( Factor( factor(I).vars(), p ) );
+    return fac;
 }
 
 
