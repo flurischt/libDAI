@@ -133,6 +133,7 @@ ADD_SUBDIRECTORY(utils)
 
 # Build target examples
 ADD_SUBDIRECTORY(examples)
+ADD_SUBDIRECTORY(generateMovieData)
 
 # TODOs:
 # * note that matlab is not working out of the box with CMake
