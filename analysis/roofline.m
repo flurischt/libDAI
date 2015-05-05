@@ -1,5 +1,5 @@
 figure;
-hold on;
+hold on; grid on
 x = logspace(-1,1);
 
 
@@ -92,3 +92,4 @@ legend('Peak Performance', 'Maximal Memory Bandwidth', 'Fitted Memory Bandwidth 
 title('Roofline Plot')
 xlabel('Operational Intensity [ops/byte]')
 ylabel('Performance [ops/cycle]')
+print(gcf, '-r150', 'roofline.png', '-dpng');

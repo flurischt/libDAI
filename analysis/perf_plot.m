@@ -58,21 +58,23 @@ data_points2(6,:) = [N, ops_cycle];
 data_points(6,:) = [N, perf];
 
 plot(data_points(:,1), data_points(:,2));
-hold on;
+hold on; grid on;
 
-title('Performance Plot for different Number of Movies');
+title('Performance Plot for different Numbers of Movies');
 xlabel('Number of Movies in Dataset')
 ylabel('Performance [flops/cycle]')
 
 set(gca,'XTick',[32 64 128 256 512 1024]);
+print(gcf, '-r150', 'performance_flops.png', '-dpng');
 
 
 figure;
 plot(data_points2(:,1), data_points2(:,2));
-hold on;
+hold on; grid on;
 
 title('Operations/Cycle Plot for different Number of Movies');
 xlabel('Number of Movies in Dataset')
 ylabel('[ops/cycle]')
 
 set(gca,'XTick',[32 64 128 256 512 1024]);
+print(gcf, '-r150', 'performance_ops.png', '-dpng');
