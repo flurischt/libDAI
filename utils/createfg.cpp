@@ -624,7 +624,7 @@ int main( int argc, char *argv[] ) {
             cout << "# noise = " << noise << endl;
 
             // Construct likelihood and paritycheck factors
-            Real likelihood[4] = {1.0 - noise, noise, noise, 1.0 - noise};
+            Real likelihood[4] = {1.f - noise, noise, noise, 1.f - noise};
             Real *paritycheck = new Real[1 << k];
             createParityCheck(paritycheck, k, 0.0);
 

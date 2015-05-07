@@ -89,7 +89,7 @@ void BP::construct() {
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
-        _oldProd.push_back(vector<double>(var(i).states(), 1));
+        _oldProd.push_back(vector<Real>(var(i).states(), 1));
         _edge2lutNew.push_back( vector<heap_data_handle>() );
         _edge2lutNew[i].reserve( nbV(i).size() );
         for( const Neighbor &I : nbV(i) ) {
