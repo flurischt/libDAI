@@ -175,10 +175,14 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
             for(size_t r = 0; r < prod.size(); ++r) {
 
                 // Let's divide by that message that should not go into the product.
-                Real prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
+                // Calculate with double precision!
+                double prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
 
                 // And multiply it with the target.
                 prod._p[r] *= prod_jk;
+
+                // This is a hack to handle issues with precision.
+                //if (normalize) prod.normalize();
             }
         }
     }
@@ -321,7 +325,12 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
     p.resize(var(i).states());
     std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
+    {
             p *= newMessage( i, I.iter );
+
+        if (sizeof(Prob::value_type) == sizeof(float))
+            p.normalize();
+    }
 }
 
 
@@ -337,9 +346,12 @@ Factor BP::beliefV( size_t i ) const {
 
 Factor BP::beliefF( size_t I ) const {
     Factor fac( factor(I) );
+    static int count = 0; count ++;
     Prob &p = fac.p();
-    calcBeliefF( I, p );
-    p.normalize();
+    ProbProduct pd(p.begin(), p.end(), p.size());
+    calcBeliefF( I, pd );
+    pd.normalize();
+    std::copy(pd.begin(), pd.end(), p.begin());
 
     return fac;
 }
