@@ -26,7 +26,6 @@
 
 namespace dai {
 
-
 /// Function object that returns the value itself
 template<typename T> struct fo_id : public std::unary_function<T, T> {
     /// Returns \a x
@@ -197,6 +196,9 @@ class TProb {
         typedef std::vector<T> container_type;
 
         /// Shorthand
+        typedef T value_type;
+
+        /// Shorthand
         typedef TProb<T> this_type;
 
         /// The data structure that stores the values
@@ -235,10 +237,11 @@ class TProb {
          *  \param v vector used for initialization.
          */
         template <typename S>
-        TProb( const std::vector<S> &v ) : _p() {
+        explicit TProb( const std::vector<S> &v ) : _p() {
             _p.reserve( v.size() );
             _p.insert( _p.begin(), v.begin(), v.end() );
         }
+
     //@}
 
         /// Constant iterator over the elements

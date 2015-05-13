@@ -28,7 +28,6 @@
 
 namespace dai {
 
-
 using namespace std;
 
 void BP::setProperties( const PropertySet &opts ) {
@@ -89,7 +88,7 @@ void BP::construct() {
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
-        _oldProd.push_back(vector<Real>(var(i).states(), 1));
+        _oldProd.push_back(vector<double>(var(i).states(), 1));
         _edge2lutNew.push_back( vector<heap_data_handle>() );
         _edge2lutNew[i].reserve( nbV(i).size() );
         for( const Neighbor &I : nbV(i) ) {
@@ -147,7 +146,7 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
 
 
 // TODO: Optimize (in progress)
-void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const {
+void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const {
 
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
