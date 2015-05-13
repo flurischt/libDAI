@@ -163,6 +163,7 @@ class BP : public DAIAlgFG {
 
         /// Specifies whether the history of message updates should be recorded
         bool recordSentMessages;
+        int messageCount;
 
     public:
     /// \name Constructors/destructors
