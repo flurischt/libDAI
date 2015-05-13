@@ -32,7 +32,6 @@ using namespace std;
 
 void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("tol") );
-    DAI_ASSERT( opts.hasKey("updates") );
 
     props.tol = opts.getStringAs<Real>("tol");
 

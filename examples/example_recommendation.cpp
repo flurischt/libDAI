@@ -79,6 +79,16 @@ pair<size_t, Real> doInference(FactorGraph &fg,
 
     // Choose here whether message recording should be enabled or not.
     bp.recordSentMessages = false;
+    // Set properties explicitly.
+    PropertySet props;
+    props.set("damping", (Real)   0.0f);
+    props.set("maxiter", (size_t) maxIter);
+    props.set("maxtime", (Real)   INFINITY);
+    props.set("tol",     (Real)   tol);
+    props.set("verbose", (size_t) 0);
+    bp.setProperties(props);
+
+    cout << "Properties: " << bp.printProperties() << endl;
 
     // Initialize inference algorithm
     //cout << "Initializing inference algorithm..." << endl;
