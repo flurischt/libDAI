@@ -153,6 +153,7 @@ void BP::init() {
         }
     }
     _iters = 0;
+    messageCount = 0;
 }
 
 
@@ -430,10 +431,13 @@ void BP::init( const VarSet &ns ) {
         }
     }
     _iters = 0;
+    messageCount = 0;
 }
 
 
 void BP::updateMessage( size_t i, size_t _I ) {
+    // Count message.
+    messageCount++;
     if( recordSentMessages )
         _sentMessages.push_back(make_pair(i,_I));
     if( props.damping == 0.0 ) {

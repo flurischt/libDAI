@@ -71,12 +71,12 @@ FactorGraph example2fg() {
 }
 
 
-pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter, double tol, vector<double> &m) {
-    InfAlg *ia = newInfAlgFromString(algOpts, fg);
+pair<size_t, double> doInference(FactorGraph &fg, const string &options, size_t maxIter, double tol, vector<double> &m) {
+    BP bp(fg, options);
 
     // Initialize inference algorithm
     //cout << "Initializing inference algorithm..." << endl;
-    ia->init();
+    bp.init();
 
     // Initialize vector for storing the recommendations
     m = vector<double>(fg.nrVars(), 0.0);
@@ -86,24 +86,22 @@ pair<size_t, double> doInference(FactorGraph &fg, string algOpts, size_t maxIter
 
     // Iterate while maximum number of iterations has not been
     // reached and requested convergence level has not been reached
-    //cout << "Starting inference algorithm..." << endl;
+    cout << "Running inference..." << endl;
     size_t iter;
     for (iter = 0; iter < maxIter && maxDiff > tol; iter++) {
         // Set recommendations to beliefs
         for (size_t i = 0; i < fg.nrVars(); i++)
-            m[i] = ia->beliefV(i)[0];
+            m[i] = bp.beliefV(i)[0];
 
         // Perform the requested inference algorithm for only one step
-        ia->setMaxIter(iter + 1);
-        maxDiff = ia->run();
+        bp.setMaxIter(iter + 1);
+        maxDiff =  bp.run();
 
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
-    //cout << "Finished inference algorithm" << endl;
-
-    // Clean up inference algorithm
-    delete ia;
+    cout << "Inference done!" << endl;
+    cout << "Messages processed: " << bp.messageCount << endl;
 
     // Return num of iterations and reached convergence level
     return make_pair(++iter, maxDiff);
@@ -252,7 +250,7 @@ void verify_results(const string dataset, const double delta, vector<pair<double
 
 /// Main program
 int main(int argc, char **argv) {
-    const char *infname = "BP[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]";
+    const string options = "[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]";
     const size_t maxiter =  100;
     const double tol = 1e-15;
 
@@ -286,12 +284,12 @@ int main(int argc, char **argv) {
             FactorGraph fg = data2fg(input_data, user);
 
             vector<double> m; // Stores the final recommendations
-            cout << "Inference algorithm: " << infname << endl;
+            cout << "Inference algorithm: BP.Options: " << options << endl;
             cout << "Solving the inference problem...please be patient!" << endl;
             cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
 
             timer.tic();
-            pair<size_t, double> result = doInference(fg, infname, maxiter, tol, m);
+            pair<size_t, double> result = doInference(fg, options, maxiter, tol, m);
             measured_cycles += timer.toc();
 
             cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
@@ -345,4 +343,3 @@ int main(int argc, char **argv) {
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
     return 0;
 }
-
