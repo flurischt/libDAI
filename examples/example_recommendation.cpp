@@ -89,7 +89,7 @@ pair<size_t, double> doInference(FactorGraph &fg,
 
     // Iterate while maximum number of iterations has not been
     // reached and requested convergence level has not been reached
-    //cout << "Starting inference algorithm..." << endl;
+    cout << "Running inference..." << endl;
     size_t iter;
     for (iter = 0; iter < maxIter && maxDiff > tol; iter++) {
         // Set recommendations to beliefs
@@ -103,7 +103,8 @@ pair<size_t, double> doInference(FactorGraph &fg,
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
-    //cout << "Finished inference algorithm" << endl;
+    cout << "Inference done!" << endl;
+    cout << "Messages processed: " << bp.messageCount << endl;
 
     // Clean up inference algorithm
 

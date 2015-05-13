@@ -136,6 +136,7 @@ void BP::init() {
         }
     }
     _iters = 0;
+    messageCount = 0;
 }
 
 
@@ -374,6 +375,7 @@ void BP::init( const VarSet &ns ) {
         }
     }
     _iters = 0;
+    messageCount = 0;
 }
 
 
@@ -382,7 +384,8 @@ void BP::updateMessage( size_t i, size_t _I ) {
         _oldProd[i][j] =  _edges[i][_I].newMessage._p[j] * _oldProd[i][j] / _edges[i][_I].message._p[j];
     }
 
-
+    // Count message.
+    messageCount++;
     if( recordSentMessages )
         _sentMessages.push_back(make_pair(i,_I));
     if( props.damping == 0.0 ) {
