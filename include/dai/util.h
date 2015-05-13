@@ -97,7 +97,7 @@ namespace dai {
 
 
 /// Real number (alias for \c double, which could be changed to <tt>long double</tt> if necessary)
-typedef double Real;
+typedef float Real;
 
 /// Arbitrary precision integer number
 #ifndef DAI_WITHOUT_GMP

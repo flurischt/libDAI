@@ -718,7 +718,7 @@ class TProb {
         /** \pre <tt>this->size() == q.size()</tt>
          */
         template<typename binOp1, typename binOp2> T innerProduct( const this_type &q, T init, binOp1 binaryOp1, binOp2 binaryOp2 ) const {
-            DAI_DEBASSERT( size() == q.size() );
+            //DAI_DEBASSERT( size() == q.size() );
             return std::inner_product( begin(), end(), q.begin(), init, binaryOp1, binaryOp2 );
         }
 };
