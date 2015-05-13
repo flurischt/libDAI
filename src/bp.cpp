@@ -137,7 +137,7 @@ void BP::init() {
 }
 
 
-void BP::findMaxResidual( size_t &i, size_t &_I ) {
+bool BP::findMaxResidual( size_t &i, size_t &_I ) {
     DAI_ASSERT( !_lutNew.empty() );
     i  = _lutNew.top().second.first;
     _I = _lutNew.top().second.second;
@@ -152,6 +152,8 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
         sum = 0;
     }
 #endif
+
+    return _lutNew.top().first > 0;
 }
 
 
@@ -249,7 +251,11 @@ Real BP::run() {
     // do several passes over the network until maximum number of iterations has
     // been reached or until the maximum belief difference is smaller than tolerance
     Real maxDiff = INFINITY;
-    for( ; _iters < props.maxiter && maxDiff > props.tol && (toc() - tic) < props.maxtime; _iters++ ) {
+    bool hasValidResidual = true;
+    for( ; (_iters < props.maxiter)
+           && (maxDiff > props.tol)
+           && ((toc() - tic) < props.maxtime)
+           && hasValidResidual; _iters++ ) {
         if( _iters == 0 ) {
             // do the first pass
             for( size_t i = 0; i < nrVars(); ++i )
@@ -261,7 +267,9 @@ Real BP::run() {
         for( size_t t = 0; t < _updateSeq.size(); ++t ) {
             // update the message with the largest residual
             size_t i, _I;
-            findMaxResidual( i, _I );
+            hasValidResidual = findMaxResidual( i, _I );
+            if (!hasValidResidual) break;
+
             DAI_LOG("updating message from " << i << " to " << _I);
             updateMessage( i, _I );
 
