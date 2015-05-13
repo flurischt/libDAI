@@ -334,7 +334,7 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
     std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
     {
-            p *= newMessage( i, I.iter );
+        p *= newMessage( i, I.iter );
 
         if (sizeof(Prob::value_type) == sizeof(float))
             p.normalize();
@@ -418,9 +418,8 @@ void BP::init( const VarSet &ns ) {
 
 void BP::updateMessage( size_t i, size_t _I ) {
     for (size_t j=0; j<_oldProd[i].size(); ++j) {
-        _oldProd[i][j] =  _edges[i][_I].newMessage._p[j] * _oldProd[i][j] / _edges[i][_I].message._p[j];
+        _oldProd[i][j] =  _oldProd[i][j] / _edges[i][_I].message._p[j] * _edges[i][_I].newMessage._p[j];
     }
-
 
     if( recordSentMessages )
         _sentMessages.push_back(make_pair(i,_I));
