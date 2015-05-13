@@ -205,12 +205,15 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 
         // Marginalize onto i
         Prob &marg = newMessage(i,_I);
-        std::fill(marg._p.begin(), marg._p.end(), 0.0);
+        if (_marg.size() != marg.size())
+            _marg.resize(marg.size());
+        std::fill(_marg._p.begin(), _marg._p.end(), 0.0);
         // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
         const ind_t& ind = index(i,_I);
         for( size_t r = 0; r < _prod.size(); ++r )
-            marg._p[ind[r]] = marg[ind[r]] + _prod[r];
-        marg.normalizeFast();
+            _marg._p[ind[r]] = _marg[ind[r]] + _prod[r];
+        _marg.normalizeFast();
+        std::copy(_marg._p.begin(), _marg._p.end(), marg._p.begin());
     }
 
     // Update the residual if necessary

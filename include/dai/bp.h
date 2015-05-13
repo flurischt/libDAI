@@ -96,6 +96,7 @@ class BP : public DAIAlgFG {
         // recreated each time. _prod.size() toggles between 2 and 4.
         // Use double precision!
         ProbProduct _prod;
+        ProbProduct _marg;
 
         // Buffer for simple calculations.
         mutable Prob _probTemp;
