@@ -546,6 +546,10 @@ class TProb {
             T Z = 0.;
             for (size_t i = 0; i < _p.size(); ++i)
                 Z += _p[i];
+#ifndef DAI_PERF
+            if( Z == (T)0 )
+                DAI_THROW(NOT_NORMALIZABLE);
+#endif
             for (T& val : _p)
                 val /= Z;
             return Z;
