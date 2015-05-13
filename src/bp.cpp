@@ -141,6 +141,17 @@ void BP::findMaxResidual( size_t &i, size_t &_I ) {
     DAI_ASSERT( !_lutNew.empty() );
     i  = _lutNew.top().second.first;
     _I = _lutNew.top().second.second;
+
+#if 0
+    static int count = 0; count ++;
+    static Real sum = 0.f; sum += _lutNew.top().first;
+    if (isnan(_lutNew.top().first))
+        cout << "Warning: invalid residual occured for " << i << " <-- " << _I << endl;
+    if (count % 1000 == 0) {
+        cout << "Moving avgerage of residuals: "<< sum / 1000 << " " << _lutNew.top().first << endl;
+        sum = 0;
+    }
+#endif
 }
 
 
@@ -294,6 +305,13 @@ Real BP::run() {
                 cerr << "converged in " << _iters << " passes (" << toc() - tic << " seconds)." << endl;
         }
     }
+
+#if 0
+    // Print how the messages look like at the end of the calculation.
+    for( size_t i = 0; i < nrVars(); ++i )
+        for ( const Neighbor &I : nbV(i))
+            cout << message(i,I.iter);
+#endif
 
     return maxDiff;
 }
