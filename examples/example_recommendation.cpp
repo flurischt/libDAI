@@ -77,6 +77,9 @@ pair<size_t, Real> doInference(FactorGraph &fg,
                                  vector<Real> &m) {
     BP bp(fg, options);
 
+    // Choose here whether message recording should be enabled or not.
+    bp.recordSentMessages = false;
+
     // Initialize inference algorithm
     //cout << "Initializing inference algorithm..." << endl;
     bp.init();
@@ -103,6 +106,17 @@ pair<size_t, Real> doInference(FactorGraph &fg,
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
+
+    if (bp.recordSentMessages)
+    {
+        ofstream file;
+        file.open("messages.txt");
+        if (file.is_open())
+            for (const auto& m : bp.getSentMessages())
+                file << m.first << " <-- " << m.second << std::endl;
+        file.close();
+    }
+
     //cout << "Finished inference algorithm" << endl;
 
     // Clean up inference algorithm
