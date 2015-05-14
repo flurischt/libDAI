@@ -222,6 +222,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         // Marginalize onto i
+#ifdef DAI_SINGLE_PRECISION
         Prob &marg = newMessage(i,_I);
         if (_marg.size() != marg.size())
             _marg.resize(marg.size());
@@ -232,6 +233,16 @@ void BP::calcNewMessage( size_t i, size_t _I) {
             _marg._p[ind[r]] = _marg[ind[r]] + _prod[r];
         _marg.normalizeFast();
         std::copy(_marg._p.begin(), _marg._p.end(), marg._p.begin());
+#else
+        Prob &marg = newMessage(i,_I);
+        std::fill(marg._p.begin(), marg._p.end(), 0.0);
+
+        // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
+        const ind_t& ind = index(i,_I);
+        for( size_t r = 0; r < _prod.size(); ++r )
+            marg._p[ind[r]] = marg[ind[r]] + _prod[r];
+        marg.normalizeFast();
+#endif
     }
 
     // Update the residual if necessary
@@ -337,8 +348,13 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
     {
         p *= newMessage( i, I.iter );
 
+#ifdef DAI_SINGLE_PRECISION
+        // To "save the precision" normalize in case of floats.
+        // (This function is not performance critical, so it's okay
+        // to normalize for every variable...)
         if (sizeof(Prob::value_type) == sizeof(float))
             p.normalize();
+#endif
     }
 }
 
@@ -355,12 +371,16 @@ Factor BP::beliefV( size_t i ) const {
 
 Factor BP::beliefF( size_t I ) const {
     Factor fac( factor(I) );
-    static int count = 0; count ++;
     Prob &p = fac.p();
+#ifdef DAI_SINGLE_PRECISION
     ProbProduct pd(p.begin(), p.end(), p.size());
     calcBeliefF( I, pd );
     pd.normalize();
     std::copy(pd.begin(), pd.end(), p.begin());
+#else
+    calcBeliefF( I, p );
+    p.normalize();
+#endif
 
     return fac;
 }

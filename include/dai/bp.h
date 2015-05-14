@@ -69,6 +69,7 @@ class BP : public DAIAlgFG {
     protected:
 
         /// Type used for products of probabilities.
+        /// Indifferent to presence of flag DAI_SINGLE_PRECISION.
         typedef ProbD ProbProduct;
 
         /// Type used for index cache
@@ -96,7 +97,9 @@ class BP : public DAIAlgFG {
         // recreated each time. _prod.size() toggles between 2 and 4.
         // Use double precision!
         ProbProduct _prod;
+#ifdef DAI_SINGLE_PRECISION
         ProbProduct _marg;
+#endif
 
         // Buffer for simple calculations.
         mutable Prob _probTemp;
