@@ -67,6 +67,11 @@ namespace dai {
  */
 class BP : public DAIAlgFG {
     protected:
+
+        /// Type used for products of probabilities.
+        /// Indifferent to presence of flag DAI_SINGLE_PRECISION.
+        typedef ProbD ProbProduct;
+
         /// Type used for index cache
         typedef std::vector<size_t> ind_t;
         /// Type used for storing edge properties
@@ -82,13 +87,19 @@ class BP : public DAIAlgFG {
         };
         /// Stores all edge properties
         std::vector<std::vector<EdgeProp> > _edges;
-        // We store the product for each variable. Every time a message gets updated we also
-        // update the corresponding product. We can then reuse the result and make our algorithm much faster.
-        std::vector<std::vector<Real> > _oldProd;
+        // We store the product for each variable. Every time a message gets
+        // updated we also update the corresponding product. We can then reuse
+        // the result and make the algorithm much faster.
+        // Use double precision!
+        std::vector< std::vector<double> > _oldProd;
 
         // Storage container used in calcNewMessage that does not need to be
         // recreated each time. _prod.size() toggles between 2 and 4.
-        Prob _prod;
+        // Use double precision!
+        ProbProduct _prod;
+#ifdef DAI_SINGLE_PRECISION
+        ProbProduct _marg;
+#endif
 
         // Buffer for simple calculations.
         mutable Prob _probTemp;
@@ -258,7 +269,7 @@ class BP : public DAIAlgFG {
         /** If \a without_i == \c true, the message coming from variable \a i is omitted from the product
          *  \note This function is used by calcNewMessage() and calcBeliefF()
          */
-        virtual void calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const;
+        virtual void calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const;
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
         virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message
@@ -266,11 +277,11 @@ class BP : public DAIAlgFG {
         /// Set the residual (difference between new and old message) for the edge between variable \a i and its \a _I 'th neighbor to \a r
         void updateResidual( size_t i, size_t _I, Real r );
         /// Finds the edge which has the maximum residual (difference between new and old message)
-        void findMaxResidual( size_t &i, size_t &_I );
+        bool findMaxResidual( size_t &i, size_t &_I );
         /// Calculates unnormalized belief of variable \a i
         virtual void calcBeliefV( size_t i, Prob &p ) const;
         /// Calculates unnormalized belief of factor \a I
-        virtual void calcBeliefF( size_t I, Prob &p ) const {
+        virtual void calcBeliefF( size_t I, ProbProduct &p ) const {
             calcIncomingMessageProduct(p, I, false, 0);
         }
 

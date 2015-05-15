@@ -30,7 +30,7 @@ using namespace cimg_library;
     \param evidence The local evidence (represented as a grayscale image)
 **/
 template<class T>
-FactorGraph example2fg(const CImg<T> &img, double J, double th_min, double th_max, double scale, double pbg,
+FactorGraph example2fg(const CImg<T> &img, Real J, Real th_min, Real th_max, Real scale, Real pbg,
                        CImg<unsigned char> &evidence) {
     vector<Var> vars;
     vector<Factor> factors;
@@ -79,8 +79,8 @@ FactorGraph example2fg(const CImg<T> &img, double J, double th_min, double th_ma
     factors.reserve( 3 * N - dimx - dimy );
     // th_avg is the local field strength that would correspond with pixel value level
     // th_width is the width of the local field strength range
-    double th_avg = (th_min + th_max) / 2.0;
-    double th_width = (th_max - th_min) / 2.0;
+    Real th_avg = (th_min + th_max) / 2.0;
+    Real th_width = (th_max - th_min) / 2.0;
     // For each pixel
     for( size_t i = 0; i < dimx; i++ )
         for( size_t j = 0; j < dimy; j++ ) {
@@ -91,9 +91,9 @@ FactorGraph example2fg(const CImg<T> &img, double J, double th_min, double th_ma
             if( j >= 1 )
                 factors.push_back( createFactorIsing( vars[i*dimy+j], vars[i*dimy+(j-1)], J ) );
             // Get the pixel value
-            double x = img(i,j);
+            Real x = img(i,j);
             // Apply the nonlinear transformation to get the local field strength
-            double th = th_avg + th_width * tanh( (x - level) / scale );
+            Real th = th_avg + th_width * tanh( (x - level) / scale );
             // Add a single-variable interaction with strength th
             factors.push_back( createFactorIsing( vars[i*dimy+j], th ) );
 
@@ -127,7 +127,7 @@ FactorGraph example2fg(const CImg<T> &img, double J, double th_min, double th_ma
  *  \param dimy Image height
  *  \param disp Handle for displaying the intermediate beliefs
  */
-double doInference( FactorGraph& fg, string algOpts, size_t maxIter, double tol, vector<double> &m, size_t dimx, size_t dimy, CImgDisplay &disp ) {
+Real doInference( FactorGraph& fg, string algOpts, size_t maxIter, Real tol, vector<Real> &m, size_t dimx, size_t dimy, CImgDisplay &disp ) {
     // Construct inference algorithm
     cout << "Inference algorithm: " << algOpts << endl;
     cout << "Constructing inference algorithm object..." << endl;
@@ -138,14 +138,14 @@ double doInference( FactorGraph& fg, string algOpts, size_t maxIter, double tol,
     ia->init();
 
     // Initialize vector for storing the magnetizations
-    m = vector<double>( fg.nrVars(), 0.0 );
+    m = vector<Real>( fg.nrVars(), 0.0 );
 
     // Construct an image that will hold the intermediate single-variable beliefs
     CImg<unsigned char> image( dimx, dimy, 1, 3 );
 
     // maxDiff stores the current convergence level
-    double maxDiff = 1.0;
-    
+    Real maxDiff = 1.0;
+
     // Iterate while maximum number of iterations has not been
     // reached and requested convergence level has not been reached
     cout << "Starting inference algorithm..." << endl;
@@ -211,14 +211,14 @@ int main(int argc,char **argv) {
     const char* file_i2 = cimg_option( "-i2", "example_img_in2.jpg", "Input image 2" );
     const char* file_o1 = cimg_option( "-o1", "example_img_out1.jpg", "Output image (local evidence)" );
     const char* file_o2 = cimg_option( "-o2", "example_img_out2.jpg", "Output image (magnetizations)" );
-    const double J = cimg_option( "-J", 2.4, "Pairwise interaction strength (i.e., smoothing strength)" );
-    const double th_min = cimg_option( "-thmin", -3.0, "Local evidence strength of background" );
-    const double th_max = cimg_option( "-thmax", 3.2, "Local evidence strength of foreground" );
-    const double scale = cimg_option( "-scale", 40.0, "Typical difference in pixel values between fore- and background" );
-    const double pbg = cimg_option( "-pbg", 90.0, "Percentage of background in image" );
+    const Real J = cimg_option( "-J", 2.4, "Pairwise interaction strength (i.e., smoothing strength)" );
+    const Real th_min = cimg_option( "-thmin", -3.0, "Local evidence strength of background" );
+    const Real th_max = cimg_option( "-thmax", 3.2, "Local evidence strength of foreground" );
+    const Real scale = cimg_option( "-scale", 40.0, "Typical difference in pixel values between fore- and background" );
+    const Real pbg = cimg_option( "-pbg", 90.0, "Percentage of background in image" );
     const char *infname = cimg_option( "-method", "BP[updates=SEQMAX,maxiter=1,tol=1e-9,logdomain=0]", "Inference method in format name[key1=val1,...,keyn=valn]" );
     const size_t maxiter = cimg_option( "-maxiter", 100, "Maximum number of iterations for inference method" );
-    const double tol = cimg_option( "-tol", 1e-9, "Desired tolerance level for inference method" );
+    const Real tol = cimg_option( "-tol", 1e-9, "Desired tolerance level for inference method" );
     const char *file_fg = cimg_option( "-fg", "", "Output factor graph" );
 
     // Read input images
@@ -295,7 +295,7 @@ int main(int argc,char **argv) {
 
     // Solve the inference problem and visualize intermediate steps
     CImgDisplay disp5( dimx, dimy, "Beliefs during inference", 0 );
-    vector<double> m; // Stores the final magnetizations
+    vector<Real> m; // Stores the final magnetizations
     cout << "Solving the inference problem...please be patient!" << endl;
     doInference( fg, infname, maxiter, tol, m, dimx, dimy, disp5 );
 

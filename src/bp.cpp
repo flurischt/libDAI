@@ -28,12 +28,10 @@
 
 namespace dai {
 
-
 using namespace std;
 
 void BP::setProperties( const PropertySet &opts ) {
     DAI_ASSERT( opts.hasKey("tol") );
-    DAI_ASSERT( opts.hasKey("updates") );
 
     props.tol = opts.getStringAs<Real>("tol");
 
@@ -140,15 +138,28 @@ void BP::init() {
 }
 
 
-void BP::findMaxResidual( size_t &i, size_t &_I ) {
+bool BP::findMaxResidual( size_t &i, size_t &_I ) {
     DAI_ASSERT( !_lutNew.empty() );
     i  = _lutNew.top().second.first;
     _I = _lutNew.top().second.second;
+
+#if 0
+    static int count = 0; count ++;
+    static Real sum = 0.f; sum += _lutNew.top().first;
+    if (isnan(_lutNew.top().first))
+        cout << "Warning: invalid residual occured for " << i << " <-- " << _I << endl;
+    if (count % 1000 == 0) {
+        cout << "Moving avgerage of residuals: "<< sum / 1000 << " " << _lutNew.top().first << endl;
+        sum = 0;
+    }
+#endif
+
+    return _lutNew.top().first > 0;
 }
 
 
 // TODO: Optimize (in progress)
-void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const {
+void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const {
 
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
@@ -167,10 +178,14 @@ void BP::calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t
             for(size_t r = 0; r < prod.size(); ++r) {
 
                 // Let's divide by that message that should not go into the product.
-                Real prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
+                // Calculate with double precision!
+                double prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
 
                 // And multiply it with the target.
                 prod._p[r] *= prod_jk;
+
+                // This is a hack to handle issues with precision.
+                //if (normalize) prod.normalize();
             }
         }
     }
@@ -207,13 +222,27 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         // Marginalize onto i
+#ifdef DAI_SINGLE_PRECISION
+        Prob &marg = newMessage(i,_I);
+        if (_marg.size() != marg.size())
+            _marg.resize(marg.size());
+        std::fill(_marg._p.begin(), _marg._p.end(), 0.0);
+        // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
+        const ind_t& ind = index(i,_I);
+        for( size_t r = 0; r < _prod.size(); ++r )
+            _marg._p[ind[r]] = _marg[ind[r]] + _prod[r];
+        _marg.normalizeFast();
+        std::copy(_marg._p.begin(), _marg._p.end(), marg._p.begin());
+#else
         Prob &marg = newMessage(i,_I);
         std::fill(marg._p.begin(), marg._p.end(), 0.0);
+
         // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
         const ind_t& ind = index(i,_I);
         for( size_t r = 0; r < _prod.size(); ++r )
             marg._p[ind[r]] = marg[ind[r]] + _prod[r];
         marg.normalizeFast();
+#endif
     }
 
     // Update the residual if necessary
@@ -234,7 +263,11 @@ Real BP::run() {
     // do several passes over the network until maximum number of iterations has
     // been reached or until the maximum belief difference is smaller than tolerance
     Real maxDiff = INFINITY;
-    for( ; _iters < props.maxiter && maxDiff > props.tol && (toc() - tic) < props.maxtime; _iters++ ) {
+    bool hasValidResidual = true;
+    for( ; (_iters < props.maxiter)
+           && (maxDiff > props.tol)
+           && ((toc() - tic) < props.maxtime)
+           && hasValidResidual; _iters++ ) {
         if( _iters == 0 ) {
             // do the first pass
             for( size_t i = 0; i < nrVars(); ++i )
@@ -246,7 +279,9 @@ Real BP::run() {
         for( size_t t = 0; t < _updateSeq.size(); ++t ) {
             // update the message with the largest residual
             size_t i, _I;
-            findMaxResidual( i, _I );
+            hasValidResidual = findMaxResidual( i, _I );
+            if (!hasValidResidual) break;
+
             DAI_LOG("updating message from " << i << " to " << _I);
             updateMessage( i, _I );
 
@@ -295,6 +330,13 @@ Real BP::run() {
         }
     }
 
+#if 0
+    // Print how the messages look like at the end of the calculation.
+    for( size_t i = 0; i < nrVars(); ++i )
+        for ( const Neighbor &I : nbV(i))
+            cout << message(i,I.iter);
+#endif
+
     return maxDiff;
 }
 
@@ -303,7 +345,17 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
     p.resize(var(i).states());
     std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
-            p *= newMessage( i, I.iter );
+    {
+        p *= newMessage( i, I.iter );
+
+#ifdef DAI_SINGLE_PRECISION
+        // To "save the precision" normalize in case of floats.
+        // (This function is not performance critical, so it's okay
+        // to normalize for every variable...)
+        if (sizeof(Prob::value_type) == sizeof(float))
+            p.normalize();
+#endif
+    }
 }
 
 
@@ -320,8 +372,15 @@ Factor BP::beliefV( size_t i ) const {
 Factor BP::beliefF( size_t I ) const {
     Factor fac( factor(I) );
     Prob &p = fac.p();
+#ifdef DAI_SINGLE_PRECISION
+    ProbProduct pd(p.begin(), p.end(), p.size());
+    calcBeliefF( I, pd );
+    pd.normalize();
+    std::copy(pd.begin(), pd.end(), p.begin());
+#else
     calcBeliefF( I, p );
     p.normalize();
+#endif
 
     return fac;
 }
@@ -381,7 +440,7 @@ void BP::init( const VarSet &ns ) {
 
 void BP::updateMessage( size_t i, size_t _I ) {
     for (size_t j=0; j<_oldProd[i].size(); ++j) {
-        _oldProd[i][j] =  _edges[i][_I].newMessage._p[j] * _oldProd[i][j] / _edges[i][_I].message._p[j];
+        _oldProd[i][j] =  _oldProd[i][j] / _edges[i][_I].message._p[j] * _edges[i][_I].newMessage._p[j];
     }
 
     // Count message.
