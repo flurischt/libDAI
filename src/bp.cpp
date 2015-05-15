@@ -95,9 +95,19 @@ void BP::construct() {
             newEP.message = Prob( var(i).states() );
             newEP.newMessage = Prob( var(i).states() );
 
-            newEP.index.reserve( factor(I).nrStates() );
+            ind_t index;
             for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
-                newEP.index.push_back( k );
+                index.push_back( k );
+            auto it = std::find(_indices.begin(), _indices.end(), index);
+            if ( it == _indices.end() ) {
+                _indices.push_back(index);
+                newEP.index = _indices.size() - 1;
+                //cout << "Added index: " << index << endl;
+            }
+            else {
+                newEP.index = std::distance(_indices.begin(), it);
+            }
+            DAI_DEBASSERT(_indices[newEP.index] == index);
 
             newEP.residual = 0.0;
             _edges[i].push_back( newEP );
