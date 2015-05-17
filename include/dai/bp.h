@@ -75,16 +75,22 @@ class BP : public DAIAlgFG {
         /// Type used for index cache
         typedef std::vector<size_t> ind_t;
         /// Type used for storing edge properties
+#ifdef DAI_RECOMMENDER_BOOST
+        typedef Real MessageType;
+#else
+        typedef Prob MessageType;
+#endif
         struct EdgeProp {
             /// Index cached for this edge
-            size_t index;
+            size_t      index;
             /// Old message living on this edge
-            Prob   message;
+            MessageType message;
             /// New message living on this edge
-            Prob   newMessage;
+            MessageType newMessage;
             /// Residual for this edge
-            Real   residual;
+            Real        residual;
         };
+
         /// Stores all edge properties
         std::vector<std::vector<EdgeProp> > _edges;
 
@@ -95,6 +101,7 @@ class BP : public DAIAlgFG {
         // updated we also update the corresponding product. We can then reuse
         // the result and make the algorithm much faster.
         // Use double precision!
+        // TODO: use std::vector<ProbProd> (for consistent notation)
         std::vector< std::vector<double> > _oldProd;
 
         // Storage container used in calcNewMessage that does not need to be
@@ -289,13 +296,13 @@ class BP : public DAIAlgFG {
 
     protected:
         /// Returns constant reference to message from the \a _I 'th neighbor of variable \a i to variable \a i
-        const Prob & message(size_t i, size_t _I) const { return _edges[i][_I].message; }
+        const MessageType & message(size_t i, size_t _I) const { return _edges[i][_I].message; }
         /// Returns reference to message from the \a _I 'th neighbor of variable \a i to variable \a i
-        Prob & message(size_t i, size_t _I) { return _edges[i][_I].message; }
+        MessageType & message(size_t i, size_t _I) { return _edges[i][_I].message; }
         /// Returns constant reference to updated message from the \a _I 'th neighbor of variable \a i to variable \a i
-        const Prob & newMessage(size_t i, size_t _I) const { return _edges[i][_I].newMessage; }
+        const MessageType & newMessage(size_t i, size_t _I) const { return _edges[i][_I].newMessage; }
         /// Returns reference to updated message from the \a _I 'th neighbor of variable \a i to variable \a i
-        Prob & newMessage(size_t i, size_t _I) { return _edges[i][_I].newMessage; }
+        MessageType & newMessage(size_t i, size_t _I) { return _edges[i][_I].newMessage; }
         /// Returns constant reference to cached index for the edge between variable \a i and its \a _I 'th neighbor
         const ind_t & index(size_t i, size_t _I) const { return _indices[_edges[i][_I].index]; }
         /// Returns reference to cached index for the edge between variable \a i and its \a _I 'th neighbor
@@ -317,6 +324,8 @@ class BP : public DAIAlgFG {
         void calcIncomingMessageProduct_0101(ProbProduct &prod, size_t I) const;
         void calcIncomingMessageProduct_01(ProbProduct &prod, size_t I) const;
         void calcIncomingMessageProduct_0101_0011(ProbProduct &prod, size_t I, size_t i) const;
+
+        void marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t _I);
 
         static const int INDEX_0011      = 0;
         static const int INDEX_0101      = 1;
