@@ -250,7 +250,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         Prob &marg = newMessage(i,_I);
         if (_marg.size() != marg.size())
             _marg.resize(marg.size());
-        std::fill(_marg._p.begin(), _marg._p.end(), 0.0);
 
         // Shortcut, to avoid code duplication. We are making use of the
         // fact that m is always of type ProbD == ProbProduct!
@@ -258,7 +257,6 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         ProbProduct &m = _marg;
 #else
         Prob &marg = newMessage(i,_I);
-        std::fill(marg._p.begin(), marg._p.end(), 0.0);
 
         // Shortcut, to avoid code duplication. We are making use of the
         // fact that m is always of type ProbD == ProbProduct!
@@ -266,25 +264,31 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         ProbProduct &m = marg;
 #endif
 
+        // Calculate marginal AND normalize probability.
         // Avoid the indirect lookup via ind_t if possible.
         switch (_edges[i][_I].index) {
-            case INDEX_0011:
-                m._p[0] += (_prod._p[0]+_prod._p[1]);
-                m._p[1] += (_prod._p[2]+_prod._p[3]);
-                break;
-            case INDEX_0101:
-                m._p[0] += (_prod._p[0]+_prod._p[2]);
-                m._p[1] += (_prod._p[1]+_prod._p[3]);
-                break;
+            case INDEX_0011: {
+                const ProbProduct::value_type a = (_prod._p[0]+_prod._p[1]);
+                const ProbProduct::value_type s = a + (_prod._p[2]+_prod._p[3]);
+                m._p[0] = a/s;
+                m._p[1] = 1. - m._p[0];
+            } break;
+            case INDEX_0101: {
+                const ProbProduct::value_type a = (_prod._p[0]+_prod._p[2]);
+                const ProbProduct::value_type s = a + (_prod._p[1]+_prod._p[3]);
+                m._p[0] = a/s;
+                m._p[1] = 1. - m._p[0];
+            } break;
             default: {
+                std::fill(m._p.begin(), m._p.end(), 0.0);
                 // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
                 // corresponds x_i == ind[k]
                 const ind_t& ind = index(i,_I);
                 for( size_t r = 0; r < _prod.size(); ++r )
                     m._p[ind[r]] += _prod[r];
+                m.normalizeFast();
             }
         }
-        m.normalizeFast();
 
 #ifdef DAI_SINGLE_PRECISION
         // Copy (and cast) from ProbProduct to Prob.
