@@ -122,8 +122,10 @@ pair<size_t, Real> doInference(FactorGraph &fg,
 
     if (bp.recordSentMessages)
     {
+        const string filename("message.txt");
         ofstream file;
-        file.open("messages.txt");
+        file.open(filename);
+        cout << "Dumping messages to " << filename << "..." << endl;
         if (file.is_open())
             for (const auto& m : bp.getSentMessages())
                 file << m.first << " <-- " << m.second << std::endl;
