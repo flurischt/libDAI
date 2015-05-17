@@ -236,9 +236,14 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         if (_prod.size() != _factors[I].p().size())
             _prod.resize(_factors[I].p().size());
         std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
-        calcIncomingMessageProduct(_prod, I, true, i);
 
+        // Calc the message product.
         DAI_LOG("calcNewMessage " << I << " <-> " << i);
+#ifdef DAI_RECOMMENDER_BOOST
+        calcIncomingMessageProduct_0101_0011(_prod, I, i);
+#else
+        calcIncomingMessageProduct(_prod, I, true, i);
+#endif
 
         // Marginalize onto i
 #ifdef DAI_SINGLE_PRECISION
@@ -248,6 +253,8 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         std::fill(_marg._p.begin(), _marg._p.end(), 0.0);
         // ind is the precalculated IndexFor(i,I) i.e. to x_I == k corresponds x_i == ind[k]
         const ind_t& ind = index(i,_I);
+//        if (ind != ind_t({0,0,1,1}))
+//            cout << ind << " ";
         for( size_t r = 0; r < _prod.size(); ++r )
             _marg._p[ind[r]] = _marg[ind[r]] + _prod[r];
         _marg.normalizeFast();
