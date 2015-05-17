@@ -310,6 +310,9 @@ class BP : public DAIAlgFG {
          *  \note This function is used by calcNewMessage() and calcBeliefF()
          */
         virtual void calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const;
+        static const int INDEX_0011      = 0;
+        static const int INDEX_0101      = 1;
+        static const int INDEX_01        = 2;
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
         virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message

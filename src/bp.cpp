@@ -81,9 +81,17 @@ void BP::construct() {
     // create edge properties
     _edges.clear();
     _edges.reserve( nrVars() );
+    _indices.clear();
     _oldProd.clear();
     _edge2lutNew.clear();
     _edge2lutNew.reserve( nrVars() );
+
+    // Add the predefined indices first.
+    // The order matters and will be used later!
+    _indices.push_back({0,0,1,1}); DAI_DEBASSERT(_indices.size()-1 == INDEX_0011);
+    _indices.push_back({0,1,0,1}); DAI_DEBASSERT(_indices.size()-1 == INDEX_0101);
+    _indices.push_back({0,1});     DAI_DEBASSERT(_indices.size()-1 == INDEX_01);
+
     for( size_t i = 0; i < nrVars(); ++i ) {
         _edges.push_back( vector<EdgeProp>() );
         _edges[i].reserve( nbV(i).size() );
@@ -105,7 +113,8 @@ void BP::construct() {
                 //cout << "Added index: " << index << endl;
             }
             else {
-                newEP.index = std::distance(_indices.begin(), it);
+                newEP.index = it - _indices.begin();
+                DAI_DEBASSERT(newEP.index < _indices.size());
             }
             DAI_DEBASSERT(_indices[newEP.index] == index);
 
