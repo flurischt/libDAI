@@ -26,7 +26,6 @@
 
 namespace dai {
 
-
 /// Function object that returns the value itself
 template<typename T> struct fo_id : public std::unary_function<T, T> {
     /// Returns \a x
@@ -197,6 +196,9 @@ class TProb {
         typedef std::vector<T> container_type;
 
         /// Shorthand
+        typedef T value_type;
+
+        /// Shorthand
         typedef TProb<T> this_type;
 
         /// The data structure that stores the values
@@ -235,10 +237,11 @@ class TProb {
          *  \param v vector used for initialization.
          */
         template <typename S>
-        TProb( const std::vector<S> &v ) : _p() {
+        explicit TProb( const std::vector<S> &v ) : _p() {
             _p.reserve( v.size() );
             _p.insert( _p.begin(), v.begin(), v.end() );
         }
+
     //@}
 
         /// Constant iterator over the elements
@@ -543,6 +546,10 @@ class TProb {
             T Z = 0.;
             for (size_t i = 0; i < _p.size(); ++i)
                 Z += _p[i];
+#ifndef DAI_PERF
+            if( Z == (T)0 )
+                DAI_THROW(NOT_NORMALIZABLE);
+#endif
             for (T& val : _p)
                 val /= Z;
             return Z;
@@ -715,7 +722,7 @@ class TProb {
         /** \pre <tt>this->size() == q.size()</tt>
          */
         template<typename binOp1, typename binOp2> T innerProduct( const this_type &q, T init, binOp1 binaryOp1, binOp2 binaryOp2 ) const {
-            DAI_DEBASSERT( size() == q.size() );
+            //DAI_DEBASSERT( size() == q.size() );
             return std::inner_product( begin(), end(), q.begin(), init, binaryOp1, binaryOp2 );
         }
 };
@@ -781,6 +788,8 @@ template<typename T> TProb<T> max( const TProb<T> &a, const TProb<T> &b ) {
 
 /// Represents a vector with entries of type dai::Real.
 typedef TProb<Real> Prob;
+typedef TProb<float> ProbF;     // Float prob.
+typedef TProb<double> ProbD;    // Double prob.
 
 
 } // end of namespace dai

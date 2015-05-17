@@ -67,12 +67,17 @@ namespace dai {
  */
 class BP : public DAIAlgFG {
     protected:
+
+        /// Type used for products of probabilities.
+        /// Indifferent to presence of flag DAI_SINGLE_PRECISION.
+        typedef ProbD ProbProduct;
+
         /// Type used for index cache
         typedef std::vector<size_t> ind_t;
         /// Type used for storing edge properties
         struct EdgeProp {
             /// Index cached for this edge
-            ind_t  index;
+            size_t index;
             /// Old message living on this edge
             Prob   message;
             /// New message living on this edge
@@ -82,13 +87,23 @@ class BP : public DAIAlgFG {
         };
         /// Stores all edge properties
         std::vector<std::vector<EdgeProp> > _edges;
-        // We store the product for each variable. Every time a message gets updated we also
-        // update the corresponding product. We can then reuse the result and make our algorithm much faster.
-        std::vector<std::vector<Real> > _oldProd;
+
+        /// Stores the pre-calculated indices for the edges.
+        std::vector<ind_t> _indices;
+
+        // We store the product for each variable. Every time a message gets
+        // updated we also update the corresponding product. We can then reuse
+        // the result and make the algorithm much faster.
+        // Use double precision!
+        std::vector< std::vector<double> > _oldProd;
 
         // Storage container used in calcNewMessage that does not need to be
         // recreated each time. _prod.size() toggles between 2 and 4.
-        Prob _prod;
+        // Use double precision!
+        ProbProduct _prod;
+#ifdef DAI_SINGLE_PRECISION
+        ProbProduct _marg;
+#endif
 
         // Buffer for simple calculations.
         mutable Prob _probTemp;
@@ -155,24 +170,60 @@ class BP : public DAIAlgFG {
 
         /// Specifies whether the history of message updates should be recorded
         bool recordSentMessages;
+        int messageCount;
 
     public:
     /// \name Constructors/destructors
     //@{
         /// Default constructor
-        BP() : DAIAlgFG(), _edges(), _edge2lutOld(), _lut(), _maxdiff(0.0), _iters(0U), _sentMessages(), _oldBeliefsV(), _oldBeliefsF(), _updateSeq(), props(), recordSentMessages(false) {}
+        BP() : DAIAlgFG()
+          , _edges()
+          , _indices()
+          , _edge2lutOld()
+          , _lut()
+          , _maxdiff(0.0)
+          , _iters(0U)
+          , _sentMessages()
+          , _oldBeliefsV()
+          , _oldBeliefsF()
+          , _updateSeq()
+          , props()
+          , recordSentMessages(false)
+        {}
 
         /// Construct from FactorGraph \a fg and PropertySet \a opts
         /** \param fg Factor graph.
          *  \param opts Parameters @see Properties
          */
-        BP( const FactorGraph & fg, const PropertySet &opts ) : DAIAlgFG(fg), _edges(), _maxdiff(0.0), _iters(0U), _sentMessages(), _oldBeliefsV(), _oldBeliefsF(), _updateSeq(), props(), recordSentMessages(false) {
+        BP( const FactorGraph & fg, const PropertySet &opts ) : DAIAlgFG(fg)
+          , _edges()
+          , _indices()
+          , _maxdiff(0.0)
+          , _iters(0U)
+          , _sentMessages()
+          , _oldBeliefsV()
+          , _oldBeliefsF()
+          , _updateSeq()
+          , props()
+          , recordSentMessages(false) {
             setProperties( opts );
             construct();
         }
 
         /// Copy constructor
-        BP( const BP &x ) : DAIAlgFG(x), _edges(x._edges), _edge2lutOld(x._edge2lutOld), _lut(x._lut), _maxdiff(x._maxdiff), _iters(x._iters), _sentMessages(x._sentMessages), _oldBeliefsV(x._oldBeliefsV), _oldBeliefsF(x._oldBeliefsF), _updateSeq(x._updateSeq), props(x.props), recordSentMessages(x.recordSentMessages) {
+        BP( const BP &x ) : DAIAlgFG(x)
+          , _edges(x._edges)
+          , _indices(x._indices)
+          , _edge2lutOld(x._edge2lutOld)
+          , _lut(x._lut)
+          , _maxdiff(x._maxdiff)
+          , _iters(x._iters)
+          , _sentMessages(x._sentMessages)
+          , _oldBeliefsV(x._oldBeliefsV)
+          , _oldBeliefsF(x._oldBeliefsF)
+          , _updateSeq(x._updateSeq)
+          , props(x.props)
+          , recordSentMessages(x.recordSentMessages) {
             for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
                 _edge2lutOld[l->second.first][l->second.second] = l;
         }
@@ -182,6 +233,7 @@ class BP : public DAIAlgFG {
             if( this != &x ) {
                 DAIAlgFG::operator=( x );
                 _edges = x._edges;
+                _indices = x._indices;
                 _oldProd = x._oldProd;
                 _lut = x._lut;
                 for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
@@ -245,9 +297,9 @@ class BP : public DAIAlgFG {
         /// Returns reference to updated message from the \a _I 'th neighbor of variable \a i to variable \a i
         Prob & newMessage(size_t i, size_t _I) { return _edges[i][_I].newMessage; }
         /// Returns constant reference to cached index for the edge between variable \a i and its \a _I 'th neighbor
-        const ind_t & index(size_t i, size_t _I) const { return _edges[i][_I].index; }
+        const ind_t & index(size_t i, size_t _I) const { return _indices[_edges[i][_I].index]; }
         /// Returns reference to cached index for the edge between variable \a i and its \a _I 'th neighbor
-        ind_t & index(size_t i, size_t _I) { return _edges[i][_I].index; }
+        ind_t & index(size_t i, size_t _I) { return _indices[_edges[i][_I].index]; }
         /// Returns constant reference to residual for the edge between variable \a i and its \a _I 'th neighbor
         const Real & residual(size_t i, size_t _I) const { return _edges[i][_I].residual; }
         /// Returns reference to residual for the edge between variable \a i and its \a _I 'th neighbor
@@ -257,7 +309,7 @@ class BP : public DAIAlgFG {
         /** If \a without_i == \c true, the message coming from variable \a i is omitted from the product
          *  \note This function is used by calcNewMessage() and calcBeliefF()
          */
-        virtual void calcIncomingMessageProduct(Prob &prod, size_t I, bool without_i, size_t i) const;
+        virtual void calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const;
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
         virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message
@@ -265,11 +317,11 @@ class BP : public DAIAlgFG {
         /// Set the residual (difference between new and old message) for the edge between variable \a i and its \a _I 'th neighbor to \a r
         void updateResidual( size_t i, size_t _I, Real r );
         /// Finds the edge which has the maximum residual (difference between new and old message)
-        void findMaxResidual( size_t &i, size_t &_I );
+        bool findMaxResidual( size_t &i, size_t &_I );
         /// Calculates unnormalized belief of variable \a i
         virtual void calcBeliefV( size_t i, Prob &p ) const;
         /// Calculates unnormalized belief of factor \a I
-        virtual void calcBeliefF( size_t I, Prob &p ) const {
+        virtual void calcBeliefF( size_t I, ProbProduct &p ) const {
             calcIncomingMessageProduct(p, I, false, 0);
         }
 
