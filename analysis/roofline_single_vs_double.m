@@ -1,6 +1,6 @@
 figure;
 hold on; grid on
-x = logspace(-2,0);
+x = logspace(-3,0);
 
 
 bytesCycle = 4.2;
@@ -65,6 +65,38 @@ intensity = opsCycle/bandwidthCycle;
 
 loglog(opsCycle, intensity, 'ob');
 text(opsCycle,intensity,{' b030 double precision'},'VerticalAlignment','top');
+
+%% b032 single precision repeated
+cycles = 62842094263;
+% #total flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
+% FP_COMP_OPS_EXE.SSE_SCALAR_SINGLE + FP_COMP_OPS_EXE.X87
+flops = 1500002250 + 642000963 + 690001035;
+runtime = 16.661; % seconds
+bytes_sec = 1.071 * 1000000000;
+bytes = runtime * bytes_sec;
+
+bandwidthCycle = bytes/cycles;
+opsCycle = flops/cycles;
+intensity = opsCycle/bandwidthCycle;
+
+loglog(opsCycle, intensity, 'ob');
+text(opsCycle,intensity,{' b032 single precision (N=10)'},'VerticalAlignment','top');
+
+%% b032 double precision
+cycles = 62842094263;
+% #total flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
+% FP_COMP_OPS_EXE.SSE_SCALAR_SINGLE + FP_COMP_OPS_EXE.X87
+flops = 942001413 + 0 + 318000477;
+runtime = 19.236; % seconds
+bytes_sec = 5.328 * 1000000000;
+bytes = runtime * bytes_sec;
+
+bandwidthCycle = bytes/cycles;
+opsCycle = flops/cycles;
+intensity = opsCycle/bandwidthCycle;
+
+loglog(opsCycle, intensity, 'ob');
+text(opsCycle,intensity,{' b032 double precision'},'VerticalAlignment','top');
 
 %%
 set(gca,'XScale','log')
