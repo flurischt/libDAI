@@ -60,6 +60,7 @@ ENDIF(WITH_ADVANCED)
 IF(WITH_BP)
     SET(dai_hdrs ${dai_hdrs} "${dai_include_dir}/bp.h")
     SET(dai_srcs ${dai_srcs} bp.cpp)
+    SET(dai_srcs ${dai_srcs} bp_ext.cpp)
 ENDIF(WITH_BP)
 
 IF(WITH_FBP)
