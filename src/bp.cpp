@@ -474,7 +474,12 @@ void BP::calcBeliefV( size_t i, Prob &p ) const {
     std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
     {
-        p *= newMessage( i, I.iter );   // works for any MessageType :)
+#ifndef DAI_RECOMMENDER_BOOST
+        p *= newMessage( i, I.iter );
+#else
+        p._p[0] *= newMessage( i, I.iter );
+        p._p[1] *= ((Real)1-newMessage( i, I.iter ));
+#endif
 
 #ifdef DAI_SINGLE_PRECISION
         // To "save the precision" normalize in case of floats.
