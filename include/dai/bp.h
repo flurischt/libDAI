@@ -113,7 +113,7 @@ class BP : public DAIAlgFG {
 #endif
 
         // Buffer for simple calculations.
-        mutable Prob _probTemp;
+        mutable ProbProduct _probTemp;
 
         /// Type of lookup table (only used for maximum-residual BP)
         typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
@@ -342,7 +342,7 @@ class BP : public DAIAlgFG {
         /// Finds the edge which has the maximum residual (difference between new and old message)
         bool findMaxResidual( size_t &i, size_t &_I );
         /// Calculates unnormalized belief of variable \a i
-        virtual void calcBeliefV( size_t i, Prob &p ) const;
+        virtual void calcBeliefV(size_t i, ProbProduct &p ) const;
         /// Calculates unnormalized belief of factor \a I
         virtual void calcBeliefF( size_t I, ProbProduct &p ) const {
             calcIncomingMessageProduct(p, I, false, 0);

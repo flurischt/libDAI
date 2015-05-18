@@ -487,24 +487,17 @@ Real BP::run() {
 }
 
 
-void BP::calcBeliefV( size_t i, Prob &p ) const {
+void BP::calcBeliefV( size_t i, ProbProduct &p ) const {
     p.resize(var(i).states());
     std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
     {
 #ifndef DAI_RECOMMENDER_BOOST
-        p *= newMessage( i, I.iter );
+        for (size_t j=0; j<p.size(); ++j)
+            p._p[j] *= newMessage( i, I.iter )._p[j];
 #else
         p._p[0] *= newMessage( i, I.iter );
         p._p[1] *= ((Real)1-newMessage( i, I.iter ));
-#endif
-
-#ifdef DAI_SINGLE_PRECISION
-        // To "save the precision" normalize in case of floats.
-        // (This function is not performance critical, so it's okay
-        // to normalize for every variable...)
-        if (sizeof(Prob::value_type) == sizeof(float))
-            p.normalize();
 #endif
     }
 }
@@ -516,7 +509,7 @@ Factor BP::beliefV( size_t i ) const {
 
     // Factor is created each time. Could be avoided...
     // Currently not a bottleneck, so no need to change InfAlg interface.
-    return( Factor( var(i), _probTemp ) );
+    return( Factor( var(i), Prob(_probTemp.begin(), _probTemp.end(), _probTemp.size()) ) );
 }
 
 
