@@ -149,7 +149,25 @@ void BP::construct() {
 
 
 void BP::init() {
-    Real c = 1.0;
+
+    // The initialization of the messages has a strong impact on the
+    // convergence. The value originally suggested by libDAI was c = 1.0.
+    // I consider this choice unnatural because it will lead to messages
+    // that don't sum up to 1. This seems wrong, because throughout
+    // the algorithm, messages are "normalized".
+    // Changing c to (e.g.) 0.5 leads to faster convergence: 40% less
+    // messages are required for example for the u1 dataset!
+    // For DAI_RECOMMENDER_BOOST, it is required to choose a value
+    // different from 1.0 - otherwise we run into problems with
+    // division by zero (as p[1] = 1-p[0] = 0)...
+    // The most appropriate choice seems to me the uniform distribution:
+    // c = (Real)1./message.size();
+    // Addendum: the observed faster convergence was observed only for
+    // single precision. Double precision behaves identical (in terms
+    // of number of messages processed).
+
+    //Real c = 1.0;
+    Real c = 0.5;
     for( size_t i = 0; i < nrVars(); ++i ) {
         for( const Neighbor &I : nbV(i) ) {
 #ifndef DAI_RECOMMENDER_BOOST
@@ -599,8 +617,9 @@ void BP::updateMessage( size_t i, size_t _I ) {
 
     // Damping is not supported here.
     DAI_DEBASSERT(props.damping == false);
+    DAI_DEBASSERT(_oldProd[i].size() == 2);
 
-    _oldProd[i][0] =  _oldProd[i][0] / _edges[i][_I].message * _edges[i][_I].newMessage;
+    _oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
     _oldProd[i][1] =  _oldProd[i][1] / (1. - _edges[i][_I].message) * (1. - _edges[i][_I].newMessage);
 
     // Count message.
