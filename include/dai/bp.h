@@ -75,11 +75,7 @@ class BP : public DAIAlgFG {
         /// Type used for index cache
         typedef std::vector<size_t> ind_t;
         /// Type used for storing edge properties
-#ifdef DAI_RECOMMENDER_BOOST
         typedef Real MessageType;
-#else
-        typedef Prob MessageType;
-#endif
         struct EdgeProp {
             /// Index cached for this edge
             size_t      index;
