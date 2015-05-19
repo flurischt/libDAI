@@ -51,6 +51,11 @@ void BP::setProperties( const PropertySet &opts ) {
         props.damping = opts.getStringAs<Real>("damping");
     else
         props.damping = 0.0;
+
+    if( opts.hasKey("specialFactors") )
+        props.specialFactors = opts.getStringAs<size_t>("specialFactors");
+    else
+        props.specialFactors = 0;
 }
 
 
@@ -61,6 +66,7 @@ PropertySet BP::getProperties() const {
     opts.set( "maxtime", props.maxtime );
     opts.set( "verbose", props.verbose );
     opts.set( "damping", props.damping );
+    opts.set( "specialFactors", props.specialFactors );
     return opts;
 }
 
@@ -72,7 +78,8 @@ string BP::printProperties() const {
     s << "maxiter=" << props.maxiter << ",";
     s << "maxtime=" << props.maxtime << ",";
     s << "verbose=" << props.verbose << ",";
-    s << "damping=" << props.damping << "]";
+    s << "damping=" << props.damping << ",";
+    s << "specialFactors=" << props.specialFactors << "]";
     return s.str();
 }
 
@@ -139,6 +146,8 @@ void BP::construct() {
     for( size_t I = 0; I < nrFactors(); I++ )
         for( const Neighbor &i : nbF(I) )
             _updateSeq.push_back( Edge( i, i.dual ) );
+
+    _factorsFixed = _factors[0].p();
 }
 
 
@@ -173,7 +182,8 @@ void BP::init() {
     messageCount = 0;
 }
 
-
+// Finds the maximum residual which determines which part of the graph should be updated next. This can be done
+// efficiently because we already store the residuals in order and only need to take the top element.
 bool BP::findMaxResidual( size_t &i, size_t &_I ) {
     DAI_ASSERT( !_lutNew.empty() );
     i  = _lutNew.top().second.first;
@@ -183,16 +193,15 @@ bool BP::findMaxResidual( size_t &i, size_t &_I ) {
 }
 
 
-// TODO: Optimize (in progress)
+// This function computes a product over all incoming messages. The parameter without_i is used to determine if we
+// should also take the message from ourself into account. Normally this is set to true, which means we ignore our own
+// message (no self loop). Because we have the product already precomputed we then only need to divide by 'our' message
+// to get the correct product.
 void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const {
 
     // Calculate product of incoming messages and factor I
     for(const Neighbor &j: nbF(I)) {
         if( !(without_i && (j == i)) ) {
-
-            // TODO: the calculation in this loop got very cryptic.
-            // One might want to have some explanations at some point...
-
             // The message that should not go into the product is the one from that
             // node that that message will be sent to. Conveniently, the value is
             // already available: j.dual.
@@ -215,13 +224,25 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
                 // And multiply it with the target.
                 prod._p[r] *= prod_jk;
 
+                // TODO: Can we remove this?
                 // This is a hack to handle issues with precision.
-                //if (normalize) prod.normalize();
+                // if (normalize) prod.normalize();
             }
         }
     }
 }
 
+// We want to marginalize over our matrix in two directions (horizontal and vertical).
+// Assume our matrix layout is the following:
+//
+// a1 a2 -> c1
+// a3 a4 -> c2
+//  |  |
+//  v  v
+// b1  b2
+//
+// This means we want to add the first two to c1 (1->0, 2->0) and the next two to c2 (3->1, 4->1) which gives us
+// our first pattern 0011. Then we want to add (1->0, 2->1) and (3->0, 4->1) which gives us our second pattern 0101.
 void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t _I)
 {
     MessageType &marg = newMessage(i,_I);
@@ -229,6 +250,7 @@ void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t
     // Calculate marginal AND normalize probability.
     // Avoid the indirect lookup via ind_t if possible.
     switch (_edges[i][_I].index) {
+        // Check which case and do the marginalization (explained above) directly.
         case INDEX_0011: {
             const ProbProduct::value_type a = (prod._p[0]+prod._p[1]);
             const ProbProduct::value_type s = a + (prod._p[2]+prod._p[3]);
@@ -240,6 +262,8 @@ void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t
             marg = a/s;
         } break;
         default: {
+            // No idea what is going on here (maybe the matrix is not 2x2, let us do the slow approach).
+            // This will never happen with our graph structure.
             marg = 0;
             // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
             // corresponds x_i == ind[k]
@@ -265,24 +289,21 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     // load
     size_t I = _G.nb1(i)[_I].node;
 
-    // The following applies only rarely  (uV2New1: 50x, uNew1 and u1: 135x)
-    // TODO: investigate further, can this still be useful?
-    // UPDATE: image segmentation example doesn't converge if this "optimization"
-    // is removed. I don't fully get it though. NJU
-    if( _factors[I].vars().size() == 1 ) {    // optimization
+    // We check if we have a normal factor, or a special one (defined by the ratings of the current user)
+    if( I > props.specialFactors  -1 ) {
+        // special factor, let us copy the probability
         newMessage(i,_I) = _factors[I].p()[0];
     }
     else {
         // calculate updated message I->i
 
-        // The capacity of _prod is not changed here. malloc/free will be called
-        // very rarely. However, this can be further improved, because
-        //  _factors[I].p().size() cleanly toggles between 2 and 4:
+        // We have a standard factor, resize the prod and copy the values from factorsFixed.
         // TODO: create two containers _prod4 and _prod2 and cleverly call
         // calcNewMessage() with either one as argument.
-        if (_prod.size() != _factors[I].p().size())
-            _prod.resize(_factors[I].p().size());
-        std::copy(_factors[I].p().begin(), _factors[I].p().end(), _prod.begin());
+        _prod.resize(4);
+
+        // Use our precomputed version.
+        std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod.begin());
 
         // Calc the message product.
         DAI_LOG("calcNewMessage " << I << " <-> " << i);

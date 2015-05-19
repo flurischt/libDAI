@@ -100,6 +100,8 @@ class BP : public DAIAlgFG {
         // TODO: use std::vector<ProbProd> (for consistent notation)
         std::vector< std::vector<double> > _oldProd;
 
+        TProb<Real> _factorsFixed;
+
         // Storage container used in calcNewMessage that does not need to be
         // recreated each time. _prod.size() toggles between 2 and 4.
         // Use double precision!
@@ -168,6 +170,8 @@ class BP : public DAIAlgFG {
 
             /// Damping constant (0.0 means no damping, 1.0 is maximum damping)
             Real damping;
+
+            size_t specialFactors;
 
         } props;
 
