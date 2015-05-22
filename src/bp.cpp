@@ -100,8 +100,13 @@ void BP::construct() {
         _edge2lutNew[i].reserve( nbV(i).size() );
         for( const Neighbor &I : nbV(i) ) {
             EdgeProp newEP;
+#ifndef DAI_RECOMMENDER_BOOST
             newEP.message = Prob( var(i).states() );
             newEP.newMessage = Prob( var(i).states() );
+#else
+            newEP.message = 0;
+            newEP.newMessage = 0;
+#endif
 
             ind_t index;
             for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
@@ -144,12 +149,36 @@ void BP::construct() {
 
 
 void BP::init() {
-    Real c = 1.0;
+
+    // The initialization of the messages has a strong impact on the
+    // convergence. The value originally suggested by libDAI was c = 1.0.
+    // I consider this choice unnatural because it will lead to messages
+    // that don't sum up to 1. This seems wrong, because throughout
+    // the algorithm, messages are "normalized".
+    // Changing c to (e.g.) 0.5 leads to faster convergence: 40% less
+    // messages are required for example for the u1 dataset!
+    // For DAI_RECOMMENDER_BOOST, it is required to choose a value
+    // different from 1.0 - otherwise we run into problems with
+    // division by zero (as p[1] = 1-p[0] = 0)...
+    // The most appropriate choice seems to me the uniform distribution:
+    // c = (Real)1./message.size();
+    // Addendum: the observed faster convergence was observed only for
+    // single precision. Double precision behaves identical (in terms
+    // of number of messages processed).
+
+    //Real c = 1.0;
+    Real c = 0.5;
     for( size_t i = 0; i < nrVars(); ++i ) {
         for( const Neighbor &I : nbV(i) ) {
+#ifndef DAI_RECOMMENDER_BOOST
             message( i, I.iter ).fill( c );
             newMessage( i, I.iter ).fill( c );
             updateResidual( i, I.iter, 0.0 );
+#else
+            message( i, I.iter ) = c;
+            newMessage( i, I.iter ) = c;
+            updateResidual( i, I.iter, 0.0 );
+#endif
         }
     }
     _iters = 0;
@@ -194,11 +223,23 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
 
             // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
             const ind_t &ind = index(j, _I);
+#ifdef DAI_RECOMMENDER_BOOST
+            DAI_DEBASSERT(var(j).states() == 2);
+            Real message_0 = _edges[j][_I].message;
+            Real message_1 = (Real)1 - message_0;
+#endif
+
             for(size_t r = 0; r < prod.size(); ++r) {
 
                 // Let's divide by that message that should not go into the product.
                 // Calculate with double precision!
+#ifndef DAI_RECOMMENDER_BOOST
                 double prod_jk = _oldProd[j.node][ind[r]] / _edges[j][_I].message._p[ind[r]];
+#else
+                double prod_jk = (ind[r] == 0)
+                        ? _oldProd[j.node][0] / message_0
+                        : _oldProd[j.node][1] / message_1;
+#endif
 
                 // And multiply it with the target.
                 prod._p[r] *= prod_jk;
@@ -209,6 +250,96 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
         }
     }
 }
+
+#ifndef DAI_RECOMMENDER_BOOST
+void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t _I)
+{
+#ifdef DAI_SINGLE_PRECISION
+        MessageType &marg = newMessage(i,_I);
+        if (_marg.size() != marg.size())
+            _marg.resize(marg.size());
+
+        // Shortcut, to avoid code duplication. We are making use of the
+        // fact that m is always of type ProbD == ProbProduct!
+        // m <-- _marg = ProbProduct(newMessage(i, _I))
+        ProbProduct &m = _marg;
+#else
+        MessageType &marg = newMessage(i,_I);
+
+        // Shortcut, to avoid code duplication. We are making use of the
+        // fact that m is always of type ProbD == ProbProduct!
+        // m <-- marg = newMessage(i, _I)
+        ProbProduct &m = marg;
+#endif
+
+        // Calculate marginal AND normalize probability.
+        // Avoid the indirect lookup via ind_t if possible.
+        switch (_edges[i][_I].index) {
+            case INDEX_0011: {
+                const ProbProduct::value_type a = (prod._p[0]+prod._p[1]);
+                const ProbProduct::value_type s = a + (prod._p[2]+prod._p[3]);
+                m._p[0] = a/s;
+                m._p[1] = 1. - m._p[0];
+            } break;
+            case INDEX_0101: {
+                const ProbProduct::value_type a = (prod._p[0]+prod._p[2]);
+                const ProbProduct::value_type s = a + (prod._p[1]+prod._p[3]);
+                m._p[0] = a/s;
+                m._p[1] = 1. - m._p[0];
+            } break;
+            default: {
+                std::fill(m._p.begin(), m._p.end(), 0.0);
+                // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
+                // corresponds x_i == ind[k]
+                const ind_t& ind = index(i,_I);
+                for( size_t r = 0; r < prod.size(); ++r )
+                    m._p[ind[r]] += prod[r];
+                m.normalizeFast();
+            }
+        }
+
+#ifdef DAI_SINGLE_PRECISION
+        // Copy (and cast) from m to newMessage(i,_I);
+        std::copy(m._p.begin(), m._p.end(), marg._p.begin());
+#endif
+}
+#else
+void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t _I)
+{
+    MessageType &marg = newMessage(i,_I);
+
+    // Calculate marginal AND normalize probability.
+    // Avoid the indirect lookup via ind_t if possible.
+    switch (_edges[i][_I].index) {
+        case INDEX_0011: {
+            const ProbProduct::value_type a = (prod._p[0]+prod._p[1]);
+            const ProbProduct::value_type s = a + (prod._p[2]+prod._p[3]);
+            marg = a/s;
+        } break;
+        case INDEX_0101: {
+            const ProbProduct::value_type a = (prod._p[0]+prod._p[2]);
+            const ProbProduct::value_type s = a + (prod._p[1]+prod._p[3]);
+            marg = a/s;
+        } break;
+        default: {
+            marg = 0;
+            // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
+            // corresponds x_i == ind[k]
+            const ind_t& ind = index(i,_I);
+            ProbProduct::value_type a = 0.;
+            ProbProduct::value_type s = 0.;
+            for( size_t r = 0; r < prod.size(); ++r )
+            {
+                if (ind[r] == 0)
+                    a += prod[r];
+                s += prod[r];
+                DAI_ASSERT(ind[r] == 0 || ind[r] == 1);
+            }
+            marg = a/s;
+        }
+    }
+}
+#endif
 
 
 void BP::calcNewMessage( size_t i, size_t _I) {
@@ -221,9 +352,13 @@ void BP::calcNewMessage( size_t i, size_t _I) {
     // UPDATE: image segmentation example doesn't converge if this "optimization"
     // is removed. I don't fully get it though. NJU
     if( _factors[I].vars().size() == 1 ) {    // optimization
+#ifndef DAI_RECOMMENDER_BOOST
         std::copy(_factors[I].p().begin(),
                   _factors[I].p().end(),
                   newMessage(i,_I)._p.begin());
+#else
+        newMessage(i,_I) = _factors[I].p()[0];
+#endif
     }
     else {
         // calculate updated message I->i
@@ -246,58 +381,18 @@ void BP::calcNewMessage( size_t i, size_t _I) {
 #endif
 
         // Marginalize onto i
-#ifdef DAI_SINGLE_PRECISION
-        Prob &marg = newMessage(i,_I);
-        if (_marg.size() != marg.size())
-            _marg.resize(marg.size());
-
-        // Shortcut, to avoid code duplication. We are making use of the
-        // fact that m is always of type ProbD == ProbProduct!
-        // m <-- _marg = ProbProduct(newMessage(i, _I))
-        ProbProduct &m = _marg;
-#else
-        Prob &marg = newMessage(i,_I);
-
-        // Shortcut, to avoid code duplication. We are making use of the
-        // fact that m is always of type ProbD == ProbProduct!
-        // m <-- marg = newMessage(i, _I)
-        ProbProduct &m = marg;
-#endif
-
-        // Calculate marginal AND normalize probability.
-        // Avoid the indirect lookup via ind_t if possible.
-        switch (_edges[i][_I].index) {
-            case INDEX_0011: {
-                const ProbProduct::value_type a = (_prod._p[0]+_prod._p[1]);
-                const ProbProduct::value_type s = a + (_prod._p[2]+_prod._p[3]);
-                m._p[0] = a/s;
-                m._p[1] = 1. - m._p[0];
-            } break;
-            case INDEX_0101: {
-                const ProbProduct::value_type a = (_prod._p[0]+_prod._p[2]);
-                const ProbProduct::value_type s = a + (_prod._p[1]+_prod._p[3]);
-                m._p[0] = a/s;
-                m._p[1] = 1. - m._p[0];
-            } break;
-            default: {
-                std::fill(m._p.begin(), m._p.end(), 0.0);
-                // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
-                // corresponds x_i == ind[k]
-                const ind_t& ind = index(i,_I);
-                for( size_t r = 0; r < _prod.size(); ++r )
-                    m._p[ind[r]] += _prod[r];
-                m.normalizeFast();
-            }
-        }
-
-#ifdef DAI_SINGLE_PRECISION
-        // Copy (and cast) from ProbProduct to Prob.
-        std::copy(m._p.begin(), m._p.end(), marg._p.begin());
-#endif
+        marginalizeProductOntoMessage(_prod, i, _I);
     }
 
     // Update the residual if necessary
-    updateResidual( i, _I , distFast( newMessage( i, _I ), message( i, _I ) ) );
+#ifdef DAI_RECOMMENDER_BOOST
+    // Make use of the fact that message.size() == 2 and that
+    // the messages are normalized to 1.
+    Real r = std::abs( newMessage( i, _I ) - message( i, _I ) );
+#else
+    Real r = distFast( newMessage( i, _I ), message( i, _I ) );
+#endif
+    updateResidual( i, _I , r );
 }
 
 
@@ -385,26 +480,24 @@ Real BP::run() {
     // Print how the messages look like at the end of the calculation.
     for( size_t i = 0; i < nrVars(); ++i )
         for ( const Neighbor &I : nbV(i))
-            cout << message(i,I.iter);
+            cout << message(i,I.iter) << " ";
 #endif
 
     return maxDiff;
 }
 
 
-void BP::calcBeliefV( size_t i, Prob &p ) const {
+void BP::calcBeliefV( size_t i, ProbProduct &p ) const {
     p.resize(var(i).states());
     std::fill(p._p.begin(), p._p.end(), 1.0);
     for ( const Neighbor &I : nbV(i) )
     {
-        p *= newMessage( i, I.iter );
-
-#ifdef DAI_SINGLE_PRECISION
-        // To "save the precision" normalize in case of floats.
-        // (This function is not performance critical, so it's okay
-        // to normalize for every variable...)
-        if (sizeof(Prob::value_type) == sizeof(float))
-            p.normalize();
+#ifndef DAI_RECOMMENDER_BOOST
+        for (size_t j=0; j<p.size(); ++j)
+            p._p[j] *= newMessage( i, I.iter )._p[j];
+#else
+        p._p[0] *= newMessage( i, I.iter );
+        p._p[1] *= ((Real)1-newMessage( i, I.iter ));
 #endif
     }
 }
@@ -416,7 +509,7 @@ Factor BP::beliefV( size_t i ) const {
 
     // Factor is created each time. Could be avoided...
     // Currently not a bottleneck, so no need to change InfAlg interface.
-    return( Factor( var(i), _probTemp ) );
+    return( Factor( var(i), Prob(_probTemp.begin(), _probTemp.end(), _probTemp.size()) ) );
 }
 
 
@@ -479,16 +572,22 @@ void BP::init( const VarSet &ns ) {
         size_t ni = findVar( *n );
         for( const Neighbor &I : nbV( ni ) ) {
             Real val = 1.0;
+#ifndef DAI_RECOMMENDER_BOOST
             message( ni, I.iter ).fill( val );
             newMessage( ni, I.iter ).fill( val );
             updateResidual( ni, I.iter, 0.0 );
+#else
+            message( ni, I.iter ) = val;
+            newMessage( ni, I.iter ) = val;
+            updateResidual( ni, I.iter, 0.0 );
+#endif
         }
     }
     _iters = 0;
     messageCount = 0;
 }
 
-
+#ifndef DAI_RECOMMENDER_BOOST
 void BP::updateMessage( size_t i, size_t _I ) {
     for (size_t j=0; j<_oldProd[i].size(); ++j) {
         _oldProd[i][j] =  _oldProd[i][j] / _edges[i][_I].message._p[j] * _edges[i][_I].newMessage._p[j];
@@ -506,8 +605,27 @@ void BP::updateMessage( size_t i, size_t _I ) {
         updateResidual( i, _I, distFast( newMessage(i,_I), message(i,_I) ) );
     }
 }
+#else
+void BP::updateMessage( size_t i, size_t _I ) {
 
-// TODO: Optimize: We are using a heap now but this is not faster then the multimap solution. So we might have to revert to it.
+    // Damping is not supported here.
+    DAI_DEBASSERT(props.damping == false);
+    DAI_DEBASSERT(_oldProd[i].size() == 2);
+
+    _oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
+    _oldProd[i][1] =  _oldProd[i][1] / (1. - _edges[i][_I].message) * (1. - _edges[i][_I].newMessage);
+
+    // Count message.
+    messageCount++;
+    if( recordSentMessages )
+        _sentMessages.push_back(make_pair(i,_I));
+    message(i,_I) = newMessage(i,_I);
+    updateResidual( i, _I, 0.0 );
+}
+#endif
+
+// TODO: Optimize: We are using a heap now but this is not faster then the
+// multimap solution. So we might have to revert to it.
 void BP::updateResidual( size_t i, size_t _I, Real r ) {
     EdgeProp* pEdge = &_edges[i][_I];
     pEdge->residual = r;
