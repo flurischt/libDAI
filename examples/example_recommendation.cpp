@@ -69,7 +69,7 @@ FactorGraph example2fg() {
 }
 
 
-pair<size_t, Real> doInference(FactorGraph &fg,
+tuple<size_t, Real, long> doInference(FactorGraph &fg,
                                  const string &options,
                                  size_t maxIter,
                                  Real tol,
@@ -133,7 +133,7 @@ pair<size_t, Real> doInference(FactorGraph &fg,
     // Clean up inference algorithm
 
     // Return num of iterations and reached convergence level
-    return make_pair(++iter, maxDiff);
+    return make_tuple(++iter, maxDiff, bp.messageCount);
 }
 
 // vector of users, containing a vector of ratings. Each rating consists of a movie id (first) and the rating (second)
@@ -300,11 +300,12 @@ int main(int argc, char **argv) {
     cout << "reading " << dataset << ".base now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings(dataset + ".base");
     vector<vector<pair<int, int> > > test_data = extract_ratings(dataset + ".test");
-    const int N = 1;
+    const int N = 10;
     Real p10 = 0;
     Real p20 = 0;
     Real r10 = 0;
     Real r20 = 0;
+    long messages = 0;
     long measured_cycles = 0;
     Timer timer;
     vector<long> measurements;
@@ -324,10 +325,10 @@ int main(int argc, char **argv) {
             cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
 
             timer.tic();
-            pair<size_t, Real> result = doInference(fg, options, maxiter, tol, m);
+            tuple<size_t, Real, long> result = doInference(fg, options, maxiter, tol, m);
             measured_cycles += timer.toc();
 
-            cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
+            cout << "Iterations = " << get<0>(result) << ", maxDiff = " << get<1>(result) << ", messages = " << get<2>(result) << endl;
 
             // Debug output with all the values:
             // for (size_t i = 0; i < m.size(); ++i) {
@@ -360,6 +361,7 @@ int main(int argc, char **argv) {
             p20 +=  pr20.first;
             r10 +=  pr10.second;
             r20 +=  pr20.second;
+            messages += get<2>(result);
             cout << "Precision (N=10): " << pr10.first << endl;
             cout << "Precision (N=20): " << pr20.first << endl;
             cout << "Recall (N=10): " << pr10.second << endl;
@@ -380,6 +382,7 @@ int main(int argc, char **argv) {
     cout << "Recall (N=20): " << r20 << endl;
     cout << "Ran " << num_measurements << " times.\nMedian:" << endl;
     cout << "Measured cycles: " << measured_cycles << endl;
+    cout << "Average number of messages: " << messages / N << endl;
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
     return 0;
 }
