@@ -65,7 +65,10 @@ FactorGraph example2fg() {
 
     // Create the factor graph out of the variables and factors
     cout << "Creating the factor graph..." << endl;
-    return FactorGraph(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
+    FactorGraph fg(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
+    string fileName = "factorGraphExampleOut.dot";
+    fg.WriteToFile(fileName.c_str(), 0.01);
+    return fg;
 }
 
 
@@ -73,7 +76,8 @@ pair<size_t, Real> doInference(FactorGraph &fg,
                                  const string &options,
                                  size_t maxIter,
                                  Real tol,
-                                 vector<Real> &m) {
+                                 vector<Real> &m,
+                                 size_t specialFactors) {
     BP bp(fg, options);
 
     // Choose here whether message recording should be enabled or not.
@@ -85,6 +89,8 @@ pair<size_t, Real> doInference(FactorGraph &fg,
     props.set("maxtime", (Real)   INFINITY);
     props.set("tol",     (Real)   tol);
     props.set("verbose", (size_t) 0);
+    props.set("specialFactors", (size_t) specialFactors);
+
     bp.setProperties(props);
 
     cout << "Properties: " << bp.printProperties() << endl;
@@ -167,7 +173,7 @@ vector<vector<pair<int, int> > > extract_ratings(string file_name) {
 }
 
 
-FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
+FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user, size_t& specialFactors) {
     // We will create a variable for every potential user/movie. We know the number of users, let us estimate the number of movies.
     int num_users = votings.size();
     int num_movies = 0;
@@ -198,6 +204,8 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user) {
             }
         }
     }
+    specialFactors = factors.size();
+
     cout << "Factors created. Dealing with the user now..." << endl;
     // calculate some metrics for the user.
     int normalization_factor_p = 4;
@@ -258,7 +266,7 @@ pair<Real, Real> getPrecisionAndRecall(const vector<vector<pair<int, int> > > &t
 }
 
 // compares the calculated ratings to the reference file
-void verify_results(const string dataset, const Real delta, vector<pair<Real, int>> ratings){
+void verify_results(const string dataset, const Real delta, vector<pair<Real, int>>& ratings){
     ifstream fin;
     string file_name = dataset + ".reference";
     fin.open(file_name.c_str(), ifstream::in);
@@ -319,14 +327,16 @@ int main(int argc, char **argv) {
         for (int user=0; user<N; ++user) {
             cout << "building factor graph for user " << user+1 << " out of " << N << endl;
             //FactorGraph fg  = example2fg();
-            FactorGraph fg = data2fg(input_data, user);
+            size_t specialFactors = -1;
+            FactorGraph fg = data2fg(input_data, user, specialFactors);
+
             vector<Real> m; // Stores the final recommendations
             cout << "Inference algorithm: BP. Options: " << options << endl;
             cout << "Solving the inference problem...please be patient!" << endl;
             cout << "Note: There's no output during the inference. You may have to wait a bit..." << endl;
 
             timer.tic();
-            pair<size_t, Real> result = doInference(fg, options, maxiter, tol, m);
+            pair<size_t, Real> result = doInference(fg, options, maxiter, tol, m, specialFactors);
             measured_cycles += timer.toc();
 
             cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
@@ -341,7 +351,7 @@ int main(int argc, char **argv) {
                 // push back the negative so we can use the standard sorting.
                 ratings.push_back(make_pair<Real, int>(-m[i], i - input_data.size() + 1));
             }
-
+            cout << "RatingsSize" << ratings.size() << endl;
             if(output_ratings && run == num_measurements -1) {
                 // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
                 // you can create a reference file the following way:

@@ -2,17 +2,10 @@
 
 namespace dai {
 
-#ifndef DAI_RECOMMENDER_BOOST
-#   define MESSAGE0(j,_I) (_edges[j][_I].message._p[0])
-#   define MESSAGE1(j,_I) (_edges[j][_I].message._p[1])
-#   define OLDPROD0(j)    (_oldProd[j][0])
-#   define OLDPROD1(j)    (_oldProd[j][1])
-#else
-#   define MESSAGE0(j,_I) (_edges[j][_I].message)
-#   define MESSAGE1(j,_I) (1. - _edges[j][_I].message)
-#   define OLDPROD0(j)    (_oldProd[j][0])
-#   define OLDPROD1(j)    (_oldProd[j][1])
-#endif
+#define MESSAGE0(j,_I) (_edges[j][_I].message)
+#define MESSAGE1(j,_I) (1. - _edges[j][_I].message)
+#define OLDPROD0(j)    (_oldProd[j][0])
+#define OLDPROD1(j)    (_oldProd[j][1])
 
 void BP::calcIncomingMessageProduct_0011(BP::ProbProduct &prod, size_t I) const
 {

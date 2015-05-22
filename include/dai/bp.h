@@ -75,11 +75,7 @@ class BP : public DAIAlgFG {
         /// Type used for index cache
         typedef std::vector<size_t> ind_t;
         /// Type used for storing edge properties
-#ifdef DAI_RECOMMENDER_BOOST
         typedef Real MessageType;
-#else
-        typedef Prob MessageType;
-#endif
         struct EdgeProp {
             /// Index cached for this edge
             size_t      index;
@@ -103,6 +99,8 @@ class BP : public DAIAlgFG {
         // Use double precision!
         // TODO: use std::vector<ProbProd> (for consistent notation)
         std::vector< std::vector<double> > _oldProd;
+
+        TProb<Real> _factorsFixed;
 
         // Storage container used in calcNewMessage that does not need to be
         // recreated each time. _prod.size() toggles between 2 and 4.
@@ -172,6 +170,8 @@ class BP : public DAIAlgFG {
 
             /// Damping constant (0.0 means no damping, 1.0 is maximum damping)
             Real damping;
+
+            size_t specialFactors;
 
         } props;
 

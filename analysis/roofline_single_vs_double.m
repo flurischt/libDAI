@@ -48,7 +48,7 @@ opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
 loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b030 single precision'},'VerticalAlignment','top','HorizontalAlignment', 'right');
+text(opsCycle,intensity,{' b030 float'},'VerticalAlignment','top','HorizontalAlignment', 'right');
 
 %% b030 double precision
 cycles = 62842094263;
@@ -64,7 +64,7 @@ opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
 loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b030 double precision'},'VerticalAlignment','top');
+text(opsCycle,intensity,{' b030 double'},'VerticalAlignment','top');
 
 %% b032 single precision repeated
 cycles = 54856082284;
@@ -80,7 +80,7 @@ opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
 loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b032 single precision (N=10)'},'VerticalAlignment','top');
+text(opsCycle,intensity,{' b032 float (N=10)'},'VerticalAlignment','top');
 
 %% b032 single precision repeated with DAI_RECOMMENDER_BOOST
 cycles = 5796008694;
@@ -96,7 +96,7 @@ opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
 loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b032 single precision (N=10, BOOST)'},'VerticalAlignment','bottom','HorizontalAlignment','center');
+text(opsCycle,intensity,{' b032 float (N=10, BOOST)'},'VerticalAlignment','bottom','HorizontalAlignment','center');
 
 %% b032 double precision
 cycles = 63334095001;
@@ -112,7 +112,7 @@ opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
 loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b032 double precision'},'VerticalAlignment','top');
+text(opsCycle,intensity,{' b032 double'},'VerticalAlignment','top');
 
 %%
 set(gca,'XScale','log')
