@@ -428,8 +428,10 @@ Factor BP::beliefV( size_t i ) const {
 Factor BP::beliefF( size_t I ) const {
     Factor fac( factor(I) );
     Prob &p = fac.p();
-    calcBeliefF( I, p );
-    p.normalize();
+    ProbProduct pd(p.begin(), p.end(), p.size());
+    calcBeliefF( I, pd );
+    pd.normalize();
+    std::copy(pd.begin(), pd.end(), p.begin());
     return fac;
 }
 
