@@ -382,6 +382,7 @@ int main(int argc, char **argv) {
     cout << "Recall (N=20): " << r20 << endl;
     cout << "Ran " << num_measurements << " times.\nMedian:" << endl;
     cout << "Measured cycles: " << measured_cycles << endl;
+    cout << "Total number of messages: " << messages << endl;
     cout << "Average number of messages: " << messages / N << endl;
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
     return 0;
