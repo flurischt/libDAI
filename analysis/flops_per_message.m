@@ -7,6 +7,19 @@ builds = {};
 % number of flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
 %                   FP_COMP_OPS_EXE.SSE_SCALAR_SINGLE + 
 %                   FP_COMP_OPS_EXE.X87
+%% B003 [Baseline] doubles, N=1
+% -O3 -g
+num_messages = 442075;
+num_flops = 13974020961 + 0 + 2334003501;
+num_cycles = 355138532707; % reported by vTune
+num_cycles_print = 358095519066; % reported by the program itself
+runtime_sec = 107.862;
+bandwidth_GB_sec = 1.597;
+
+data = [data;data_points, num_flops/num_messages];
+data_points = data_points + 1;
+builds = [builds, {'Baseline'}];
+
 %% B030 floats, N=10
 % -O3 -g
 num_messages = 884068;
