@@ -32,7 +32,7 @@ for c in $COMMITS; do
     cd examples/
 
     cp $TEST_FILES/* .
-    ./example_recommendation -dataset 32MoviesUID1 -numMeasurements 7 > $RESULT_DIR/${c}_32MoviesUID1.txt
-    ./example_recommendation -dataset 512MoviesUID1 -numMeasurements 7 > $RESULT_DIR/${c}_512MoviesUID1.txt
-    ./example_recommendation -dataset ml100kfull -numMeasurements 7 > $RESULT_DIR/${c}_ml100kfull.txt
+    ./example_recommendation -dataset 32MoviesUID1 -numMeasurements 7 -cpufreq 2300000000 > $RESULT_DIR/${c}_32MoviesUID1.txt
+    ./example_recommendation -dataset 512MoviesUID1 -numMeasurements 7 -cpufreq 2300000000 > $RESULT_DIR/${c}_512MoviesUID1.txt
+    ./example_recommendation -dataset ml100kfull -numMeasurements 7 -cpufreq 2300000000 > $RESULT_DIR/${c}_ml100kfull.txt
 done
