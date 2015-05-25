@@ -1,0 +1,357 @@
+commit fa8a10d2535c4ceacb819f5559af7ca28595f16f
+Author: Flurin Rindisbacher <info@flurischt.ch>
+Date:   Fri Apr 24 15:54:18 2015 +0200 
+Measured cycles: 149064403850
+Runtime: 64.8106 seconds
+
+commit ee10c7f8b7d30f3af68088eab9c18de4668f126a
+Author: Flurin Rindisbacher <info@flurischt.ch>
+Date:   Sat Apr 25 15:17:52 2015 +0200
+    run measurements several times and report median 
+Ran 7 times.
+Median:
+Measured cycles: 148547987642
+Runtime: 64.5861 seconds
+
+commit a62b7f3212045c5753c3c709e01dd8a3591b3360
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Tue Apr 28 16:26:12 2015 +0200
+    New reference files and validation method (before sorting) 
+Ran 7 times.
+Median:
+Measured cycles: 150244016240
+Runtime: 65.3235 seconds
+
+commit f530c477d753a1eb0b8223e0839c9b6b6e32b794
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Tue Apr 28 17:27:53 2015 +0200
+    [NOT AN IMPROVEMENT]: Using boosts fibonacci heap instead of map insert/erase. This does not help decrease the runtime but we want to have this in our version history for completeness sake. 
+Ran 7 times.
+Median:
+Measured cycles: 170549012498
+Runtime: 74.1517 seconds
+
+commit f167ea14bf2b4b6ec3994658e38bd20ac2e4064e
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Wed Apr 29 14:25:07 2015 +0200
+    Using a pairing heap seems to be almost as good as to delete/insert into a Multimap. Updated the code to use this type of heap instead of the Fibonacci heap. 
+Ran 7 times.
+Median:
+Measured cycles: 157862730681
+Runtime: 68.636 seconds
+
+commit 11ff29da7e597cd8e79cae8ad5af0ab3c8a2af16
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Sat May 2 02:56:18 2015 +0200
+    Instead of calculating the incomingMessageProduct every time we now compute it once and update it whenever a message changes. This allows us to get rid of the inner most loop, significantly improving performance as well as possibilities for further optimizations. This optimization should be applicable to every graph structure and might be interesting for the original library. 
+Ran 7 times.
+Median:
+Measured cycles: 100082235536
+Runtime: 43.514 seconds
+
+commit eec5859a0dced6cd06d149a5922b5c88f62bf873
+Merge: 11ff29d 47fae0a
+Author: normanius <normanius@gmail.com>
+Date:   Sat May 2 13:01:31 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 102126863334
+Runtime: 44.403 seconds
+
+commit 6d75cc883be69980db3dc116c2693007fc6dfadb
+Merge: eec5859 ecac8c5
+Author: normanius <normanius@gmail.com>
+Date:   Sat May 2 22:08:55 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 100359135544
+Runtime: 43.6344 seconds
+
+commit 043e0371166481769214ad5639431dfcafe9b51a
+Merge: 6d75cc8 7ad1707
+Author: normanius <normanius@gmail.com>
+Date:   Sat May 2 22:45:36 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 102288067896
+Runtime: 44.4731 seconds
+
+commit 8e6729bf9610287257be34abf8034d10a78b309d
+Merge: 043e037 0c56a78
+Author: normanius <normanius@gmail.com>
+Date:   Sat May 2 23:34:06 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 89265198342
+Runtime: 38.811 seconds
+
+commit 2359214cd219fcf4eeb486285090c9b861c16da4
+Merge: 8e6729b 0b66612
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 00:48:00 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 85670578762
+Runtime: 37.2481 seconds
+
+commit e111a89a9d20aedb1d9e597f2f728a2d6beeac12
+Merge: 2359214 6ed96a1
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 01:32:10 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 84191941106
+Runtime: 36.6052 seconds
+
+commit 561cca3b2999962055786febee03581b465afaf1
+Merge: c593b53 e58df0b
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 01:55:26 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 70983324810
+Runtime: 30.8623 seconds
+
+commit 38ac1a2248dd1e29ad8a73fbbc8146f3966891cd
+Merge: 10e53c3 561cca3
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Sun May 3 02:15:34 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 71397129946
+Runtime: 31.0422 seconds
+
+commit b2e2062ca90b3971bf2b16e37160e6fd264f8ab6
+Merge: 38ac1a2 41f7c60
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 02:25:34 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 68107070738
+Runtime: 29.6118 seconds
+
+commit be440f5e5f7e1acc5b035b30f208617bdc1c6d95
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Sun May 3 03:18:03 2015 +0200
+    Nitpick: Only retrieve j.dual once and then reuse it. 
+Ran 7 times.
+Median:
+Measured cycles: 66923057536
+Runtime: 29.097 seconds
+
+commit 9c7445da0ceda309c5ae0751527e652856c02ce3
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 13:32:20 2015 +0200
+    Had to undo commit 4ab1dd0 as the image segmentation example doesn't converge correctly anymore. I don't expect any noticeable impact on performance. 
+Ran 7 times.
+Median:
+Measured cycles: 56752581604
+Runtime: 24.675 seconds
+
+commit 033258043f1b25aae1f6869db7813106fbdabbe1
+Merge: 9c7445d 971b76a
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 14:06:11 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 61246920742
+Runtime: 26.6291 seconds
+
+commit 1f2564395ea1f2510c12d8f273c1b1c7160f4adf
+Merge: 0332580 610ee59
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 3 14:21:46 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 61210244144
+Runtime: 26.6131 seconds
+
+commit d117265c117473d81dea7e91078c46870288d18a
+Merge: 1f25643 7ee223f
+Author: normanius <normanius@gmail.com>
+Date:   Mon May 4 00:01:41 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 55872539702
+Runtime: 24.2924 seconds
+
+commit aa882dc2e40514f176d411a3a2f237b197b45418
+Merge: d117265 15ee09b
+Author: normanius <normanius@gmail.com>
+Date:   Mon May 4 00:48:54 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 57139302188
+Runtime: 24.8432 seconds
+
+commit 34467fdef95afc2e21ad5402b8762a0f4e84f23c
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Tue May 5 14:50:32 2015 +0200
+    Added Roofline plot and Matlab script to repository. 
+Ran 7 times.
+Median:
+Measured cycles: 56329806530
+Runtime: 24.4912 seconds
+
+commit c1001306c0b13fe86a121c42dbce22dea2865190
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Tue May 5 17:48:16 2015 +0200
+    Added performance plot for build 21. 
+Ran 7 times.
+Median:
+Measured cycles: 56692734844
+Runtime: 24.649 seconds
+
+commit ba917f58379acdeeec6c22a0a8131b79da794488
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Tue May 5 18:10:38 2015 +0200
+    Corrected mistake in performance plot. Added an operations / cycle plot. 
+Ran 7 times.
+Median:
+Measured cycles: 56410334976
+Runtime: 24.5262 seconds
+
+commit bbbf2f0475dad2bc8b5a1bafd3c6e129a007d957
+Author: Flurin Rindisbacher <info@flurischt.ch>
+Date:   Tue May 5 18:48:23 2015 +0200
+    NOT PERFORMANCE RELEVANT: add CMakeLists.txt for generateMovieData 
+Ran 7 times.
+Median:
+Measured cycles: 57433303798
+Runtime: 24.971 seconds
+
+commit af7e70c37d474798ff4d41934ef5e467c6a05667
+Author: normanius <normanius@gmail.com>
+Date:   Tue May 5 18:59:47 2015 +0200
+    Nicify plots and print them with better quality. 
+Ran 7 times.
+Median:
+Measured cycles: 57057207212
+Runtime: 24.8075 seconds
+
+commit 619a04c8fe721fd50f8272e48ec8625d251975d3
+Author: normanius <normanius@gmail.com>
+Date:   Thu May 14 00:34:28 2015 +0200
+    Introduce a messageCount and display the number of messages processed at the end of the inference. 
+Ran 7 times.
+Median:
+Measured cycles: 54283955460
+Runtime: 23.6017 seconds
+
+commit 2a1fd1242c45ebb042706f5a34c6222e498cf263
+Merge: 619a04c b0cf84b
+Author: normanius <normanius@gmail.com>
+Date:   Fri May 15 15:13:22 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 56529132200
+Runtime: 24.5779 seconds
+
+commit 0130ff9579dc15470fb06f0057b621fb6bcaf75b
+Merge: 2a1fd12 4af65f2
+Author: normanius <normanius@gmail.com>
+Date:   Sat May 16 00:12:39 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 62672798384
+Runtime: 27.249 seconds
+
+commit 0130ff9579dc15470fb06f0057b621fb6bcaf75b
+Merge: 2a1fd12 4af65f2
+Author: normanius <normanius@gmail.com>
+Date:   Sat May 16 00:12:39 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 50355396398
+Runtime: 21.8937 seconds
+
+commit 38c66399fc5dc979469a99bfe1473f1b74185b79
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Sun May 17 09:22:52 2015 +0200
+    Roofline comparison between single and double precision. 
+Ran 7 times.
+Median:
+Measured cycles: 50495039108
+Runtime: 21.9544 seconds
+
+commit b1c906e25029ee4ab4fb080b0234e096c508890e
+Merge: 38c6639 78d9540
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 17 16:01:15 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 47841114086
+Runtime: 20.8005 seconds
+
+commit 6d0a39f1d886aa0e936427ca09d68a0c31f4e757
+Merge: b1c906e 0e4c1cd
+Author: normanius <normanius@gmail.com>
+Date:   Sun May 17 22:51:31 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 43679163480
+Runtime: 18.9909 seconds
+
+commit fb9a39dd988c1e4f068596c961878760c2141b28
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Mon May 18 19:07:29 2015 +0200
+    Updated roofline measurement for b032. 
+Ran 7 times.
+Median:
+Measured cycles: 43849780482
+Runtime: 19.0651 seconds
+
+commit 0bac085566f8cf54bc4620e5bf85ee95916196f5
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Mon May 18 21:41:06 2015 +0200
+    Updated Roofline Plot for DAI_RECOMMENDER_BOOST. 
+Ran 7 times.
+Median:
+Measured cycles: 44569931836
+Runtime: 19.3782 seconds
+
+commit 8d83fe95c1c659e5cf875bd55d45d01085e39d11
+Merge: 0bac085 6f9813c
+Author: normanius <normanius@gmail.com>
+Date:   Tue May 19 00:57:02 2015 +0200 
+Ran 7 times.
+Median:
+Measured cycles: 23689647414
+Runtime: 10.2998 seconds
+
+commit 2b3aed43e3375d47ce3d80f30816cf25aac4a26e
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Tue May 19 15:04:58 2015 +0200
+    Removed IfDef to make the code more readable. If you need it, feel free to look at the Git History (Sorry Norman) 
+Ran 7 times.
+Median:
+Measured cycles: 20506435464
+Runtime: 8.91584 seconds
+
+commit 5491a748f47cd7af664a5eeb2f2446b8572692e0
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Tue May 19 16:00:45 2015 +0200
+    Nicify plot. 
+Ran 7 times.
+Median:
+Measured cycles: 23760966068
+Runtime: 10.3309 seconds
+
+commit 768968e8fa30913c5b859f3e413e555a6e9ffc0e
+Author: Frederik Rothenberger <frothenb@student.ethz.ch>
+Date:   Tue May 19 16:20:21 2015 +0200
+    Cleaned up forgotten ifdef. 
+Ran 7 times.
+Median:
+Measured cycles: 23146355110
+Runtime: 10.0636 seconds
+
+commit 0e9eb711cf65e352a83c3a86fb2058b4c241f1ef
+Author: Sylvus <eliass@student.ethz.ch>
+Date:   Tue May 19 16:37:10 2015 +0200
+    Updated code to deal with normal and special factors (optimize memory by not accessing the normal factors and instead use a fixedFactor). 
+Ran 7 times.
+Median:
+Measured cycles: 17747056478
+Runtime: 7.71611 seconds
+
