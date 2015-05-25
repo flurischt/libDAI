@@ -411,6 +411,7 @@ void BP::calcBeliefV( size_t i, ProbProduct &p ) const {
     {
         p._p[0] *= newMessage( i, I.iter );
         p._p[1] *= ((Real)1-newMessage( i, I.iter ));
+        p.normalizeFast();
     }
 }
 
