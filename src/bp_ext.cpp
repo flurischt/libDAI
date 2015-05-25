@@ -69,7 +69,7 @@ void BP::calcIncomingMessageProduct_01(BP::ProbProduct &prod, size_t I) const
     }
 }
 
-void BP::calcIncomingMessageProduct_0101_0011(BP::ProbProduct &prod, size_t I, size_t i) const
+void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const
 {
     const Neighbors& n = nbF(I);
     DAI_ASSERT(nbF(I).size() == 2);
@@ -90,10 +90,10 @@ void BP::calcIncomingMessageProduct_0101_0011(BP::ProbProduct &prod, size_t I, s
         const ProbProduct::value_type r_m0 = 1. / MESSAGE0(n0,_I0);
         const ProbProduct::value_type r_m1 = 1. / MESSAGE1(n0,_I0);
 
-        prod._p[0] *= OLDPROD0(n0) * r_m0;
-        prod._p[1] *= OLDPROD1(n0) * r_m1;
-        prod._p[2] *= OLDPROD0(n0) * r_m0;
-        prod._p[3] *= OLDPROD1(n0) * r_m1;
+        prod[0] *= OLDPROD0(n0) * r_m0;
+        prod[1] *= OLDPROD1(n0) * r_m1;
+        prod[2] *= OLDPROD0(n0) * r_m0;
+        prod[3] *= OLDPROD1(n0) * r_m1;
     }
 
     const size_t _I1 = n[1].dual;
@@ -111,10 +111,10 @@ void BP::calcIncomingMessageProduct_0101_0011(BP::ProbProduct &prod, size_t I, s
         const ProbProduct::value_type r_m0 = 1. / MESSAGE0(n1,_I1);
         const ProbProduct::value_type r_m1 = 1. / MESSAGE1(n1,_I1);
 
-        prod._p[0] *= OLDPROD0(n1) * r_m0;
-        prod._p[1] *= OLDPROD0(n1) * r_m0;
-        prod._p[2] *= OLDPROD1(n1) * r_m1;
-        prod._p[3] *= OLDPROD1(n1) * r_m1;
+        prod[0] *= OLDPROD0(n1) * r_m0;
+        prod[1] *= OLDPROD0(n1) * r_m0;
+        prod[2] *= OLDPROD1(n1) * r_m1;
+        prod[3] *= OLDPROD1(n1) * r_m1;
     }
 }
 

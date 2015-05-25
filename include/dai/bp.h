@@ -105,7 +105,7 @@ class BP : public DAIAlgFG {
         // Storage container used in calcNewMessage that does not need to be
         // recreated each time. _prod.size() toggles between 2 and 4.
         // Use double precision!
-        ProbProduct _prod;
+        double _prod[4];
 #ifdef DAI_SINGLE_PRECISION
         ProbProduct _marg;
 #endif
@@ -323,9 +323,9 @@ class BP : public DAIAlgFG {
         void calcIncomingMessageProduct_0011(ProbProduct &prod, size_t I) const;
         void calcIncomingMessageProduct_0101(ProbProduct &prod, size_t I) const;
         void calcIncomingMessageProduct_01(ProbProduct &prod, size_t I) const;
-        void calcIncomingMessageProduct_0101_0011(ProbProduct &prod, size_t I, size_t i) const;
+        void calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const;
 
-        void marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t _I);
+        void marginalizeProductOntoMessage(const double* prod, size_t i, size_t _I, size_t prodsize);
 
         static const int INDEX_0011      = 0;
         static const int INDEX_0101      = 1;

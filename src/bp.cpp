@@ -243,7 +243,7 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
 //
 // This means we want to add the first two to c1 (1->0, 2->0) and the next two to c2 (3->1, 4->1) which gives us
 // our first pattern 0011. Then we want to add (1->0, 2->1) and (3->0, 4->1) which gives us our second pattern 0101.
-void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t _I)
+void BP::marginalizeProductOntoMessage(const double* prod, size_t i, size_t _I, size_t prodsize)
 {
     MessageType &marg = newMessage(i,_I);
 
@@ -252,13 +252,13 @@ void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t
     switch (_edges[i][_I].index) {
         // Check which case and do the marginalization (explained above) directly.
         case INDEX_0011: {
-            const ProbProduct::value_type a = (prod._p[0]+prod._p[1]);
-            const ProbProduct::value_type s = a + (prod._p[2]+prod._p[3]);
+            const ProbProduct::value_type a = (prod[0]+prod[1]);
+            const ProbProduct::value_type s = a + (prod[2]+prod[3]);
             marg = a/s;
         } break;
         case INDEX_0101: {
-            const ProbProduct::value_type a = (prod._p[0]+prod._p[2]);
-            const ProbProduct::value_type s = a + (prod._p[1]+prod._p[3]);
+            const ProbProduct::value_type a = (prod[0]+prod[2]);
+            const ProbProduct::value_type s = a + (prod[1]+prod[3]);
             marg = a/s;
         } break;
         default: {
@@ -270,7 +270,7 @@ void BP::marginalizeProductOntoMessage(const ProbProduct &prod, size_t i, size_t
             const ind_t& ind = index(i,_I);
             ProbProduct::value_type a = 0.;
             ProbProduct::value_type s = 0.;
-            for( size_t r = 0; r < prod.size(); ++r )
+            for( size_t r = 0; r < prodsize; ++r )
             {
                 if (ind[r] == 0)
                     a += prod[r];
@@ -300,17 +300,17 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         // We have a standard factor, resize the prod and copy the values from factorsFixed.
         // TODO: create two containers _prod4 and _prod2 and cleverly call
         // calcNewMessage() with either one as argument.
-        _prod.resize(4);
+        //_prod.resize(4);
 
         // Use our precomputed version.
-        std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod.begin());
+        std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod);
 
         // Calc the message product.
         DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
         calcIncomingMessageProduct_0101_0011(_prod, I, i);
         // Marginalize onto i
-        marginalizeProductOntoMessage(_prod, i, _I);
+        marginalizeProductOntoMessage(_prod, i, _I, 4);
     }
 
     // Update the residual if necessary
