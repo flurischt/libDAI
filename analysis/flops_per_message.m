@@ -74,7 +74,7 @@ builds = [builds, {'B042'}];
 figure; hold on; grid on;
 plot(data(:,1), data(:,2));
 title('Flops per Message');
-xlabel('Build Number')
+xlabel('Build')
 ylabel('[flops/message]')
 set(gca,'XTick',0:1:(data_points-1));
 set(gca,'XTickLabel',builds);
