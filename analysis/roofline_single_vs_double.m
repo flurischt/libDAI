@@ -3,7 +3,7 @@ hold on; grid on
 x = logspace(-3,0);
 
 
-bytesCycle = 4.2;
+bytesCycle = 4;
 % flops / cycle
 peakPerf = 2;
 oneOpCycle = 1;
@@ -31,8 +31,10 @@ bandwidthCycle = bytes/cycles;
 opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
-loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+%loglog(opsCycle, intensity, 'ob');
+%text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+loglog(intensity, opsCycle, 'ob');
+text(intensity,opsCycle,{' b003 baseline'},'VerticalAlignment','bottom');
 
 %% b030 single precision
 cycles = 6100009150;
@@ -47,9 +49,10 @@ bandwidthCycle = bytes/cycles;
 opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
-loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b030 float'},'VerticalAlignment','top','HorizontalAlignment', 'right');
-
+%loglog(opsCycle, intensity, 'ob');
+%text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+loglog(intensity, opsCycle, 'ob');
+text(intensity,opsCycle,{' b030 float'},'VerticalAlignment','bottom');
 %% b030 double precision
 cycles = 62842094263;
 % #total flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
@@ -63,9 +66,10 @@ bandwidthCycle = bytes/cycles;
 opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
-loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b030 double'},'VerticalAlignment','top');
-
+%loglog(opsCycle, intensity, 'ob');
+%text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+loglog(intensity, opsCycle, 'ob');
+text(intensity,opsCycle,{' b030 double'},'VerticalAlignment','bottom');
 %% b032 single precision repeated
 cycles = 54856082284;
 % #total flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
@@ -79,9 +83,10 @@ bandwidthCycle = bytes/cycles;
 opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
-loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b032 float (N=10)'},'VerticalAlignment','top');
-
+%loglog(opsCycle, intensity, 'ob');
+%text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+loglog(intensity, opsCycle, 'ob');
+text(intensity,opsCycle,{' b032 float'},'VerticalAlignment','bottom');
 %% b032 single precision repeated with DAI_RECOMMENDER_BOOST
 cycles = 5796008694;
 % #total flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
@@ -95,9 +100,10 @@ bandwidthCycle = bytes/cycles;
 opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
-loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b032 float (N=10, BOOST)'},'VerticalAlignment','bottom','HorizontalAlignment','center');
-
+%loglog(opsCycle, intensity, 'ob');
+%text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+loglog(intensity, opsCycle, 'ob');
+text(intensity,opsCycle,{' b032 float BOOST'},'VerticalAlignment','bottom');
 %% b032 double precision
 cycles = 63334095001;
 % #total flops = FP_COMP_OPS_EXE.SSE_SCALAR_DOUBLE +
@@ -111,13 +117,14 @@ bandwidthCycle = bytes/cycles;
 opsCycle = flops/cycles;
 intensity = opsCycle/bandwidthCycle;
 
-loglog(opsCycle, intensity, 'ob');
-text(opsCycle,intensity,{' b032 double'},'VerticalAlignment','top');
-
+%loglog(opsCycle, intensity, 'ob');
+%text(opsCycle,intensity,{' b003 baseline'},'VerticalAlignment','bottom');
+loglog(intensity, opsCycle, 'ob');
+text(intensity,opsCycle,{' b032 double'},'VerticalAlignment','bottom');
 %%
 set(gca,'XScale','log')
 set(gca,'YScale','log')
-legend('Peak Performance', 'Maximal Memory Bandwidth (fitted, 4.2 bytes/cycle)','Location','northwest')
+legend('Peak Performance', 'Maximal Memory Bandwidth','Location','northwest')
 title('Roofline Plot')
 xlabel('Operational Intensity [flops/byte]')
 ylabel('Performance [flops/cycle]')

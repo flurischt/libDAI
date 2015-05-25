@@ -68,7 +68,7 @@ bandwidth_GB_sec = 1.293;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
-builds = [builds, {'B042'}];
+builds = [builds, {'B040'}];
 
 %% Plot styling
 figure; hold on; grid on;
