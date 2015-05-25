@@ -8,7 +8,7 @@ rm -rf $BUILD_DIR
 mkdir $BUILD_DIR
 cd $BUILD_DIR
 cmake -DCMAKE_BUILD_TYPE=Release -DWITH_PERF=TRUE -DWITH_RECOMMENDER_BOOST=TRUE ..
-make -j8
+make -j8 VERBOSE=1
 cd examples/
 cp ../../examples/new_datasets/ml100kfull.* .
 cp ../../examples/new_datasets/u1/32MoviesUID1.* .
@@ -20,7 +20,7 @@ rm -rf $FLOAT_BUILD_DIR
 mkdir $FLOAT_BUILD_DIR
 cd $FLOAT_BUILD_DIR
 cmake -DCMAKE_BUILD_TYPE=Release -DWITH_PERF=TRUE -DWITH_RECOMMENDER_BOOST=TRUE -DWITH_SINGLE_PRECISION=TRUE ..
-make -j8
+make -j8 VERBOSE=1
 cd examples/
 cp ../../examples/new_datasets/ml100kfull.* .
 cp ../../examples/new_datasets/u1/32MoviesUID1.* .
