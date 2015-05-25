@@ -67,12 +67,14 @@ bandwidth_sec = 0.567; % GB/s
 flops_cycle = num_flops/num_cycles;
 data_points = [data_points; 32, flops_cycle];
 %% Plotting
-plot(data_points(:,1), data_points(:,2));
+plot(data_points(:,1), data_points(:,2), 'LineWidth',2);
 hold on; grid on;
 
-title('Baseline Performance for different Numbers of Movies');
-xlabel('Number of Movies in Dataset')
-ylabel('Performance [flops/cycle]')
+fontsize = 14;
+title('Baseline Performance for different Numbers of Movies', 'fontsize', fontsize);
+xlabel('Number of Movies in Dataset', 'fontsize', fontsize)
+ylabel('Performance [flops/cycle]', 'fontsize', fontsize)
 
 set(gca,'XTick',[32, 272, 734, 1638]);
+set(gca,'fontsize', fontsize);
 print(gcf, '-r150', 'performance_baseline.png', '-dpng');
