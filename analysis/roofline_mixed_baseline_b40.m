@@ -81,7 +81,7 @@ yb = x.*maxBytesCycle;
 memBound = loglog(x,yb,'r','LineWidth',2);
 
 % measurements
-loglog(roofline_points(:,1), roofline_points(:,2), 'xb', 'LineWidth',2);
+loglog(roofline_points(:,1), roofline_points(:,2), '-b', 'LineWidth',2);
 
 title('Roofline Plot Baseline','fontsize', fontsize);
 legend('Peak Performance','Maximal Memory Bandwidth','Location','northwest');
@@ -186,7 +186,7 @@ divBound = loglog(x,ys,'--b','LineWidth',2);
 title('Roofline Plot Build 40','fontsize', fontsize);
 legend([perfBound, divBound, memBound],{'Peak Performance', 'Peak Division Performance', 'Maximal Memory Bandwidth'},'Location','northwest');
 % measurements
-loglog(roofline_points(:,1), roofline_points(:,2), 'xr', 'LineWidth',2);
+loglog(roofline_points(:,1), roofline_points(:,2), '-r', 'LineWidth',2);
 text(0.2, 0.025,{'Baseline'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize);
 text(0.075, 0.025,{'Build 40'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize);
 print(gcf, '-r150', 'roofline_mixed.png', '-dpng');
