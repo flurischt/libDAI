@@ -243,22 +243,28 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
 //
 // This means we want to add the first two to c1 (1->0, 2->0) and the next two to c2 (3->1, 4->1) which gives us
 // our first pattern 0011. Then we want to add (1->0, 2->1) and (3->0, 4->1) which gives us our second pattern 0101.
-void BP::marginalizeProductOntoMessage(const double* prod, size_t i, size_t _I, size_t prodsize)
+void BP::marginalizeProductOntoMessage(__m256d& prod, size_t i, size_t _I, size_t prodsize)
 {
     MessageType &marg = newMessage(i,_I);
+
+    // theoretically we don't need prod after this function call so in theory we could even override it here.
+    __m256d prod_new = _mm256_hadd_pd(prod, prod);
+    // a0 + a1, a0 + a1, a2 + a3, a2 + a3
+
 
     // Calculate marginal AND normalize probability.
     // Avoid the indirect lookup via ind_t if possible.
     switch (_edges[i][_I].index) {
         // Check which case and do the marginalization (explained above) directly.
         case INDEX_0011: {
-            const ProbProduct::value_type a = (prod[0]+prod[1]);
-            const ProbProduct::value_type s = a + (prod[2]+prod[3]);
+            double a = ((double*)&prod_new)[0];
+            double s = a + ((double*)&prod_new)[2];
             marg = a/s;
         } break;
         case INDEX_0101: {
-            const ProbProduct::value_type a = (prod[0]+prod[2]);
-            const ProbProduct::value_type s = a + (prod[1]+prod[3]);
+            // Would be nice to do that with some permutation instead but it is hard to mix the lower 128 and upper 128 bits.
+            double a = ((double*)&prod)[0] + ((double*)&prod)[2];
+            double s = ((double*)&prod_new)[0] + ((double*)&prod_new)[2];
             marg = a/s;
         } break;
         default: {
@@ -270,11 +276,13 @@ void BP::marginalizeProductOntoMessage(const double* prod, size_t i, size_t _I, 
             const ind_t& ind = index(i,_I);
             ProbProduct::value_type a = 0.;
             ProbProduct::value_type s = 0.;
+            double prod_double[4];
+            _mm256_store_pd(prod_double, prod);
             for( size_t r = 0; r < prodsize; ++r )
             {
                 if (ind[r] == 0)
-                    a += prod[r];
-                s += prod[r];
+                    a += prod_double[r];
+                s += prod_double[r];
                 DAI_ASSERT(ind[r] == 0 || ind[r] == 1);
             }
             marg = a/s;
@@ -303,7 +311,7 @@ void BP::calcNewMessage( size_t i, size_t _I) {
         //_prod.resize(4);
 
         // Use our precomputed version.
-        std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod);
+        _prod = _mm256_load_pd(&(_factorsFixed._p[0]));
 
         // Calc the message product.
         DAI_LOG("calcNewMessage " << I << " <-> " << i);

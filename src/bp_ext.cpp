@@ -69,16 +69,21 @@ void BP::calcIncomingMessageProduct_01(BP::ProbProduct &prod, size_t I) const
     }
 }
 
-void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const
+void BP::calcIncomingMessageProduct_0101_0011(__m256d& prod_vec, size_t I, size_t i) const
 {
     const Neighbors& n = nbF(I);
     DAI_ASSERT(nbF(I).size() == 2);
 
     const size_t _I0 = n[0].dual;
     const size_t n0  = n[0].node;
+    const size_t _I1 = n[1].dual;
+    const size_t n1  = n[1].node;
 
+    __m256d r_m, old_prod;
 
+    //std::cout << i << " " << n0 << " " << n1 << std::endl;
     if (i!=n0) {
+        //std::cout << ",";
         DAI_ASSERT(_edges[n0][_I0].index == INDEX_0101);
 
         // prod._p[0] *= _oldProd[n0][0] / _edges[n0][_I0].message._p[0];
@@ -90,16 +95,16 @@ void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) 
         const ProbProduct::value_type r_m0 = 1. / MESSAGE0(n0,_I0);
         const ProbProduct::value_type r_m1 = 1. / MESSAGE1(n0,_I0);
 
-        prod[0] *= OLDPROD0(n0) * r_m0;
-        prod[1] *= OLDPROD1(n0) * r_m1;
-        prod[2] *= OLDPROD0(n0) * r_m0;
-        prod[3] *= OLDPROD1(n0) * r_m1;
+        r_m = _mm256_set_pd(r_m0, r_m1, r_m0, r_m1);
+        old_prod = _mm256_set_pd(OLDPROD0(n0), OLDPROD1(n0), OLDPROD0(n0), OLDPROD1(n0));
+        r_m = _mm256_mul_pd(old_prod, r_m);
+        prod_vec = _mm256_mul_pd(prod_vec, r_m);
     }
 
-    const size_t _I1 = n[1].dual;
-    const size_t n1  = n[1].node;
+
 
     if (i!=n1) {
+        //std::cout << ".";
         DAI_ASSERT(_edges[n1][_I1].index == INDEX_0011);
 
         // prod._p[0] *= _oldProd[n1][0] / _edges[n1][_I1].message._p[0];
@@ -111,10 +116,10 @@ void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) 
         const ProbProduct::value_type r_m0 = 1. / MESSAGE0(n1,_I1);
         const ProbProduct::value_type r_m1 = 1. / MESSAGE1(n1,_I1);
 
-        prod[0] *= OLDPROD0(n1) * r_m0;
-        prod[1] *= OLDPROD0(n1) * r_m0;
-        prod[2] *= OLDPROD1(n1) * r_m1;
-        prod[3] *= OLDPROD1(n1) * r_m1;
+        r_m = _mm256_set_pd(r_m0, r_m0, r_m1, r_m1);
+        old_prod = _mm256_set_pd(OLDPROD0(n1), OLDPROD0(n1), OLDPROD1(n1), OLDPROD1(n1));
+        r_m = _mm256_mul_pd(old_prod, r_m);
+        prod_vec = _mm256_mul_pd(prod_vec, r_m);
     }
 }
 
