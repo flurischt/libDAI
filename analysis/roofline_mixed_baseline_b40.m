@@ -91,9 +91,9 @@ y=ylabel({'Performance [flops/cycle]'}, 'fontsize', fontsize,'rot', 0);
 set(y, 'position', [0.0225,10,0]);
 set(gca,'XScale','log')
 set(gca,'YScale','log')
-t=title('Roofline Plot Baseline','fontsize', fontsize);
-titlepos = get(t,'position') + [0, 3, 0];
-set(t, 'position', titlepos);
+% t=title('Roofline Plot Baseline','fontsize', fontsize+1);
+% titlepos = get(t,'position') + [0, 3, 0];
+% set(t, 'position', titlepos);
 set(gca,'fontsize', fontsize);
 print(gcf, '-r150', 'roofline_baseline.png', '-dpng');
 
@@ -188,7 +188,7 @@ roofline_points = [roofline_points; intensity, flops_cycle];
 % Peak division perf
 ys = ones(length(x),1).*(1/22);
 divBound = loglog(x,ys,'--b','LineWidth',2);
-title('Roofline Plot Build 40','fontsize', fontsize);
+% title('Roofline Plot Build 40','fontsize', fontsize);
 legend([perfBound, divBound, memBound],{'Peak Performance', 'Peak Division Performance', 'Maximal Memory Bandwidth'},'Location','northwest');
 % measurements
 loglog(roofline_points(:,1), roofline_points(:,2), '-r', 'LineWidth',2);
