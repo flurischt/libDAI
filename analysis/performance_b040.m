@@ -165,7 +165,7 @@ ys = ones(length(x),1).*peakPerf;
 loglog(x,ys,'-b','LineWidth',2);
 
 % Peak division perf
-ys = ones(length(x),1).*(1/14);
+ys = ones(length(x),1).*(1/22);
 loglog(x,ys,'--b','LineWidth',2);
 
 % memory bandwidth
