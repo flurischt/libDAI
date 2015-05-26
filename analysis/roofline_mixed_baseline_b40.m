@@ -83,12 +83,17 @@ memBound = loglog(x,yb,'r','LineWidth',2);
 % measurements
 loglog(roofline_points(:,1), roofline_points(:,2), '-b', 'LineWidth',2);
 
-title('Roofline Plot Baseline','fontsize', fontsize);
+
+
 legend('Peak Performance','Maximal Memory Bandwidth','Location','northwest');
 xlabel('Operational Intensity [flops/byte]', 'fontsize', fontsize)
-ylabel('Performance [flops/cycle]', 'fontsize', fontsize)
+y=ylabel({'Performance [flops/cycle]'}, 'fontsize', fontsize,'rot', 0);
+set(y, 'position', [0.0225,10,0]);
 set(gca,'XScale','log')
 set(gca,'YScale','log')
+t=title('Roofline Plot Baseline','fontsize', fontsize);
+titlepos = get(t,'position') + [0, 3, 0];
+set(t, 'position', titlepos);
 set(gca,'fontsize', fontsize);
 print(gcf, '-r150', 'roofline_baseline.png', '-dpng');
 
