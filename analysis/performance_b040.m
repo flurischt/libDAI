@@ -37,7 +37,6 @@ intensity = flops_cycle/bandwidth_cycle;
 roofline_points = [roofline_points; intensity, flops_cycle];
 
 data_points_double = [data_points_double; 1638, flops_cycle];
-
 %% Performance Analysis [dataset user 405] 734 movies, user 405, single precision
 num_cycles = 2538003807; % CPU_CLK_UNHALTED.REF_TSC
 num_messages = 54330;
@@ -54,7 +53,6 @@ intensity = flops_cycle/bandwidth_cycle;
 roofline_points = [roofline_points; intensity, flops_cycle];
 
 data_points_single = [data_points_single; 734, flops_cycle];
-
 %% Performance Analysis [dataset user 405] 734 movies, user 405, double precision
 num_cycles = 16308024462; % CPU_CLK_UNHALTED.REF_TSC
 num_messages = 275480;
@@ -71,7 +69,6 @@ intensity = flops_cycle/bandwidth_cycle;
 roofline_points = [roofline_points; intensity, flops_cycle];
 
 data_points_double = [data_points_double; 734, flops_cycle];
-
 %% Performance Analysis [dataset 512] 272 movies, user 1-10, single precision
 num_cycles = 9630014445; % CPU_CLK_UNHALTED.REF_TSC
 num_messages = 105670;
@@ -88,7 +85,6 @@ intensity = flops_cycle/bandwidth_cycle;
 roofline_points = [roofline_points; intensity, flops_cycle];
 
 data_points_single = [data_points_single; 272, flops_cycle];
-
 %% Performance Analysis [dataset 512] 272 movies, user 1-10, double precision
 num_cycles = 93388140082; % CPU_CLK_UNHALTED.REF_TSC
 num_messages = 2083777;
@@ -105,7 +101,6 @@ intensity = flops_cycle/bandwidth_cycle;
 roofline_points = [roofline_points; intensity, flops_cycle];
 
 data_points_double = [data_points_double; 272, flops_cycle];
-
 %% Performance Analysis 32 movies, user 1-100, single precision
 num_cycles = 7810011715; % CPU_CLK_UNHALTED.REF_TSC
 num_messages = 46139;
@@ -122,7 +117,6 @@ intensity = flops_cycle/bandwidth_cycle;
 %roofline_points = [roofline_points; intensity, flops_cycle];
 
 data_points_single = [data_points_single; 32, flops_cycle];
-
 %% Performance Analysis 32 movies, user 1-100, double precision
 num_cycles = 20396030594; % CPU_CLK_UNHALTED.REF_TSC
 num_messages = 872656;
@@ -159,7 +153,7 @@ close all;
 %% Roofline Plot
 figure;
 hold on; grid on
-x = logspace(-2,0);
+x = logspace(-2,-1);
 
 maxBytesCycle = 4;
 % flops / cycle
@@ -168,23 +162,27 @@ oneOpCycle = 1;
 
 % Scalar peak performance
 ys = ones(length(x),1).*peakPerf;
-loglog(x,ys,'-b');
+loglog(x,ys,'-b','LineWidth',2);
+
+% Peak division perf
+ys = ones(length(x),1).*(1/14);
+loglog(x,ys,'--b','LineWidth',2);
 
 % memory bandwidth
 yb = x.*maxBytesCycle;
-loglog(x,yb,'r');
+loglog(x,yb,'r','LineWidth',2);
 
 % measurements
-loglog(roofline_points(:,1), roofline_points(:,2), 'ob');
-%text(roofline_points(1,1), roofline_points(1,2),{' 1038, float'},'VerticalAlignment','middle','HorizontalAlignment','left', 'fontsize', fontsize);
-%text(roofline_points(2,1), roofline_points(2,2),{' 1038, double'},'VerticalAlignment','top', 'HorizontalAlignment','right','fontsize', fontsize);
+loglog(roofline_points(:,1), roofline_points(:,2), 'xb', 'LineWidth',2);
+%text(roofline_points(1,1), roofline_points(1,2),{' big (f)'},'VerticalAlignment','top','HorizontalAlignment','center', 'fontsize', fontsize);
+%text(roofline_points(2,1), roofline_points(2,2),{' big (d)'},'VerticalAlignment','middle', 'HorizontalAlignment','right','fontsize', fontsize);
 %text(roofline_points(3,1), roofline_points(3,2),{' 732, float'},'VerticalAlignment','middle','HorizontalAlignment','left', 'fontsize', fontsize);
 %text(roofline_points(4,1), roofline_points(4,2),{' 732, double'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize);
-%text(roofline_points(5,1), roofline_points(5,2),{' 272, float'},'VerticalAlignment','top','HorizontalAlignment','center', 'fontsize', fontsize);
-%text(roofline_points(6,1), roofline_points(6,2),{' 272, double'},'VerticalAlignment','bottom','HorizontalAlignment','left', 'fontsize', fontsize);
+%text(roofline_points(5,1), roofline_points(5,2),{' medium (f)'},'VerticalAlignment','top','HorizontalAlignment','center', 'fontsize', fontsize);
+%text(roofline_points(6,1), roofline_points(6,2),{' medium (d)'},'VerticalAlignment','bottom','HorizontalAlignment','center', 'fontsize', fontsize);
 
 title('Roofline Plot for B040','fontsize', fontsize);
-legend('Peak Performance','Maximal Memory Bandwidth','Location','northwest');
+legend('Peak Performance', 'Peak Division Performance','Maximal Memory Bandwidth','Location','northwest');
 xlabel('Operational Intensity [flops/byte]', 'fontsize', fontsize)
 ylabel('Performance [flops/cycle]', 'fontsize', fontsize)
 set(gca,'XScale','log')
