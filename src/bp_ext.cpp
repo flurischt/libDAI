@@ -2,8 +2,6 @@
 
 namespace dai {
 
-#define MESSAGE0(j,_I) (_edges[j][_I].message)
-#define MESSAGE1(j,_I) (1. - _edges[j][_I].message)
 #define OLDPROD0(j)    (_oldProd[j][0])
 #define OLDPROD1(j)    (_oldProd[j][1])
 

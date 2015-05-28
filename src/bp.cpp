@@ -494,7 +494,6 @@ void BP::updateMessage( size_t i, size_t _I ) {
     // Damping is not supported here.
     DAI_DEBASSERT(props.damping == false);
     DAI_DEBASSERT(_oldProd[i].size() == 2);
-    DAI_DEBASSERT(_reciprocals[i].size() == 2);
 
     _oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
     _oldProd[i][1] =  _oldProd[i][1] / (1. - _edges[i][_I].message) * (1. - _edges[i][_I].newMessage);
