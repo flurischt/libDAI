@@ -324,9 +324,6 @@ class BP : public DAIAlgFG {
 
         /// Specialised versions of calcIncomingMessageProduct for special patterns.
         /// Implementation in bp_ext.cpp.
-        void calcIncomingMessageProduct_0011(ProbProduct &prod, size_t I) const;
-        void calcIncomingMessageProduct_0101(ProbProduct &prod, size_t I) const;
-        void calcIncomingMessageProduct_01(ProbProduct &prod, size_t I) const;
         void calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const;
 
         void marginalizeProductOntoMessage(const double* prod, size_t i, size_t _I, size_t prodsize);
