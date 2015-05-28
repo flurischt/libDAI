@@ -85,6 +85,9 @@ class BP : public DAIAlgFG {
             MessageType newMessage;
             /// Residual for this edge
             Real        residual;
+            /// Precalculated reciprocals of the message for this edge:
+            /// 1/message and 1/(1-message).
+            Real reciprocals[2];
         };
 
         /// Stores all edge properties
@@ -221,6 +224,7 @@ class BP : public DAIAlgFG {
         BP( const BP &x ) : DAIAlgFG(x)
           , _edges(x._edges)
           , _indices(x._indices)
+          , _oldProd(x._oldProd)
           , _edge2lutOld(x._edge2lutOld)
           , _lut(x._lut)
           , _maxdiff(x._maxdiff)

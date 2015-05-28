@@ -109,6 +109,8 @@ void BP::construct() {
             EdgeProp newEP;
             newEP.message = 0;
             newEP.newMessage = 0;
+            newEP.reciprocals[0] = 1;
+            newEP.reciprocals[1] = 1;
             ind_t index;
             for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
                 index.push_back( k );
@@ -210,16 +212,14 @@ void BP::calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i,
             // ind is the precalculated IndexFor(j,I) i.e. to x_I == k corresponds x_j == ind[k]
             const ind_t &ind = index(j, _I);
             DAI_DEBASSERT(var(j).states() == 2);
-            Real message_0 = _edges[j][_I].message;
-            Real message_1 = (Real)1 - message_0;
 
             for(size_t r = 0; r < prod.size(); ++r) {
 
                 // Let's divide by that message that should not go into the product.
                 // Calculate with double precision!
                 double prod_jk = (ind[r] == 0)
-                        ? _oldProd[j.node][0] / message_0
-                        : _oldProd[j.node][1] / message_1;
+                        ? _oldProd[j.node][0] * _edges[j][_I].reciprocals[0]
+                        : _oldProd[j.node][1] * _edges[j][_I].reciprocals[1];
 
                 // And multiply it with the target.
                 prod._p[r] *= prod_jk;
@@ -494,9 +494,15 @@ void BP::updateMessage( size_t i, size_t _I ) {
     // Damping is not supported here.
     DAI_DEBASSERT(props.damping == false);
     DAI_DEBASSERT(_oldProd[i].size() == 2);
+    DAI_DEBASSERT(_reciprocals[i].size() == 2);
 
     _oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
     _oldProd[i][1] =  _oldProd[i][1] / (1. - _edges[i][_I].message) * (1. - _edges[i][_I].newMessage);
+    //_oldProd[i][0] =  _oldProd[i][0] * _edges[i][_I].reciprocals[0] *       _edges[i][_I].newMessage;
+    //_oldProd[i][1] =  _oldProd[i][1] * _edges[i][_I].reciprocals[1] * (1. - _edges[i][_I].newMessage);
+
+    _edges[i][_I].reciprocals[0] = 1. / _edges[i][_I].newMessage;
+    _edges[i][_I].reciprocals[1] = 1. / (1.-_edges[i][_I].newMessage);
 
     // Count message.
     messageCount++;
