@@ -67,8 +67,8 @@ FactorGraph example2fg() {
     // Create the factor graph out of the variables and factors
     cout << "Creating the factor graph..." << endl;
     FactorGraph fg(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
-    string fileName = "factorGraphExampleOut.dot";
-    fg.WriteToFile(fileName.c_str(), 0.01);
+    //string fileName = "factorGraphExampleOut.dot";
+    //fg.WriteToFile(fileName.c_str());
     return fg;
 }
 
@@ -122,7 +122,7 @@ pair<size_t, Real> doInference(FactorGraph &fg,
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
-    
+
     cout << "Inference done!" << endl;
     cout << "Messages processed: " << bp.messageCount << endl;
 
