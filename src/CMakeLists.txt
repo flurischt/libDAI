@@ -143,4 +143,7 @@ INSTALL(TARGETS dai
     ARCHIVE DESTINATION lib COMPONENT main
 )
 
+#set_target_properties(dai PROPERTIES COMPILE_FLAGS "-S")
+#set_target_properties(dai PROPERTIES COMPILE_FLAGS "-save-temps")
+
 INSTALL(FILES ${dai_hdrs} DESTINATION include/dai COMPONENT main)
