@@ -22,10 +22,12 @@ void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) 
         // prod._p[2] *= _oldProd[n0][0] / _edges[n0][_I0].message._p[0];
         // prod._p[3] *= _oldProd[n0][1] / _edges[n0][_I0].message._p[1];
 
-        prod[0] *= OLDPROD0(n0) * _edges[n0][_I0].reciprocals[0];
-        prod[1] *= OLDPROD1(n0) * _edges[n0][_I0].reciprocals[1];
-        prod[2] *= OLDPROD0(n0) * _edges[n0][_I0].reciprocals[0];
-        prod[3] *= OLDPROD1(n0) * _edges[n0][_I0].reciprocals[1];
+        auto temp1 =  OLDPROD0(n0) * _edges[n0][_I0].reciprocals[0];
+        auto temp2 = OLDPROD1(n0) * _edges[n0][_I0].reciprocals[1];
+        prod[0] *= temp1;
+        prod[1] *= temp2;
+        prod[2] *= temp1;
+        prod[3] *= temp2;
     }
 
     const size_t _I1 = n[1].dual;
@@ -39,10 +41,12 @@ void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) 
         // prod._p[2] *= _oldProd[n1][1] / _edges[n1][_I1].message._p[1];
         // prod._p[3] *= _oldProd[n1][1] / _edges[n1][_I1].message._p[1];
 
-        prod[0] *= OLDPROD0(n1) * _edges[n1][_I1].reciprocals[0];
-        prod[1] *= OLDPROD0(n1) * _edges[n1][_I1].reciprocals[0];
-        prod[2] *= OLDPROD1(n1) * _edges[n1][_I1].reciprocals[1];
-        prod[3] *= OLDPROD1(n1) * _edges[n1][_I1].reciprocals[1];
+        auto temp1 = OLDPROD0(n1) * _edges[n1][_I1].reciprocals[0];
+        auto temp2 = OLDPROD1(n1) * _edges[n1][_I1].reciprocals[1];
+        prod[0] *= temp1;
+        prod[1] *= temp1;
+        prod[2] *= temp2;
+        prod[3] *= temp2;
     }
 }
 
