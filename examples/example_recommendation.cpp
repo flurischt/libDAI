@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
     const string dataset = cimg_option("-dataset", "uV2New1",
                                        "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
     const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
-    const Real delta = cimg_option("-testDelta", 1e-12,
+    const Real delta = cimg_option("-testDelta", 1e-6,
                                      "Max float difference after which the tests should fail");
     const int num_measurements = cimg_option("-numMeasurements", 1, "Run numMeasurements times and print median");
 

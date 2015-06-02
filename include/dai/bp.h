@@ -31,6 +31,9 @@
 #include <boost/heap/skew_heap.hpp>
 #include <boost/heap/priority_queue.hpp>
 
+//#include "immintrin.h"
+//#include "avxintrin.h"
+
 namespace dai {
 
 
@@ -65,7 +68,7 @@ namespace dai {
  *  and a slower, less complicated one which is easier to maintain/understand. The slower one can be
  *  enabled by defining DAI_BP_FAST as false in the source file.
  */
-class BP : public DAIAlgFG {
+    class BP : public DAIAlgFG {
     protected:
 
         /// Type used for products of probabilities.
@@ -103,12 +106,11 @@ class BP : public DAIAlgFG {
         // TODO: use std::vector<ProbProd> (for consistent notation)
         std::vector< std::vector<double> > _oldProd;
 
-        TProb<Real> _factorsFixed;
+        TProb<double> _factorsFixed;
 
-        // Storage container used in calcNewMessage that does not need to be
-        // recreated each time. _prod.size() toggles between 2 and 4.
-        // Use double precision!
-        double _prod[4];
+        __m256d _prod_vec;
+        double _prod_double[4];
+
 #ifdef DAI_SINGLE_PRECISION
         ProbProduct _marg;
 #endif
@@ -183,22 +185,22 @@ class BP : public DAIAlgFG {
         int messageCount;
 
     public:
-    /// \name Constructors/destructors
-    //@{
+        /// \name Constructors/destructors
+        //@{
         /// Default constructor
         BP() : DAIAlgFG()
-          , _edges()
-          , _indices()
-          , _edge2lutOld()
-          , _lut()
-          , _maxdiff(0.0)
-          , _iters(0U)
-          , _sentMessages()
-          , _oldBeliefsV()
-          , _oldBeliefsF()
-          , _updateSeq()
-          , props()
-          , recordSentMessages(false)
+                , _edges()
+                , _indices()
+                , _edge2lutOld()
+                , _lut()
+                , _maxdiff(0.0)
+                , _iters(0U)
+                , _sentMessages()
+                , _oldBeliefsV()
+                , _oldBeliefsF()
+                , _updateSeq()
+                , props()
+                , recordSentMessages(false)
         {}
 
         /// Construct from FactorGraph \a fg and PropertySet \a opts
@@ -206,35 +208,35 @@ class BP : public DAIAlgFG {
          *  \param opts Parameters @see Properties
          */
         BP( const FactorGraph & fg, const PropertySet &opts ) : DAIAlgFG(fg)
-          , _edges()
-          , _indices()
-          , _maxdiff(0.0)
-          , _iters(0U)
-          , _sentMessages()
-          , _oldBeliefsV()
-          , _oldBeliefsF()
-          , _updateSeq()
-          , props()
-          , recordSentMessages(false) {
+                , _edges()
+                , _indices()
+                , _maxdiff(0.0)
+                , _iters(0U)
+                , _sentMessages()
+                , _oldBeliefsV()
+                , _oldBeliefsF()
+                , _updateSeq()
+                , props()
+                , recordSentMessages(false) {
             setProperties( opts );
             construct();
         }
 
         /// Copy constructor
         BP( const BP &x ) : DAIAlgFG(x)
-          , _edges(x._edges)
-          , _indices(x._indices)
-          , _oldProd(x._oldProd)
-          , _edge2lutOld(x._edge2lutOld)
-          , _lut(x._lut)
-          , _maxdiff(x._maxdiff)
-          , _iters(x._iters)
-          , _sentMessages(x._sentMessages)
-          , _oldBeliefsV(x._oldBeliefsV)
-          , _oldBeliefsF(x._oldBeliefsF)
-          , _updateSeq(x._updateSeq)
-          , props(x.props)
-          , recordSentMessages(x.recordSentMessages) {
+                , _edges(x._edges)
+                , _indices(x._indices)
+                , _oldProd(x._oldProd)
+                , _edge2lutOld(x._edge2lutOld)
+                , _lut(x._lut)
+                , _maxdiff(x._maxdiff)
+                , _iters(x._iters)
+                , _sentMessages(x._sentMessages)
+                , _oldBeliefsV(x._oldBeliefsV)
+                , _oldBeliefsF(x._oldBeliefsF)
+                , _updateSeq(x._updateSeq)
+                , props(x.props)
+                , recordSentMessages(x.recordSentMessages) {
             for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
                 _edge2lutOld[l->second.first][l->second.second] = l;
         }
@@ -260,10 +262,10 @@ class BP : public DAIAlgFG {
             }
             return *this;
         }
-    //@}
+        //@}
 
-    /// \name General InfAlg interface
-    //@{
+        /// \name General InfAlg interface
+        //@{
         virtual BP* clone() const { return new BP(*this); }
         virtual BP* construct( const FactorGraph &fg, const PropertySet &opts ) const { return new BP( fg, opts ); }
         virtual std::string name() const { return "BP"; }
@@ -285,10 +287,10 @@ class BP : public DAIAlgFG {
         virtual void setProperties( const PropertySet &opts );
         virtual PropertySet getProperties() const;
         virtual std::string printProperties() const;
-    //@}
+        //@}
 
-    /// \name Additional interface specific for BP
-    //@{
+        /// \name Additional interface specific for BP
+        //@{
         /// Returns history of which messages have been updated
         const std::vector<std::pair<size_t, size_t> >& getSentMessages() const {
             return _sentMessages;
@@ -296,7 +298,7 @@ class BP : public DAIAlgFG {
 
         /// Clears history of which messages have been updated
         void clearSentMessages() { _sentMessages.clear(); }
-    //@}
+        //@}
 
     protected:
         /// Returns constant reference to message from the \a _I 'th neighbor of variable \a i to variable \a i
@@ -324,9 +326,11 @@ class BP : public DAIAlgFG {
 
         /// Specialised versions of calcIncomingMessageProduct for special patterns.
         /// Implementation in bp_ext.cpp.
-        void calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const;
+        void calcIncomingMessageProduct_0101_0011(__m256d& prod_vec, size_t I, size_t i) const;
+        void marginalizeProductOntoMessage(__m256d& prod_vec, size_t i, size_t _I, size_t prodsize);
 
-        void marginalizeProductOntoMessage(const double* prod, size_t i, size_t _I, size_t prodsize);
+        void calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const;
+        void marginalizeProductOntoMessage(double* prod, size_t i, size_t _I, size_t prodsize);
 
         static const int INDEX_0011      = 0;
         static const int INDEX_0101      = 1;
@@ -351,7 +355,7 @@ class BP : public DAIAlgFG {
 
         /// Helper function for constructors
         virtual void construct();
-};
+    };
 
 
 } // end of namespace dai
