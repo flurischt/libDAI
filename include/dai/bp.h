@@ -31,9 +31,6 @@
 #include <boost/heap/skew_heap.hpp>
 #include <boost/heap/priority_queue.hpp>
 
-//#include "immintrin.h"
-//#include "avxintrin.h"
-
 namespace dai {
 
 
@@ -88,9 +85,17 @@ namespace dai {
             MessageType newMessage;
             /// Residual for this edge
             Real        residual;
+
+#ifdef DAI_VECTORIZATION
+            /// Precalculated reciprocals of the message for this edge:
+            /// 1/message 1/(1-message) 1/message 1/(1-message).
+            /// We store the same values twice because there is no clever way of dealing with two floats.
+            __m128 reciprocals;
+#else
             /// Precalculated reciprocals of the message for this edge:
             /// 1/message and 1/(1-message).
             Real reciprocals[2];
+#endif
         };
 
         /// Stores all edge properties
@@ -99,17 +104,20 @@ namespace dai {
         /// Stores the pre-calculated indices for the edges.
         std::vector<ind_t> _indices;
 
+        TProb<double> _factorsFixed;
+
         // We store the product for each variable. Every time a message gets
         // updated we also update the corresponding product. We can then reuse
         // the result and make the algorithm much faster.
         // Use double precision!
         // TODO: use std::vector<ProbProd> (for consistent notation)
+#ifdef DAI_VECTORIZATION
+        __m256d _prod;
+        std::vector< __m256d > _oldProd;
+        #else
+        double _prod[4];
         std::vector< std::vector<double> > _oldProd;
-
-        TProb<double> _factorsFixed;
-
-        __m256d _prod_vec;
-        double _prod_double[4];
+#endif
 
 #ifdef DAI_SINGLE_PRECISION
         ProbProduct _marg;
@@ -326,11 +334,14 @@ namespace dai {
 
         /// Specialised versions of calcIncomingMessageProduct for special patterns.
         /// Implementation in bp_ext.cpp.
+#ifdef DAI_VECTORIZATION
         void calcIncomingMessageProduct_0101_0011(__m256d& prod_vec, size_t I, size_t i) const;
         void marginalizeProductOntoMessage(__m256d& prod_vec, size_t i, size_t _I, size_t prodsize);
+#else
 
         void calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const;
         void marginalizeProductOntoMessage(double* prod, size_t i, size_t _I, size_t prodsize);
+#endif
 
         static const int INDEX_0011      = 0;
         static const int INDEX_0101      = 1;
@@ -342,6 +353,7 @@ namespace dai {
         virtual void calcNewMessage( size_t i, size_t _I);
         /// Replace the "old" message from the \a _I 'th neighbor of variable \a i to variable \a i by the "new" (updated) message
         void updateMessage( size_t i, size_t _I );
+
         /// Set the residual (difference between new and old message) for the edge between variable \a i and its \a _I 'th neighbor to \a r
         void updateResidual( size_t i, size_t _I, Real r );
         /// Finds the edge which has the maximum residual (difference between new and old message)

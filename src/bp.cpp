@@ -102,15 +102,23 @@ namespace dai {
         for( size_t i = 0; i < nrVars(); ++i ) {
             _edges.push_back( vector<EdgeProp>() );
             _edges[i].reserve( nbV(i).size() );
+#ifdef DAI_VECTORIZATION
+            _oldProd.push_back(_mm256_set1_pd(1.0));
+#else
             _oldProd.push_back(vector<double>(var(i).states(), 1));
+#endif
             _edge2lutNew.push_back( vector<heap_data_handle>() );
             _edge2lutNew[i].reserve( nbV(i).size() );
             for( const Neighbor &I : nbV(i) ) {
                 EdgeProp newEP;
                 newEP.message = 0;
                 newEP.newMessage = 0;
+#ifdef DAI_VECTORIZATION
+                newEP.reciprocals = _mm_set1_ps(1.0);
+#else
                 newEP.reciprocals[0] = 1;
                 newEP.reciprocals[1] = 1;
+#endif
                 ind_t index;
                 for( IndexFor k( var(i), factor(I).vars() ); k.valid(); ++k )
                     index.push_back( k );
@@ -149,6 +157,7 @@ namespace dai {
             for( const Neighbor &i : nbF(I) )
                 _updateSeq.push_back( Edge( i, i.dual ) );
 
+        _factorsFixed._p.clear();
         for (size_t i=0; i<_factors[0].p().size(); ++i) {
             _factorsFixed._p.push_back(_factors[0].p().get(i));
         }
@@ -219,9 +228,20 @@ namespace dai {
 
                     // Let's divide by that message that should not go into the product.
                     // Calculate with double precision!
+#ifdef DAI_VECTORIZATION
+                    double prod_jk = 0;
+                    __m256d temp = _mm256_mul_pd(_oldProd[j.node], _mm256_cvtps_pd(_edges[j][_I].reciprocals));
+                    if (ind[r] == 0)  {
+                        prod_jk =  ((double*)&temp)[0];
+                    } else {
+                        prod_jk = ((double*)&temp)[1];
+                    }
+#else
                     double prod_jk = (ind[r] == 0)
                                      ? _oldProd[j.node][0] * _edges[j][_I].reciprocals[0]
                                      : _oldProd[j.node][1] * _edges[j][_I].reciprocals[1];
+#endif
+
 
                     // And multiply it with the target.
                     prod._p[r] *= prod_jk;
@@ -245,41 +265,42 @@ namespace dai {
 //
 // This means we want to add the first two to c1 (1->0, 2->0) and the next two to c2 (3->1, 4->1) which gives us
 // our first pattern 0011. Then we want to add (1->0, 2->1) and (3->0, 4->1) which gives us our second pattern 0101.
+#ifdef DAI_VECTORIZATION
     void BP::marginalizeProductOntoMessage(__m256d& avx_prod, size_t i, size_t _I, size_t prodsize)
     {
         MessageType &marg = newMessage(i,_I);
 
-    __m256d xswap = _mm256_permute_pd(avx_prod, 0b0101);                        // [1, 0, 3, 2]
-    __m256d xflip128 = _mm256_permute2f128_pd(avx_prod, avx_prod, 0x01);        // [2, 3, 0, 1]
-    __m256d prod_2 = _mm256_blend_pd(xswap, xflip128, 0b1001);                  // [2, 0, 3, 1]
+        __m256d xswap = _mm256_permute_pd(avx_prod, 0b0101);                        // [1, 0, 3, 2]
+        __m256d xflip128 = _mm256_permute2f128_pd(avx_prod, avx_prod, 0x01);        // [2, 3, 0, 1]
+        __m256d prod_2 = _mm256_blend_pd(xswap, xflip128, 0b1001);                  // [2, 0, 3, 1]
 
-    __m256d sums =  _mm256_hadd_pd(avx_prod, prod_2); // [0+1, 2+0, 2+3, 3+1] aka [a, a, s-a, s-a]
-    __m256d flipedSums = _mm256_permute2f128_pd(sums, sums, 0x01); // [2+3, 3+1, 0+1, 2+0]
-    __m256d avx_s = _mm256_add_pd(sums, flipedSums); // [s, s, s, s]
-    __m256d avx_a = _mm256_blend_pd(sums, flipedSums, 0b1100);         // [0+1, 2+0, 0+1, 2+0]
-    __m256d avx_marg = _mm256_div_pd(avx_a, avx_s);
+        __m256d sums =  _mm256_hadd_pd(avx_prod, prod_2); // [0+1, 2+0, 2+3, 3+1] aka [a, a, s-a, s-a]
+        __m256d flipedSums = _mm256_permute2f128_pd(sums, sums, 0x01); // [2+3, 3+1, 0+1, 2+0]
+        __m256d avx_s = _mm256_add_pd(sums, flipedSums); // [s, s, s, s]
+        __m256d avx_a = _mm256_blend_pd(sums, flipedSums, 0b1100);         // [0+1, 2+0, 0+1, 2+0]
+        __m256d avx_marg = _mm256_div_pd(avx_a, avx_s);
 
-    // to be able to use _mm_storel below
-    // TODO we switch from avx to sse here. need to clear some bits?
-    __m128d marg_low = _mm256_extractf128_pd(avx_marg, 0);                  // [0+1/s, 2+0/s]
-    __m128d marg_low_flipped = _mm_permute_pd(marg_low, 0x1);
+        // to be able to use _mm_storel below
+        // TODO we switch from avx to sse here. need to clear some bits?
+        __m128d marg_low = _mm256_extractf128_pd(avx_marg, 0);                  // [0+1/s, 2+0/s]
+        __m128d marg_low_flipped = _mm_permute_pd(marg_low, 0x1);
 
-    // depending on _edges[i][_I].index we could now use _mm_storeL_pd(&marg, marg_low) (INDEX_0011)
-    // or _mm_storeH_pd(&marg, marg_low) (case INDEX_0101)
+        // depending on _edges[i][_I].index we could now use _mm_storeL_pd(&marg, marg_low) (INDEX_0011)
+        // or _mm_storeH_pd(&marg, marg_low) (case INDEX_0101)
 
-    // let's create a mask to get rid of the if/else below
-    __m128i idx = _mm_set1_epi64x(_edges[i][_I].index);
-    __m128i m = _mm_set_epi64x(INDEX_0011, INDEX_0101);
-    __m128d mask = _mm_castsi128_pd(_mm_cmpeq_epi64(idx, m));
-    marg_low = _mm_blendv_pd(marg_low, marg_low_flipped, mask);
+        // let's create a mask to get rid of the if/else below
+        __m128i idx = _mm_set1_epi64x(_edges[i][_I].index);
+        __m128i m = _mm_set_epi64x(INDEX_0011, INDEX_0101);
+        __m128d mask = _mm_castsi128_pd(_mm_cmpeq_epi64(idx, m));
+        marg_low = _mm_blendv_pd(marg_low, marg_low_flipped, mask);
 
-    // marg_low now containts the correct value in all positions. no need for an if
-    double temp;
-    _mm_storel_pd(&temp, marg_low);
-    marg = temp;
+        // marg_low now containts the correct value in all positions. no need for an if
+        double temp;
+        _mm_storel_pd(&temp, marg_low);
+        marg = temp;
 
     }
-
+#else
     void BP::marginalizeProductOntoMessage(double* prod, size_t i, size_t _I, size_t prodsize)
     {
         MessageType &marg = newMessage(i,_I);
@@ -317,8 +338,7 @@ namespace dai {
             }
         }
     }
-
-
+#endif
 
     void BP::calcNewMessage( size_t i, size_t _I) {
 
@@ -335,12 +355,16 @@ namespace dai {
             DAI_LOG("calcNewMessage " << I << " <-> " << i);
 
             // Use our precomputed version.
-            //std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod_double);
-            _prod_vec = _mm256_load_pd(&(_factorsFixed._p[0]));
+#ifdef DAI_VECTORIZATION
+            _prod = _mm256_loadu_pd(&(_factorsFixed._p[0]));
+#else
+            std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod);
+#endif
             // Calc the message product.
-            calcIncomingMessageProduct_0101_0011(_prod_vec, I, i);
+            calcIncomingMessageProduct_0101_0011(_prod, I, i);
+
             // Marginalize onto i
-            marginalizeProductOntoMessage(_prod_vec, i, _I, 4);
+            marginalizeProductOntoMessage(_prod, i, _I, 4);
 
         }
 
@@ -519,7 +543,25 @@ namespace dai {
         messageCount = 0;
     }
 
+#ifdef DAI_VECTORIZATION
+    void BP::updateMessage( size_t i, size_t _I ) {
+        // Damping is not supported here.
+        DAI_DEBASSERT(props.damping == false);
 
+        float temp = (1.f - _edges[i][_I].newMessage);
+        __m128 tempVec = _mm_set_ps(temp, _edges[i][_I].newMessage, temp, _edges[i][_I].newMessage);
+        _oldProd[i] = _mm256_mul_pd(_oldProd[i], _mm256_cvtps_pd(tempVec));
+        _edges[i][_I].reciprocals = _mm_mul_ps(_edges[i][_I].reciprocals, _mm_rcp_ps(tempVec));
+
+        // Count message.
+        messageCount++;
+        if( recordSentMessages )
+            _sentMessages.push_back(make_pair(i,_I));
+        message(i,_I) = newMessage(i,_I);
+        updateResidual( i, _I, 0.0 );
+    }
+
+#else
     void BP::updateMessage( size_t i, size_t _I ) {
 
         // Damping is not supported here.
@@ -544,6 +586,8 @@ namespace dai {
         message(i,_I) = newMessage(i,_I);
         updateResidual( i, _I, 0.0 );
     }
+
+#endif
 
 // TODO: Optimize: We are using a heap now but this is not faster then the
 // multimap solution. So we might have to revert to it.

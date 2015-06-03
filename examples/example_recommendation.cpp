@@ -417,5 +417,11 @@ int main(int argc, char **argv) {
     cout << "Ran " << num_measurements << " times.\nMedian:" << endl;
     cout << "Measured cycles: " << measured_cycles << endl;
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
+    cout << "Mean:" << endl;
+    double sum = 0;
+    for (size_t i = 0; i < measurements.size(); ++i) {
+        sum += measurements[i];
+    }
+    cout << "Runtime: " << (sum / (double) (cpu_freq * measurements.size())) << " seconds" << endl;
     return 0;
 }
