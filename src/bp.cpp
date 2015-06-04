@@ -89,7 +89,30 @@ namespace dai {
         _edges.clear();
         _edges.reserve( nrVars() );
         _indices.clear();
+#ifdef DAI_VECTORIZATION
+        cout << "constructing1" << endl;
+
+        _oldProd = vector<__m256d>(nrVars(), _mm256_set1_pd(1.0));
+
+//        vector<__m256d> temp;
+//        __m256d entry = _mm256_set1_pd(1.0);
+//        temp = vector<__m256d>(10, entry);
+//        temp = vector<__m256d>(10, entry);
+
+//        _oldProd.clear();
+//        _oldProd.reserve(nrVars());
+//        for (size_t i=0; i<nrVars(); ++i) {
+//            cout << "constructingi" << i << endl;
+//            __m256d temp = _mm256_set1_pd(1.0);
+//            cout << "tempObjCreated" << endl;
+//            _oldProd[i] = temp;
+//        }
+
+        cout << "constructing4" << endl;
+#else
         _oldProd.clear();
+#endif
+
         _edge2lutNew.clear();
         _edge2lutNew.reserve( nrVars() );
 
@@ -102,9 +125,7 @@ namespace dai {
         for( size_t i = 0; i < nrVars(); ++i ) {
             _edges.push_back( vector<EdgeProp>() );
             _edges[i].reserve( nbV(i).size() );
-#ifdef DAI_VECTORIZATION
-            _oldProd.push_back(_mm256_set1_pd(1.0));
-#else
+#ifndef DAI_VECTORIZATION
             _oldProd.push_back(vector<double>(var(i).states(), 1));
 #endif
             _edge2lutNew.push_back( vector<heap_data_handle>() );
@@ -139,7 +160,6 @@ namespace dai {
                 _edge2lutNew[i].push_back( _lutNew.push( make_pair( newEP.residual, make_pair( i, _edges[i].size() - 1 ))));
             }
         }
-
         // create old beliefs
         _oldBeliefsV.clear();
         _oldBeliefsV.reserve( nrVars() );
@@ -161,6 +181,8 @@ namespace dai {
         for (size_t i=0; i<_factors[0].p().size(); ++i) {
             _factorsFixed._p.push_back(_factors[0].p().get(i));
         }
+
+
     }
 
 
@@ -232,9 +254,9 @@ namespace dai {
                     double prod_jk = 0;
                     __m256d temp = _mm256_mul_pd(_oldProd[j.node], _mm256_cvtps_pd(_edges[j][_I].reciprocals));
                     if (ind[r] == 0)  {
-                        prod_jk =  ((double*)&temp)[0];
+                        prod_jk =  ((double*)&temp)[1];
                     } else {
-                        prod_jk = ((double*)&temp)[1];
+                        prod_jk = ((double*)&temp)[0];
                     }
 #else
                     double prod_jk = (ind[r] == 0)
@@ -353,7 +375,6 @@ namespace dai {
         else {
             // calculate updated message I->i
             DAI_LOG("calcNewMessage " << I << " <-> " << i);
-
             // Use our precomputed version.
 #ifdef DAI_VECTORIZATION
             _prod = _mm256_loadu_pd(&(_factorsFixed._p[0]));
@@ -362,10 +383,8 @@ namespace dai {
 #endif
             // Calc the message product.
             calcIncomingMessageProduct_0101_0011(_prod, I, i);
-
             // Marginalize onto i
             marginalizeProductOntoMessage(_prod, i, _I, 4);
-
         }
 
         // Update the residual if necessary
@@ -549,11 +568,16 @@ namespace dai {
         DAI_DEBASSERT(props.damping == false);
 
         float temp = (1.f - _edges[i][_I].newMessage);
+
+        // this will give us message/temp/message/temp
         __m128 tempVec = _mm_set_ps(temp, _edges[i][_I].newMessage, temp, _edges[i][_I].newMessage);
         _oldProd[i] = _mm256_mul_pd(_oldProd[i], _mm256_cvtps_pd(tempVec));
-        _edges[i][_I].reciprocals = _mm_mul_ps(_edges[i][_I].reciprocals, _mm_rcp_ps(tempVec));
+        _oldProd[i] = _mm256_mul_pd(_oldProd[i], _mm256_cvtps_pd(_edges[i][_I].reciprocals));
+        //_edges[i][_I].reciprocals = _mm_rcp_ps(tempVec);
+        __m128 ones = _mm_set1_ps(1.0);
+        _edges[i][_I].reciprocals = _mm_div_ps(ones, tempVec);
 
-        // Count message.
+        // Count message.cout << ((double*)&_edges[i][_I].reciprocals)[1] << "versus" << reciprocals0 << endl;
         messageCount++;
         if( recordSentMessages )
             _sentMessages.push_back(make_pair(i,_I));

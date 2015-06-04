@@ -13,8 +13,6 @@ void BP::calcIncomingMessageProduct_0101_0011(__m256d& prod_vec, size_t I, size_
             DAI_ASSERT(_edges[n0][_I0].index == INDEX_0101);
 
             __m256d temp_vec = _mm256_mul_pd(_oldProd[n0], _mm256_cvtps_pd(_edges[n0][_I0].reciprocals));
-            // TODO: Shuffle to have correct order, or do we have it already?
-            //__m256d temp_vec = _mm256_set_pd(temp2, temp1, temp2, temp1);
             prod_vec = _mm256_mul_pd(prod_vec, temp_vec);
         }
 
@@ -23,8 +21,12 @@ void BP::calcIncomingMessageProduct_0101_0011(__m256d& prod_vec, size_t I, size_
             const size_t _I1 = n[1].dual;
             DAI_ASSERT(_edges[n1][_I1].index == INDEX_0011);
             __m256d temp_vec = _mm256_mul_pd(_oldProd[n1], _mm256_cvtps_pd(_edges[n1][_I1].reciprocals));
-            // TODO: Shuffle to have correct order
-            //__m256d temp_vec = _mm256_set_pd(temp2, temp2, temp1, temp1);
+
+            // turn [a, b, a, b] into [a, a, b, b]
+            //std::cout << "tempvec1" << ((double*)&temp_vec)[0] << "   "<< ((double*)&temp_vec)[1] << "   "<< ((double*)&temp_vec)[2] << "   "<< ((double*)&temp_vec)[3] << std::endl;
+            __m256d xswap = _mm256_permute_pd(temp_vec, 0b0101);
+            temp_vec = _mm256_blend_pd(temp_vec, xswap, 0b0110);
+            //std::cout << "tempvec2" << ((double*)&temp_vec)[0] << "   "<< ((double*)&temp_vec)[1] << "   "<< ((double*)&temp_vec)[2] << "   "<< ((double*)&temp_vec)[3] << std::endl;
             prod_vec = _mm256_mul_pd(prod_vec, temp_vec);
         }
     }
