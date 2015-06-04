@@ -90,25 +90,7 @@ namespace dai {
         _edges.reserve( nrVars() );
         _indices.clear();
 #ifdef DAI_VECTORIZATION
-        cout << "constructing1" << endl;
-
-        _oldProd = vector<__m256d>(nrVars(), _mm256_set1_pd(1.0));
-
-//        vector<__m256d> temp;
-//        __m256d entry = _mm256_set1_pd(1.0);
-//        temp = vector<__m256d>(10, entry);
-//        temp = vector<__m256d>(10, entry);
-
-//        _oldProd.clear();
-//        _oldProd.reserve(nrVars());
-//        for (size_t i=0; i<nrVars(); ++i) {
-//            cout << "constructingi" << i << endl;
-//            __m256d temp = _mm256_set1_pd(1.0);
-//            cout << "tempObjCreated" << endl;
-//            _oldProd[i] = temp;
-//        }
-
-        cout << "constructing4" << endl;
+        _oldProd = vector<__m256d, AlignmentAllocator<__m256d, 32> >(nrVars(), _mm256_set1_pd(1.0));
 #else
         _oldProd.clear();
 #endif
@@ -177,9 +159,9 @@ namespace dai {
             for( const Neighbor &i : nbF(I) )
                 _updateSeq.push_back( Edge( i, i.dual ) );
 
-        _factorsFixed._p.clear();
+        _factorsFixed.clear();
         for (size_t i=0; i<_factors[0].p().size(); ++i) {
-            _factorsFixed._p.push_back(_factors[0].p().get(i));
+            _factorsFixed.push_back(_factors[0].p().get(i));
         }
 
 
@@ -377,7 +359,7 @@ namespace dai {
             DAI_LOG("calcNewMessage " << I << " <-> " << i);
             // Use our precomputed version.
 #ifdef DAI_VECTORIZATION
-            _prod = _mm256_loadu_pd(&(_factorsFixed._p[0]));
+            _prod = _mm256_load_pd(&(_factorsFixed[0]));
 #else
             std::copy(_factorsFixed.begin(), _factorsFixed.end(), _prod);
 #endif

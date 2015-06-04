@@ -24,6 +24,7 @@
 #include <dai/factorgraph.h>
 #include <dai/properties.h>
 #include <dai/enum.h>
+#include <dai/AlignmentAllocator.h>
 
 #include <boost/heap/fibonacci_heap.hpp>
 #include <boost/heap/binomial_heap.hpp>
@@ -104,7 +105,7 @@ namespace dai {
         /// Stores the pre-calculated indices for the edges.
         std::vector<ind_t> _indices;
 
-        TProb<double> _factorsFixed;
+        std::vector<double, AlignmentAllocator<double, 32> > _factorsFixed;
 
         // We store the product for each variable. Every time a message gets
         // updated we also update the corresponding product. We can then reuse
@@ -113,7 +114,7 @@ namespace dai {
         // TODO: use std::vector<ProbProd> (for consistent notation)
 #ifdef DAI_VECTORIZATION
         __m256d _prod;
-        std::vector< __m256d > _oldProd;
+        std::vector< __m256d,  AlignmentAllocator<__m256d, 32> > _oldProd;
         #else
         double _prod[4];
         std::vector< std::vector<double> > _oldProd;
