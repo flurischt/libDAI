@@ -38,8 +38,7 @@ DAI_ENUM(FactorType,ISINGGAUSS,ISINGUNIFORM,EXPGAUSS,POTTS);
 FactorGraph createFG( const GraphAL &G, FactorType ft, size_t states, const PropertySet &props ) {
     size_t N = G.nrNodes();
 
-    if( states > 2 )
-        DAI_ASSERT( ft != FactorType::ISINGGAUSS && ft != FactorType::ISINGUNIFORM );
+    DAI_ASSERT(states <= 2 || ft != FactorType::ISINGGAUSS && ft != FactorType::ISINGUNIFORM );
 
     // Get inverse temperature
     Real beta = 1.0;

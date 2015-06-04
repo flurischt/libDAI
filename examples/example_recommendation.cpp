@@ -66,8 +66,8 @@ FactorGraph example2fg() {
     // Create the factor graph out of the variables and factors
     cout << "Creating the factor graph..." << endl;
     FactorGraph fg(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
-    string fileName = "factorGraphExampleOut.dot";
-    fg.WriteToFile(fileName.c_str(), 0.01);
+    //string fileName = "factorGraphExampleOut.dot";
+    //fg.WriteToFile(fileName.c_str());
     return fg;
 }
 
@@ -121,7 +121,7 @@ tuple<size_t, Real, long> doInference(FactorGraph &fg,
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
-    
+
     cout << "Inference done!" << endl;
     cout << "Messages processed: " << bp.messageCount << endl;
 
@@ -234,12 +234,29 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user, s
     return FactorGraph(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
 }
 
-pair<Real, Real> getPrecisionAndRecall(const vector<vector<pair<int, int> > > &test_data,
-                                           const vector<pair<Real, int> > &ratings, int user, size_t N) {
+
+pair<Real, Real> getPrecisionAndRecall(    const vector<vector<pair<int, int> > > &test_data,
+                                           const vector<pair<Real, int> > &ratings,
+                                           const vector<vector<pair<int, int> > > &input,
+                                           int user, size_t N) {
     // get the top predicted elements.
     vector<int> predicted;
-    for (size_t i = 0; i < std::min(N, ratings.size()); ++i) {
+    for (size_t i = 0; i < ratings.size(); ++i) {
+        bool rated = false;
+        for (size_t j=0; j<input[user].size(); ++j) {
+            if (input[user][j].second == ratings[i].second) {
+                rated = true;
+                break;
+            }
+        }
+        if (rated) {
+            // already rated, skip this element
+            continue;
+        }
         predicted.push_back(ratings[i].second);
+        if (predicted.size() >= N) {
+            break;
+        }
     }
 
     vector<int> wanted;
@@ -264,6 +281,7 @@ pair<Real, Real> getPrecisionAndRecall(const vector<vector<pair<int, int> > > &t
     }
     return make_pair<Real, Real>(v.size() / static_cast<Real>(N), v.size() / static_cast<Real>(wanted.size()));
 }
+
 
 // compares the calculated ratings to the reference file
 void verify_results(const string dataset, const Real delta, vector<pair<Real, int>>& ratings){
@@ -310,7 +328,8 @@ int main(int argc, char **argv) {
     cout << "reading " << dataset << ".base now..." << endl;
     vector<vector<pair<int, int> > > input_data = extract_ratings(dataset + ".base");
     vector<vector<pair<int, int> > > test_data = extract_ratings(dataset + ".test");
-    const int N = 10;
+
+    const int N = 1;
     Real p10 = 0;
     Real p20 = 0;
     Real r10 = 0;
@@ -366,8 +385,8 @@ int main(int argc, char **argv) {
                 verify_results(dataset, delta, ratings);
 
             sort(ratings.begin(), ratings.end());
-            pair<Real, Real> pr10 = getPrecisionAndRecall(test_data, ratings, user, 10);
-            pair<Real, Real> pr20 = getPrecisionAndRecall(test_data, ratings, user, 20);
+            pair<Real, Real> pr10 = getPrecisionAndRecall(test_data, ratings, input_data, user, 10);
+            pair<Real, Real> pr20 = getPrecisionAndRecall(test_data, ratings, input_data, user, 20);
 
             p10 +=  pr10.first;
             p20 +=  pr20.first;
@@ -397,5 +416,11 @@ int main(int argc, char **argv) {
     cout << "Total number of messages: " << messages << endl;
     cout << "Average number of messages: " << messages / N << endl;
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
+    cout << "Mean:" << endl;
+    double sum = 0;
+    for (size_t i = 0; i < measurements.size(); ++i) {
+        sum += measurements[i];
+    }
+    cout << "Runtime: " << (sum / (double) (cpu_freq * measurements.size())) << " seconds" << endl;
     return 0;
 }

@@ -792,6 +792,7 @@ typedef TProb<float> ProbF;     // Float prob.
 typedef TProb<double> ProbD;    // Double prob.
 
 
+
 } // end of namespace dai
 
 

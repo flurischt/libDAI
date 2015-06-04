@@ -33,6 +33,7 @@ SET(dai_hdrs
     "${dai_include_dir}/var.h"
     "${dai_include_dir}/varset.h"
     "${dai_include_dir}/utils/timer.h"
+    "${dai_include_dir}/AlignmentAllocator.h"
 )
 
 # Files used only for inference methods other than BP, FBP or TRWBP
@@ -142,5 +143,8 @@ INSTALL(TARGETS dai
     LIBRARY DESTINATION lib COMPONENT main
     ARCHIVE DESTINATION lib COMPONENT main
 )
+
+#set_target_properties(dai PROPERTIES COMPILE_FLAGS "-S")
+#set_target_properties(dai PROPERTIES COMPILE_FLAGS "-save-temps")
 
 INSTALL(FILES ${dai_hdrs} DESTINATION include/dai COMPONENT main)
