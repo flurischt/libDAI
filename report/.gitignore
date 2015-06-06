@@ -8,7 +8,7 @@ graphics/*.pdf
 *.ps 
 *.dvi 
 *.log 
-*.pdf 
+report.pdf 
 svnver.tex 
 *.out 
 *.tmp
