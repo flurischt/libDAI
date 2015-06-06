@@ -1,0 +1,14 @@
+graphics/*.pdf
+*.bbl 
+*.blg 
+*.aux 
+*.log 
+*~ 
+*.bak 
+*.ps 
+*.dvi 
+*.log 
+*.pdf 
+svnver.tex 
+*.out 
+*.tmp
