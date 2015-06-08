@@ -18,6 +18,8 @@
 #include <dai/bp.h>
 #include <dai/util.h>
 #include <dai/properties.h>
+#include <immintrin.h>
+#include <avxintrin.h>
 
 //#define DAI_VERBOSE
 #ifdef DAI_VERBOSE
@@ -282,26 +284,46 @@ namespace dai {
         __m256d flipedSums = _mm256_permute2f128_pd(sums, sums, 0x01); // [2+3, 3+1, 0+1, 2+0]
         __m256d avx_s = _mm256_add_pd(sums, flipedSums); // [s, s, s, s]
         __m256d avx_a = _mm256_blend_pd(sums, flipedSums, 0b1100);         // [0+1, 2+0, 0+1, 2+0]
-        __m256d avx_marg = _mm256_div_pd(avx_a, avx_s);
 
-        // to be able to use _mm_storel below
-        // TODO we switch from avx to sse here. need to clear some bits?
-        __m128d marg_low = _mm256_extractf128_pd(avx_marg, 0);                  // [0+1/s, 2+0/s]
-        __m128d marg_low_flipped = _mm_permute_pd(marg_low, 0x1);
+        // mm256_div_pd is slow on sandy bridge. use scalar division
+        //__m256d avx_marg = _mm256_div_pd(avx_a, avx_s);
+        __m128d a_low = _mm256_extractf128_pd(avx_a, 0);    // [0+1, 2+0]
+        __m128d s_low = _mm256_extractf128_pd(avx_s, 0);    // [s, s]
 
-        // depending on _edges[i][_I].index we could now use _mm_storeL_pd(&marg, marg_low) (INDEX_0011)
-        // or _mm_storeH_pd(&marg, marg_low) (case INDEX_0101)
+        ProbProduct::value_type s;
+        ProbProduct::value_type a;
+        _mm_storel_pd(&s, s_low);
 
-        // let's create a mask to get rid of the if/else below
-        __m128i idx = _mm_set1_epi64x(_edges[i][_I].index);
-        __m128i m = _mm_set_epi64x(INDEX_0011, INDEX_0101);
-        __m128d mask = _mm_castsi128_pd(_mm_cmpeq_epi64(idx, m));
-        marg_low = _mm_blendv_pd(marg_low, marg_low_flipped, mask);
+        //TODO instead of switch we could use a mask and blend. see below
+        // didn't implement because my setup currently has trouble with _mm_blendv_pd..
+        switch (_edges[i][_I].index) {
+            case INDEX_0011: {
+                _mm_storel_pd(&a, a_low);
+            } break;
+            case INDEX_0101: {
+                _mm_storeh_pd(&a, a_low);
+            } break;
+        }
+        marg = a/s;
+//        // to be able to use _mm_storel below
+//        // TODO we switch from avx to sse here. need to clear some bits?
+//        __m128d marg_low = _mm256_extractf128_pd(avx_marg, 0);                  // [0+1/s, 2+0/s]
+//        __m128d marg_low_flipped = _mm_permute_pd(marg_low, 0x1);
+//
+//        // depending on _edges[i][_I].index we could now use _mm_storeL_pd(&marg, marg_low) (INDEX_0011)
+//        // or _mm_storeH_pd(&marg, marg_low) (case INDEX_0101)
+//
+//        // let's create a mask to get rid of the if/else below
+//        __m128i idx = _mm_set1_epi64x(_edges[i][_I].index);
+//        __m128i m = _mm_set_epi64x(INDEX_0011, INDEX_0101);
+//        __m128d mask = _mm_castsi128_pd(_mm_cmpeq_epi64(idx, m));
+//        marg_low = _mm_blendv_pd(marg_low, marg_low_flipped, mask);
+//
+//        // marg_low now containts the correct value in all positions. no need for an if
+//        double temp;
+//        _mm_storel_pd(&temp, marg_low);
+//        marg = temp;
 
-        // marg_low now containts the correct value in all positions. no need for an if
-        double temp;
-        _mm_storel_pd(&temp, marg_low);
-        marg = temp;
 
     }
 #else
