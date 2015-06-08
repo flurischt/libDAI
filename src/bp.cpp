@@ -236,7 +236,7 @@ namespace dai {
                     double prod_jk = 0;
                     __m256d temp = _mm256_mul_pd(_oldProd[j.node], _mm256_cvtps_pd(_edges[j][_I].reciprocals));
                     if (ind[r] == 0)  {
-                        prod_jk =  ((double*)&temp)[1];
+                        prod_jk =  ((double*)&temp)[2];
                     } else {
                         prod_jk = ((double*)&temp)[0];
                     }
@@ -545,21 +545,19 @@ namespace dai {
     }
 
 #ifdef DAI_VECTORIZATION
+    __m128 ones = _mm_set1_ps(1.0);
     void BP::updateMessage( size_t i, size_t _I ) {
         // Damping is not supported here.
         DAI_DEBASSERT(props.damping == false);
 
         float temp = (1.f - _edges[i][_I].newMessage);
-
         // this will give us message/temp/message/temp
-        __m128 tempVec = _mm_set_ps(temp, _edges[i][_I].newMessage, temp, _edges[i][_I].newMessage);
-        _oldProd[i] = _mm256_mul_pd(_oldProd[i], _mm256_cvtps_pd(tempVec));
+        __m128 tempVec = _mm_set_ps(temp, temp, _edges[i][_I].newMessage, _edges[i][_I].newMessage);
         _oldProd[i] = _mm256_mul_pd(_oldProd[i], _mm256_cvtps_pd(_edges[i][_I].reciprocals));
-        //_edges[i][_I].reciprocals = _mm_rcp_ps(tempVec);
-        __m128 ones = _mm_set1_ps(1.0);
+        //We would like to use: _edges[i][_I].reciprocals = _mm_rcp_ps(tempVec); but the accuracy is not good enough.
         _edges[i][_I].reciprocals = _mm_div_ps(ones, tempVec);
+        _oldProd[i] = _mm256_mul_pd(_oldProd[i], _mm256_cvtps_pd(tempVec));
 
-        // Count message.cout << ((double*)&_edges[i][_I].reciprocals)[1] << "versus" << reciprocals0 << endl;
         messageCount++;
         if( recordSentMessages )
             _sentMessages.push_back(make_pair(i,_I));
@@ -600,7 +598,6 @@ namespace dai {
     void BP::updateResidual( size_t i, size_t _I, Real r ) {
         EdgeProp* pEdge = &_edges[i][_I];
         pEdge->residual = r;
-
         // rearrange look-up table (delete and reinsert new key)
         _lutNew.update(_edge2lutNew[i][_I], make_pair( r, make_pair(i, _I) ));
     }
