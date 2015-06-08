@@ -22,6 +22,8 @@ IF(COMPILER_ID MATCHES "^(apple)?clang$" OR COMPILER_ID MATCHES "(gcc|gnu)")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall -W -Wextra -fPIC")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O3 -g -DDAI_DEBUG")
+  ELSE()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
   ENDIF()
 
   IF(APPLE)

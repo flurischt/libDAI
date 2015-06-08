@@ -31,6 +31,7 @@
 #include <boost/heap/pairing_heap.hpp>
 #include <boost/heap/skew_heap.hpp>
 #include <boost/heap/priority_queue.hpp>
+#include <x86intrin.h>
 
 namespace dai {
 

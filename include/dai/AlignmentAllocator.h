@@ -6,7 +6,11 @@
 #define LIBDAI_ALIGNMENTALLOCATOR_H
 
 #include <stdlib.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#else
+#include <mm_malloc.h>
+#endif
 
 template <typename T, std::size_t N = 32>
 class AlignmentAllocator {
