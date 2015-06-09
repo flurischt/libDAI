@@ -1,27 +1,30 @@
 
 \section{Introduction}\label{sec:intro}
+%<Introduction of the Introduction>
+% NJU:
+% I'd emphasise the Belief Propagation, because
+% 1) it was the initial motivation to work with this topic
+% 2) most of our improvements are applicable to general BP and not just our example
+The work at hand presents a run-time optimized implementation of loopy Belief Propagation, tuned for a Recommender System. In the following, we quickly motivate our work and present the structure of this document.
 
-Do not start the introduction with the abstract or a slightly modified
-version. It follows a possible structure of the introduction. 
-Note that the structure can be modified, but the
-content should be the same. Introduction and abstract should fill at most the first page, better less.
+%Do not start the introduction with the abstract or a slightly modified
+%version. It follows a possible structure of the introduction. 
+%Note that the structure can be modified, but the
+%content should be the same. Introduction and abstract should fill at most the first page, better less.
 
-\mypar{Motivation} The first task is to motivate what you do.  You can
-start general and zoom in one the specific problem you consider.  In
-the process you should have explained to the reader: what you are doing,
-why you are doing, why it is important (order is usually reversed).
 
-For example, if my result is the fastest DFT implementation ever, one
-could roughly go as follows. First explain why the DFT is important
-(used everywhere with a few examples) and why performance matters (large datasets,
-realtime). Then explain that fast implementations are very hard and
-expensive to get (memory hierarchy, vector, parallel). 
+\mypar{Motivation} 
+\textit{Belief Propagation} (BP) is a very popular algorithm in the domain of machine learning and has found application in many different areas, ranging from natural to social sciences. BP is exerted to do probabilistic inference on \textit{graphical models}, out of which Bayesian Networks and Markov Random Fields are the most well known kinds.
 
-Now you state what you do in this paper. In our example: 
-presenting a DFT implementation that is
-faster for some sizes than all the other ones.
+Standard BP is designed for acyclic graphs, but the algorithm can still be applied to graphical models that do contain loops. BP in this context is called \textit{Loopy Belief Propagation} (LBP). However, LBP solves the inference problem only in an iterative and approximative way. Typical LBP problems are known for bad convergence and high computational costs.
 
-\mypar{Related work} Next, you have to give a brief overview of
-related work. For a paper like this, anywhere between 2 and 8
-references. Briefly explain what they do. In the end contrast to what
-you do to make now precisely clear what your contribution is.
+In this project, LBP is applied to a \textit{Recommender System} (RS). The goal of RSs is to generate a list of recommended items to some user (or other entities) of a platform or marketplace, given the ratings of other users and some ratings of the user under consideration. With the huge success of online platforms such as Amazon, Youtube and Netflix, Recommender Systems gained a lot of traction also in scientific communities. There exist many different techniques to solve the recommendation problem, some of which build upon BP. [citation] recently proposed such a method. 
+
+A run-time efficient implementation of the RS can be of economic relevance for platforms with large and dynamic user-bases. In the following, we present an analysis on how to achieve this objective for the Top-N Recommender System through loopy BP.
+
+\mypar{Related work} 
+As mentioned before, Loopy Belief Propagation methods exhibit bad convergence rates. Worse even, convergence often cannot be guaranteed at all. The illustrative work of Elidan et al. \cite{elidan2012residual} proposes a method to improve both convergence rate and, surprisingly, convergence by itself by propagating belief in an informed way through the graph. The technique is called \textit{Residual Belief Propagation} (RBP) for loopy graphs. RBP is applicable for the Recommender System an therefore is 
+
+We know about two popular open-source C++ frameworks for graph-based inference that implement the message passing algorithm \footnote{This term will be used synonymously for BP in this article.} in a generic way: \textit{libDAI} \cite{Mooij_libDAI_10} on the one hand is a clean and accessible piece of software, whereas \textit{OpenGM} \cite{andres2012opengm} on the other hand is written with a higher degree of abstraction. We chose libDAI as our reference, mostly because it offers a native implementation of RBP (contrary to OpenGM).
+
+In the following, we briefly sketch the Top-N Recommender System based on Residual Belief Propagation in section \ref{sec:background} before we extensively inform the reader in section \ref{sec:method} about the optimization techniques that have applied. The results are presented in section \ref{sec:results}.
