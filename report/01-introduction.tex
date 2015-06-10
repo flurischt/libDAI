@@ -7,18 +7,22 @@
 % 2) most of our improvements are applicable to general BP and not just our example
 The work at hand presents a run-time optimized implementation of loopy Belief Propagation, tuned for a Recommender System. In the following, we quickly motivate our work and present the structure of this document.
 
+
 %Do not start the introduction with the abstract or a slightly modified
 %version. It follows a possible structure of the introduction. 
 %Note that the structure can be modified, but the
 %content should be the same. Introduction and abstract should fill at most the first page, better less.
 
+% Elias: We should keep that in mind because the introduction to the introduction sounds quite similiar to an abstract.
 
 \mypar{Motivation} 
-\textit{Belief Propagation} (BP) is a very popular algorithm in the domain of machine learning and has found application in many different areas, ranging from natural to social sciences. BP is exerted to do probabilistic inference on \textit{graphical models}, out of which Bayesian Networks and Markov Random Fields are the most well known kinds.
+\textit{Belief Propagation} (BP) is a very general and therefore popular algorithm in the domain of machine learning. It has found application in many different areas, ranging from natural to social sciences. 
+% Elias: To unspecifc, shouldn't we just include some examples here?
+BP is exerted to do probabilistic inference on \textit{graphical models}, out of which Bayesian Networks and Markov Random Fields are the most well known.
 
-Standard BP is designed for acyclic graphs, but the algorithm can still be applied to graphical models that do contain loops. BP in this context is called \textit{Loopy Belief Propagation} (LBP). However, LBP solves the inference problem only in an iterative and approximative way. Typical LBP problems are known for bad convergence and high computational costs.
+The standard version of BP is designed to deal with acyclic graphs. The algorithm can, however, also be applied to graphical models containing loops, although convergence is no longer guaranteed. In this context BP is often called \textit{Loopy Belief Propagation} (LBP). Typical LBP problems are known for bad convergence and high computational costs. Nevertheless the approximated solution is often accurate enough to be used in real world applications.
 
-In this project, LBP is applied to a \textit{Recommender System} (RS). The goal of RSs is to generate a list of recommended items to some user (or other entities) of a platform or marketplace, given the ratings of other users and some ratings of the user under consideration. With the huge success of online platforms such as Amazon, Youtube and Netflix, Recommender Systems gained a lot of traction also in scientific communities. There exist many different techniques to solve the recommendation problem, some of which build upon BP. [citation] recently proposed such a method. 
+In this project, LBP is used to build a \textit{Recommender System} (RS). In this system the goal is to generate a list of recommended items for a specific user of a platform or marketplace. The recommendation is based upon the ratings of other users and previous ratings of the user under consideration. With the huge success of online platforms such as Amazon, Youtube and Netflix, Recommender Systems gained a lot of traction in the scientific communities. There exist many different techniques to solve the recommendation problem, some of which build upon BP. [citation] recently proposed such a method. 
 
 A run-time efficient implementation of the RS can be of economic relevance for platforms with large and dynamic user-bases. In the following, we present an analysis on how to achieve this objective for the Top-N Recommender System through loopy BP.
 
