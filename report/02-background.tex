@@ -23,6 +23,11 @@ m_{ij}(x_c) = \sum_{x_d \in X}\phi_i(x_d)\psi_{ij}(x_d,x_c)\prod_{k \in N(i) \ j
 \mypar{Top-N Recommendation}
 Top-N Recommendation is the problem where for a user $i$ one generates a list of n recommended objects, in our case movies, given a list of ratings by user $i$ and others. Ha et al. \cite{Ha:2012:TRT:2396761.2398636} propose a method for top-n recommendation using belief propagation.
 
+\begin{figure}[h]\centering
+    \includegraphics[scale=0.33]{graphics/top-n-graph.pdf}
+  \caption{Factor Graph showing three users (u nodes), three movies (m nodes) and the Factors \label{top_n_graph}}
+\end{figure}
+
 \mypar{Cost Analysis}
 ..
 
