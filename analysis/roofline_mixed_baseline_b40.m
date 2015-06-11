@@ -74,11 +74,11 @@ oneOpCycle = 1;
 
 % Scalar peak performance
 ys = ones(length(x),1).*peakPerf;
-perfBound = loglog(x,ys,'-b','LineWidth',2);
+perfBound = loglog(x,ys,'-xk','LineWidth',2);
 
 % memory bandwidth
 yb = x.*maxBytesCycle;
-memBound = loglog(x,yb,'r','LineWidth',2);
+memBound = loglog(x,yb,'-k','LineWidth',2);
 
 % measurements
 loglog(roofline_points(:,1), roofline_points(:,2), '-b', 'LineWidth',2);
@@ -187,7 +187,7 @@ roofline_points = [roofline_points; intensity, flops_cycle];
 %% Roofline Plot Baseline & B040
 % Peak division perf
 ys = ones(length(x),1).*(1/22);
-divBound = loglog(x,ys,'--b','LineWidth',2);
+divBound = loglog(x,ys,'--k','LineWidth',2);
 % title('Roofline Plot Build 40','fontsize', fontsize);
 legend([perfBound, divBound, memBound],{'Peak Performance', 'Peak Division Performance', 'Maximal Memory Bandwidth'},'Location','northwest');
 % measurements
@@ -195,3 +195,4 @@ loglog(roofline_points(:,1), roofline_points(:,2), '-r', 'LineWidth',2);
 text(0.2, 0.025,{'Baseline'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize);
 text(0.075, 0.025,{'Build 40'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize);
 print(gcf, '-r150', 'roofline_mixed.png', '-dpng');
+saveas(gcf, 'roofline_mixed', 'pdf')

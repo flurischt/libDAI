@@ -10,23 +10,18 @@
 The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the performance plot [ref to figure].
 
 \mypar{Impact of Optimizations}
-As can be seen in the runtime plot [ref to figure], the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 6 as shown in figure [fig].
+As can be seen in the runtime plot [ref to figure], the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of x as shown in figure [ref to figure]. One particular optimization (build 6) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as shown by the roofline analysis \cite{Ofenbeck:14} shown in figure \ref{roofline-mixed}.
+
+\begin{figure}\centering
+    \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
+  \caption{Roofline analysis of the baseline and our optimized version (build 40). The analysis was conducted on the Windows system described above.\label{roofline-mixed}}
+\end{figure}
+
+\begin{figure*}\centering
+  \includegraphics[scale = 1, trim={6cm 11cm 5cm 14cm}]{graphics/runtime_plot.pdf}
+  \caption{This is a tiger.}
+\end{figure*}
 
 \mypar{Vectorization}
-To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement. 
-
-\mypar{Results}
-
-Do not put two performance lines into the same plot if the operations count changed significantly (that's apples and oranges). In that case first perform the optimizations that reduce op count and report the runtime gain in a plot. Then continue to optimize the best version and show performance plots.
-
-{\bf You should}
-\begin{itemize}
-\item Follow the guide to benchmarking presented in class, in particular
-\item very readable, attractive plots (do 1 column, not 2 column plots
-for this class), proper readable font size. An example is below (of course you can have a different style),
-\item every plot answers a question, which you pose and extract the
-answer from the plot in its discussion
-\end{itemize}
-Every plot should be discussed (what does it show, which statements do
-you extract).
+To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement.
 
