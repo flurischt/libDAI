@@ -9,7 +9,7 @@
 The program versions were compiled with the following flags: 
 -std=c++11 -Wno-deprecated -Wall -W -Wextra -fPIC -march=native -O3 -DNDEBUG -fPIC
 \\
-For performance analysis Intel\textsuperscript{\textregistered} VTune Amplifier XE 2015 (build 403110) was used. Cycle counts were compared with the readings obtained by using the RDTSC instructions to check the accuracy of VTune Amplifier XE 2015. Measurements deviated by less than 1\%.
+For performance analysis Intel\textsuperscript{\textregistered} VTune Amplifier XE 2015 (build 403110) was used. Cycle counts were compared with the readings obtained by using the RDTSC instruction to check the accuracy of VTune Amplifier XE 2015. Measurements deviated by less than 1\%.
 
 \mypar{Baseline}
 The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the roofline analysis \cite{Ofenbeck:14} (see figure~\ref{roofline-mixed}).
