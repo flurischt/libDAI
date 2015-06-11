@@ -10,7 +10,7 @@
 The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the roofline analysis \cite{Ofenbeck:14} (see figure~\ref{roofline-mixed}).
 
 \mypar{Impact of Optimizations}
-As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of x as shown in figure [ref to figure]. One particular optimization (build 6) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure \ref{roofline-mixed}.
+As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 6. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure \ref{roofline-mixed}.
 
 \begin{figure}\centering
     \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
@@ -23,5 +23,10 @@ As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a fac
 \end{figure*}
 
 \mypar{Vectorization}
-To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement.
+To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement, due to some difficulties:
+\begin{itemize}
+	\item The op count was reduced significantly by replacing floating point multiplications with floating point divisions (by reusing previously calculated products). This lead to a performance bound by the division unit.
+	\item Vectorizing this division is not possible as the program flow depends on the result immediately, thus calculation 4 divisions at once is impossible. And calculating only one division using AVX is slower than a scalar division.
+	\item Doing a scalar division results in a dependency on the write back of the floating point vector, which is expensive.
+\end{itemize}
 
