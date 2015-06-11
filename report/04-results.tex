@@ -7,10 +7,10 @@
 \end{itemize}
 
 \mypar{Baseline}
-The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the performance plot [ref to figure].
+The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the roofline analysis \cite{Ofenbeck:14} (see figure~\ref{roofline-mixed}).
 
 \mypar{Impact of Optimizations}
-As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of x as shown in figure [ref to figure]. One particular optimization (build 6) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as shown by the roofline analysis \cite{Ofenbeck:14} shown in figure \ref{roofline-mixed}.
+As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of x as shown in figure [ref to figure]. One particular optimization (build 6) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure \ref{roofline-mixed}.
 
 \begin{figure}\centering
     \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
