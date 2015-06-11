@@ -72,5 +72,7 @@ ADD_CUSTOM_COMMAND(TARGET example_recommendation POST_BUILD
                    COMMAND cp "${CMAKE_SOURCE_DIR}/examples/recommendation_ref_files/*"
                               "${CMAKE_CURRENT_BINARY_DIR}/"
                   )
+#set_target_properties(example_recommendation PROPERTIES COMPILE_FLAGS "-save-temps")
+#set_target_properties(example_recommendation PROPERTIES COMPILE_FLAGS "-S")
 
 INSTALL(FILES ${dai_EXAMPLE_RESOURCES} DESTINATION share/dai/examples)

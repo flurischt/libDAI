@@ -67,8 +67,8 @@ FactorGraph example2fg() {
     // Create the factor graph out of the variables and factors
     cout << "Creating the factor graph..." << endl;
     FactorGraph fg(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
-    string fileName = "factorGraphExampleOut.dot";
-    fg.WriteToFile(fileName.c_str(), 0.01);
+    //string fileName = "factorGraphExampleOut.dot";
+    //fg.WriteToFile(fileName.c_str());
     return fg;
 }
 
@@ -122,7 +122,7 @@ pair<size_t, Real> doInference(FactorGraph &fg,
         // Output progress
         //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
-    
+
     cout << "Inference done!" << endl;
     cout << "Messages processed: " << bp.messageCount << endl;
 
@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
     const string dataset = cimg_option("-dataset", "uV2New1",
                                        "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
     const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
-    const Real delta = cimg_option("-testDelta", 1e-12,
+    const Real delta = cimg_option("-testDelta", 1e-6,
                                      "Max float difference after which the tests should fail");
     const int num_measurements = cimg_option("-numMeasurements", 1, "Run numMeasurements times and print median");
 
@@ -417,5 +417,11 @@ int main(int argc, char **argv) {
     cout << "Ran " << num_measurements << " times.\nMedian:" << endl;
     cout << "Measured cycles: " << measured_cycles << endl;
     cout << "Runtime: " << ((double) measured_cycles) / cpu_freq << " seconds" << endl;
+    cout << "Mean:" << endl;
+    double sum = 0;
+    for (size_t i = 0; i < measurements.size(); ++i) {
+        sum += measurements[i];
+    }
+    cout << "Runtime: " << (sum / (double) (cpu_freq * measurements.size())) << " seconds" << endl;
     return 0;
 }
