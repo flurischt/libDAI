@@ -1,16 +1,21 @@
 \section{Experimental Results}\label{sec:results}
 
-Here you evaluate your work using experiments. You start again with a
-very short summary of the section. The typical structure follows.
+\mypar{Experimental setup} The improvements were evaluated on two different platforms:
+\begin{itemize}
+\item Intel\textsuperscript{\textregistered} Xeon CPU E3-1220L V2 @ 2.30 GHz, gcc (Debian 4.9.2-10) 4.9.2
+\item Intel\textsuperscript{\textregistered} Core i5-2500 @ 3.3 GHz, Windows 8.1 using cygwin64 with gcc 4.9.2
+\end{itemize}
 
-\mypar{Experimental setup} Specify the platform (processor, frequency, cache sizes)
-as well as the compiler, version, and flags used. I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
+\mypar{Baseline}
+The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the performance plot [ref to figure].
 
-Then explain what input you used and what range of sizes. The idea is to give enough information so the experiments are reproducible by somebody else on his or her code.
+\mypar{Impact of Optimizations}
+As can be seen in the runtime plot [ref to figure], the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 6 as shown in figure [fig].
+
+\mypar{Vectorization}
+To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement. 
 
 \mypar{Results}
-Next divide the experiments into classes, one paragraph for each. In the simplest case you have one plot that has the size on the x-axis and the performance on the y-axis. The plot will contain several lines, one for each relevant code version. Discuss the plot and extract the overall performance gain from baseline to best code. Also state the percentage of peak performance for the best code. Note that the peak may change depending on the situation. For example, if you only do additions it would be 12 Gflop/s
-on one core with 3 Ghz and SSE and single precision floating point.
 
 Do not put two performance lines into the same plot if the operations count changed significantly (that's apples and oranges). In that case first perform the optimizations that reduce op count and report the runtime gain in a plot. Then continue to optimize the best version and show performance plots.
 
