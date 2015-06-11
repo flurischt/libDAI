@@ -71,10 +71,11 @@ plot(data_points(:,1), data_points(:,2), 'LineWidth',2);
 hold on; grid on;
 
 fontsize = 14;
-title('Baseline Performance for different Numbers of Movies', 'fontsize', fontsize);
+%title('Baseline Performance for different Numbers of Movies', 'fontsize', fontsize);
 xlabel('Number of Movies in Dataset', 'fontsize', fontsize)
-ylabel('Performance [flops/cycle]', 'fontsize', fontsize)
-
+y = ylabel('Performance [flops/cycle]', 'fontsize', fontsize,'rot', 0);
+set(y, 'position', [500,0.0583,0]);
 set(gca,'XTick',[32, 272, 734, 1638]);
 set(gca,'fontsize', fontsize);
 print(gcf, '-r150', 'performance_baseline.png', '-dpng');
+saveas(gcf,'perf_baseline', 'pdf');
