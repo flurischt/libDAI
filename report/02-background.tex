@@ -11,10 +11,17 @@
 %and perform a cost analysis.
 
 \mypar{Belief Propagation}
-..
+Belief Propagation (BP) is a technique in the domain of machine learning to perform probabilistic inference on graphical models, out of which Bayesian Networks and Markov Random Fields are the most well known. The standard version of BP is designed to deal with factor graphs, a bipartite graph that can represent Bayesian Networks or Markov Random Fields. Each node of the factor graphs represents the state of a random variable. Through message passing the state of the nodes is inferred. BP, also known as sum-product algorithm, computes the message sent from node $v_i$ to $v_j$ using equation \ref{eqn:bp_message}.
+\begin{equation}                                                            
+\label{eqn:bp_message}
+m_{ij}(x_c) = \sum_{x_d \in X}\phi_i(x_d)\psi_{ij}(x_d,x_c)\prod_{k \in N(i) \ j}m_{ki}(x_d)
+\end{equation}
+
+\textbf{TODO: describe formula, add loopy etc.} \\
+
 
 \mypar{Top-N Recommendation}
-..
+Top-N Recommendation is the problem where for a user $i$ one generates a list of n recommended objects, in our case movies, given a list of ratings by user $i$ and others. Ha et al. \cite{Ha:2012:TRT:2396761.2398636} propose a method for top-n recommendation using belief propagation.
 
 \mypar{Cost Analysis}
 ..
