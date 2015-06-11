@@ -15,7 +15,7 @@ For performance analysis Intel\textsuperscript{\textregistered} VTune Amplifier 
 The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the roofline analysis \cite{Ofenbeck:14} (see figure~\ref{roofline-mixed}).
 
 \mypar{Impact of Optimizations}
-As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 6. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance (TODO: Performance? Should we use computational intensity instead?) of the optimized version did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore by reducing the op count and introducing divisions the division unit is now a bottle neck. (TODO: became a bottle neck, don't change the time in which you write, everything already happened)
+As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 7 to 25 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 13.5 as shown in figure~\ref{flops-per-message}. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance (TODO: Performance? Should we use computational intensity instead?) of the optimized version did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore by reducing the op count and introducing divisions the division unit is now a bottle neck. (TODO: became a bottle neck, don't change the time in which you write, everything already happened)
 
 \mypar{Memory Accesses}
 Despite all the optimizations some operations (e.g. retrieving the greatest residual to determine which message to process next or graph lookup operations) are inherently non linear in memory (TODO: What do you mean with non linear? Memory intensive?). This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses. (TODO: Is this the case, how big is our graph? Theoretical versus experimental?)
@@ -23,6 +23,11 @@ Despite all the optimizations some operations (e.g. retrieving the greatest resi
 \begin{figure}\centering
     \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
   \caption{Roofline analysis of the baseline and our optimized version (build 40). The analysis was conducted on the Windows system described above.\label{roofline-mixed}}
+\end{figure}
+
+\begin{figure}\centering
+    \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/flops_per_message.pdf}
+  \caption{Comparison of the number floating point operations needed to update a single message for different builds of the program.\label{flops-per-message}}
 \end{figure}
 
 \begin{figure*}\centering

@@ -78,11 +78,15 @@ builds = [builds, {'B040'}];
 %% Flop/message plot styling
 fontsize = 14;
 figure; hold on; grid on;
-plot(data(:,1), data(:,2));
-title('Flops per Message');
-xlabel('Build')
-ylabel('[flops/message]')
+p=plot(data(:,1), data(:,2), '-o', 'linewidth', 2);
+set(p(1),'color',[0.6 0.2 0.2]);
+y = ylabel('[flops/message]','rot',0, 'fontsize', fontsize);
+set(y, 'position', [0.43,1.03*10^5,0]);
+xlabel('Build', 'fontsize', fontsize);
 set(gca,'XTick',0:1:(data_points-1));
-set(gca,'XTickLabel',builds);
+set(gca,'XTickLabel',builds, 'fontsize',fontsize);
+set(gca,'YScale','log')
+
 print(gcf, '-r150', 'flops_per_message.png', '-dpng');
-hold off;
+saveas(gcf, 'flops_per_message', 'pdf')
+
