@@ -1,5 +1,4 @@
 data = [];
-num_flops_data = [];
 data_points = 0;
 builds = {};
 
@@ -20,7 +19,6 @@ bandwidth_GB_sec = 1.597;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
-num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'Baseline'}];
 
 %% B030 floats, N=10
@@ -35,7 +33,6 @@ bandwidth_GB_sec = 0.931;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
-num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B030'}];
 
 %% B032 floats, N=10
@@ -50,7 +47,6 @@ bandwidth_GB_sec = 0.941;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
-num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B032'}];
 
 %% B036 floats, N=10
@@ -64,7 +60,6 @@ bandwidth_GB_sec = 1.169;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
-num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B036'}];
 
 %% B040 floats, N=10
@@ -78,7 +73,6 @@ bandwidth_GB_sec = 1.293;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
-num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B040'}];
 
 %% Flop/message plot styling
@@ -92,15 +86,3 @@ set(gca,'XTick',0:1:(data_points-1));
 set(gca,'XTickLabel',builds);
 print(gcf, '-r150', 'flops_per_message.png', '-dpng');
 hold off;
-
-%% Flop plot styling
-figure; hold on; grid on;
-plot(num_flops_data(:,1), num_flops_data(:,2));
-% title('Flops', 'fontsize', fontsize);
-xlabel('Build')
-y = ylabel('[flops]', 'fontsize', fontsize,'rot', 0);
-set(y, 'position', [1.5,18 * 10^9,0]);
-set(gca,'XTick',1:1:(data_points));
-set(gca,'YScale','log')
-set(gca,'XTickLabel', builds);
-saveas(gcf, 'ops_reduction', 'pdf')
