@@ -11,10 +11,23 @@
 %and perform a cost analysis.
 
 \mypar{Belief Propagation}
-..
+Belief Propagation (BP) is a technique in the domain of machine learning to perform probabilistic inference on graphical models, out of which Bayesian Networks and Markov Random Fields are the most well known. The standard version of BP is designed to deal with factor graphs, a bipartite graph that can represent Bayesian Networks or Markov Random Fields. Each node of the factor graphs represents the state of a random variable. Through message passing the state of the nodes is inferred. BP, also known as sum-product algorithm, computes the message sent from node $v_i$ to $v_j$ using equation \ref{eqn:bp_message}.
+\begin{equation}                                                            
+\label{eqn:bp_message}
+m_{ij}(x_c) = \sum_{x_d \in X}\phi_i(x_d)\psi_{ij}(x_d,x_c)\prod_{k \in N(i) \ j}m_{ki}(x_d)
+\end{equation}
+
+\textbf{TODO: describe formula, add loopy etc.} \\
+
 
 \mypar{Top-N Recommendation}
-..
+Top-N Recommendation is the problem where for a user $i$ one generates a list of n recommended objects, in our case movies, using a list of ratings by user $i$ and other users. Ha et al. \cite{Ha:2012:TRT:2396761.2398636} propose a method for top-n recommendation using loopy belief propagation. The factor graph for top-n recommendation consists of nodes for the users and movies. For each rating above a predefined threshold a factor is created and user, movie and factor are connected. Figure \ref{top_n_graph} shows a small factor graph for user $i=2$ where user $u1$ has rated the movies $m1,m2$, $u2$ the movie $m2$ and $u3$ the movies $m1,m2$ and $m3$.  
+
+\begin{figure}[h]\centering
+    \includegraphics[scale=0.33]{graphics/top-n-graph.pdf}
+  \caption{Factor Graph for three users and movies. The dark squares are the factors. \label{top_n_graph}}
+\end{figure}
+
 
 \mypar{Cost Analysis}
 ..
