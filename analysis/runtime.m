@@ -33,4 +33,5 @@ y = ylabel('Runtime [seconds]', 'fontsize', fontsize, 'rot', 0);
 set(y, 'position', [4.6,108,0]);
 set(gca, 'YTickLabel', [0.01;0.1;1;10;100]);
 daspect([1 6 1])
+set(gca,'GridLineStyle','-')
 saveas(gcf,'runtime_plot', 'pdf');
