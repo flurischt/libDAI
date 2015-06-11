@@ -28,18 +28,20 @@ Using loopy belief propagation the most important messages are sent through the 
 % TODO why u no horizontal display?
 \begin{figure*}[h]\centering
 
-\subfloat{
+%\subfloat{
     \includegraphics[scale=0.33]{graphics/top-n-graph.pdf}
-% \caption{Factor Graph for predicting top-n movies for user $u_2$. The dark squares are the factors. The values in [] show the probabilities for the random variables being in state "like" or "don't like".\label{top_n_graph}}
- }
+\caption{Factor Graph for predicting top-n movies for user $u_2$. The dark squares are the factors. The values in [] show the probabilities for the random variables being in state "like" or "don't like".\label{top_n_graph}}
+ %}
 
-\subfloat{\includegraphics[scale=0.33]{graphics/top-n-important-messages.pdf}
-%  \caption{Belief is propagated from observed node $m_2$ to unobserved notes \label{top_n_graph_important_msg}}
-  } 
+%\subfloat{
+\includegraphics[scale=0.33]{graphics/top-n-important-messages.pdf}
+  \caption{Belief is propagated from observed node $m_2$ to unobserved notes \label{top_n_graph_important_msg}}
+  %} 
 
-    \subfloat{\includegraphics[scale=0.33]{graphics/top-n-final.pdf}
-  %\caption{A possible final state for top-n recommendation. Movie $m_1$ is the top recommendation for user $u_2$. \label{top_n_graph_final_state}}
-  }
+    %\subfloat{
+    \includegraphics[scale=0.33]{graphics/top-n-final.pdf}
+  \caption{A possible final state for top-n recommendation. Movie $m_1$ is the top recommendation for user $u_2$. \label{top_n_graph_final_state}}
+%  }
 
 \end{figure*}
 
