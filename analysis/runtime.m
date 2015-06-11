@@ -11,18 +11,26 @@ fontsize = 10;
 figure;
 hold on; grid on;
 
-p = plot(big_double(:,1), big_double(:,2), '->', 'LineWidth',1);
+p = semilogy(big_double(:,1), big_double(:,2), '-x', 'LineWidth',1);
 set(p(1),'color',[0.2 0.2 0.2])
-p = plot(medium_double(:,1), medium_double(:,2), '-o', 'LineWidth',1);
+t=text(50,12,{'big dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+set(t(1),'color',[0.2 0.2 0.2])
+p = semilogy(medium_double(:,1), medium_double(:,2), '-+', 'LineWidth',1);
 set(p(1),'color',[0.2 0.2 0.6])
-p = plot(small_double(:,1), small_double(:,2), '-x', 'LineWidth',1);
-set(p(1),'color',[0.2 0.6 0.2])
-p = plot(big_float(:,1), big_float(:,2), '-*', 'LineWidth',1);
+t=text(50,0.8,{'medium dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+set(t(1),'color',[0.2 0.2 0.6])
+p = semilogy(small_double(:,1), small_double(:,2), '-o', 'LineWidth',1);
+set(p(1),'color',[0.1 0.5 0.1])
+t=text(50,0.015,{'small dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+set(t(1),'color',[0.1 0.5 0.1])
+p = semilogy(big_float(:,1), big_float(:,2), '-s', 'LineWidth',1);
 set(p(1),'color',[0.6 0.2 0.2])
-
-legend('big dataset, double precision','medium dataset, double precision','small dataset, double precision','big dataset, single precision', 'fontsize', fontsize);
+t=text(50,0.15,{'big dataset','single precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+set(t(1),'color',[0.6 0.2 0.2])
+set(gca,'YScale','log')
 xlabel('Build', 'fontsize', fontsize)
 y = ylabel('Runtime [seconds]', 'fontsize', fontsize, 'rot', 0);
-set(y, 'position', [4.6,101,0]);
+set(y, 'position', [4.6,108,0]);
+set(gca, 'YTickLabel', [0.01;0.1;1;10;100]);
 daspect([1 6 1])
 saveas(gcf,'runtime_plot', 'pdf');
