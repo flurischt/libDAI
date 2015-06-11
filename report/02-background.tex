@@ -17,10 +17,12 @@ Belief Propagation (BP) is a technique in the domain of machine learning to perf
 \begin{figure}
 \label{eqn:bp_message}
 \begin{equation*}                                                            
-\mu_{v\rightarrow a}(x_v) = \prod_{k \in N(v)\backslash \{a\}} \mu_{k\rightarrow v}(x_v)\\
-\mu_{a\rightarrow v}(x_v) = \sum_{x_a \in X}f_a(x_a) \prod_{k \in N(a)\backslash \{v\}} \mu_{k\rightarrow a}(x_v)
+\mu_{v\rightarrow a}(x_v) = \prod_{\hat a \in N(v)\backslash \{a\}} \mu_{\hat a\rightarrow v}(x_v)
 \end{equation*}
-\caption{Update equation for the belief propagation algorithm. $X$ denotes the set of possible states that the variables can be in, $x_c, x_d$ are specific states for the variables, $m_{i,j}(x)$ is the message that is send from variable $i$ to $j$ containing the belief (probability of $j$ being in $x$). $k \in N(i)\backslash j$ denotes all neighbours of $i$ except the neighbouring variable $j$. Finally }
+\begin{equation*}                                                            
+\mu_{a\rightarrow v}(x_v) = \sum_{x_a \sim x_v}f_a(x_a) \prod_{\hat v \in N(a)\backslash \{v\}} \mu_{\hat v\rightarrow a}(x_{\hat v})
+\end{equation*}
+\caption{Update equations for the BP algorithm. First for messages from variable node $v$ to factor $a$ and the second for messages from factor $a$ to variable node $v$; $x_v$ is the specific state for which we want to send our belief; $f_a(x_a)$ denotes the belief of the factor node $a$ about state $x_a$; $\mu$ is the message itself; $k \in N(i)\backslash j$ denotes all neighbours of $i$ except the neighbouring node $j$ and $x_a \sim x_v$ is used to denote all possible states that are consistent with state $x_v$.}
 \end{figure}
 
 
