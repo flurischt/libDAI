@@ -18,8 +18,6 @@
 #include <dai/bp.h>
 #include <dai/util.h>
 #include <dai/properties.h>
-#include <immintrin.h>
-#include <avxintrin.h>
 
 //#define DAI_VERBOSE
 #ifdef DAI_VERBOSE
