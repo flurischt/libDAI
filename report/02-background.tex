@@ -26,7 +26,7 @@ Top-N Recommendation is the problem where for a user $u_i$ one generates a list 
 Using loopy belief propagation the most important messages are sent through the factors and the belief is propagated from observed nodes to unobserved nodes (see Figure \ref{top_n_graph_important_msg}). When the belief propagation converges each movie has a probability "User $i$ likes movie $j$". Figure \ref{top_n_graph_final_state} shows a possible final state. The movies can be sorted and the top N elements are returned. In this example Movie $m_1$ would be the top-one recommendation for user $u_2$.
 
 % TODO why u no horizontal display?
-\begin{figure*}[h]\centering
+\begin{figure}[h]\centering
 
 %\subfloat{
     \includegraphics[scale=0.33]{graphics/top-n-graph.pdf}
@@ -43,7 +43,7 @@ Using loopy belief propagation the most important messages are sent through the 
   \caption{A possible final state for top-n recommendation. Movie $m_1$ is the top recommendation for user $u_2$. \label{top_n_graph_final_state}}
 %  }
 
-\end{figure*}
+\end{figure}
 
 \mypar{Cost Analysis}
 
