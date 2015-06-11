@@ -27,6 +27,18 @@ We started with optimizations that could be applied without changing or limiting
 
 The first issue was that we are recomputing the incoming message product every time a message gets updated. This is wasteful because the product could include well over a hundred factors from which only one would change. To avoid the re-computation we compute the product once over all messages. Whenever a message changes we also update the product by multiplying it with the new message and dividing it by the old message. This gave us an speed-up of 1.6 reducing the runtime of the algorithm from 80 to 50 seconds.
 
+Next Norman did a bunch of stuff...
+
+\mypar{Specific optimisations}
+Floats -> Double = specific because it changes the result, not okay for a library
+
+Pattern 0101 and 0011
+
+Used the fact that we only stored p, 1-p
+
+Residual
+
+Vectorization
 %As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
 
 %Mention and cite any external resources including library or other code.
