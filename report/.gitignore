@@ -11,3 +11,4 @@ report.pdf
 svnver.tex 
 *.out 
 *.tmp
+report.synctex.gz
