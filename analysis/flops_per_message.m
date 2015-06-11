@@ -1,4 +1,5 @@
 data = [];
+num_flops_data = [];
 data_points = 0;
 builds = {};
 
@@ -9,6 +10,7 @@ builds = {};
 %                   FP_COMP_OPS_EXE.X87
 %% B003 [Baseline] doubles, N=1
 % -O3 -g
+N=1;
 num_messages = 442075;
 num_flops = 13974020961 + 0 + 2334003501;
 num_cycles = 355138532707; % reported by vTune
@@ -18,10 +20,12 @@ bandwidth_GB_sec = 1.597;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
+num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'Baseline'}];
 
 %% B030 floats, N=10
 % -O3 -g
+N=10;
 num_messages = 884068;
 num_flops = 2052003078 + 576000864 + 816001224;
 num_cycles = 59584089376; % reported by vTune
@@ -31,10 +35,12 @@ bandwidth_GB_sec = 0.931;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
+num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B030'}];
 
 %% B032 floats, N=10
 % -O3 -g
+N=10;
 num_messages = 884068;
 num_flops = 1470002205 + 582000873 + 714001071;
 num_cycles = 52960079440; % reported by vTune
@@ -44,10 +50,12 @@ bandwidth_GB_sec = 0.941;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
+num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B032'}];
 
 %% B036 floats, N=10
 % -O3 -g
+N=10;
 num_messages = 260215;
 num_flops = 456000684 + 60000090 + 210000315;
 num_cycles = 23580035370;
@@ -56,10 +64,12 @@ bandwidth_GB_sec = 1.169;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
+num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B036'}];
 
 %% B042 floats, N=10
 % -O3 -g
+N=10;
 num_messages = 260215;
 num_flops = 420000630 + 66000099 + 222000333;
 num_cycles = 21540032310;
@@ -68,9 +78,11 @@ bandwidth_GB_sec = 1.293;
 
 data = [data;data_points, num_flops/num_messages];
 data_points = data_points + 1;
+num_flops_data = [num_flops_data;data_points, num_flops/N];
 builds = [builds, {'B040'}];
 
-%% Plot styling
+%% Flop/message plot styling
+fontsize = 14;
 figure; hold on; grid on;
 plot(data(:,1), data(:,2));
 title('Flops per Message');
@@ -79,3 +91,14 @@ ylabel('[flops/message]')
 set(gca,'XTick',0:1:(data_points-1));
 set(gca,'XTickLabel',builds);
 print(gcf, '-r150', 'flops_per_message.png', '-dpng');
+
+%% Flop/message plot styling
+figure; hold on; grid on;
+plot(num_flops_data(:,1), num_flops_data(:,2));
+title('Flops', 'fontsize', fontsize);
+xlabel('Build')
+y = ylabel('[flops]', 'fontsize', fontsize,'rot', 0);
+set(y, 'position', [1.5,18 * 10^9,0]);
+set(gca,'XTick',0:1:(data_points-1));
+set(gca,'XTickLabel',builds);
+saveas(gcf, 'ops_reduction', 'pdf')
