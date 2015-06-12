@@ -186,6 +186,12 @@ namespace dai {
             for (const Neighbor &I : nbV(i)) {
                 message(i, I.iter) = c;
                 newMessage(i, I.iter) = c;
+#ifdef DAI_VECTORIZATION
+                _edges[i][I.iter].reciprocals = _mm_set1_ps(1/c);
+#else
+                _edges[i][I.iter].reciprocals[0] = 1/c;
+                _edges[i][I.iter].reciprocals[1] = 1/c;
+#endif
                 updateResidual(i, I.iter, 0.0);
             }
         }
@@ -556,6 +562,7 @@ namespace dai {
         _oldProd[i][0] = _oldProd[i][0] / _edges[i][_I].message * _edges[i][_I].newMessage;
         _oldProd[i][1] = _oldProd[i][1] / (1.f - _edges[i][_I].message) * temp;
 
+        // The following is not feasible because of precision problems. (x/y ≠ x*(1/y))
         //_oldProd[i][0] *=  _edges[i][_I].reciprocals[0] * _edges[i][_I].newMessage;
         //_oldProd[i][1] *=  _edges[i][_I].reciprocals[1] * temp;
 
