@@ -592,13 +592,14 @@ namespace dai {
         DAI_DEBASSERT(props.damping == false);
         DAI_DEBASSERT(_oldProd[i].size() == 2);
 
-        //_oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
-        //_oldProd[i][1] =  _oldProd[i][1] / (1.f - _edges[i][_I].message) * (1.f - _edges[i][_I].newMessage);
 
         auto temp = (1.f - _edges[i][_I].newMessage);
 
-        _oldProd[i][0] *=  _edges[i][_I].reciprocals[0] * _edges[i][_I].newMessage;
-        _oldProd[i][1] *=  _edges[i][_I].reciprocals[1] * temp;
+        _oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
+        _oldProd[i][1] =  _oldProd[i][1] / (1.f - _edges[i][_I].message) * temp;
+
+        //_oldProd[i][0] *=  _edges[i][_I].reciprocals[0] * _edges[i][_I].newMessage;
+        //_oldProd[i][1] *=  _edges[i][_I].reciprocals[1] * temp;
 
         _edges[i][_I].reciprocals[0] = 1.f / _edges[i][_I].newMessage;
         _edges[i][_I].reciprocals[1] = 1.f / temp;
