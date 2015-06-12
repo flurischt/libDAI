@@ -6,10 +6,25 @@
 
 %For this class, explain all the optimizations you performed. This mean, you first very briefly
 %explain the baseline implementation, then go through locality and other optimizations, and finally SSE (every project will be slightly different of course). Show or mention relevant analysis or assumptions. A few examples: 1) Profiling may lead you to optimize one part first; 2) bandwidth plus data transfer analysis may show that it is memory bound; 3) it may be too hard to implement the algorithm in full generality: make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we consider only one type of input image); 4) explain how certain data accesses have poor locality. Generally, any type of analysis adds value to your work.
-As a baseline we used the libDai library \cite{Mooij_libDAI_10} which provides an implementation for loopy belief propagation using the max residual updating scheme. Using the library is was easy to implement a recommendation system on top of it, closely following \cite{Ha:2012:TRT:2396761.2398636}. One important decision, when dealing with belief propagation, is the one concerning the domain. Switching to a logarithmic domain enables us to express the product over the messages as a sum, often making it less likely to suffer from numerical rounding errors and sometimes making the computation faster. We tested both methods and decided to not utilize the logarithmic domain because the accuracy did not increase and the overhead of transforming the results from/to the log-domain gave us a small increase in the runtime. 
+
+As a baseline we used the libDAI library \cite{Mooij_libDAI_10} which provides an implementation for loopy belief propagation using the max residual updating scheme. With the library, it was simple to implement the recommendation system as proposed in \cite{Ha:2012:TRT:2396761.2398636}.
+
+One important decision, when dealing with belief propagation, is the one concerning the domain. Switching to a logarithmic domain enables us to express the product over the messages as a sum, often making it less likely to suffer from numerical rounding errors and sometimes making the computation faster. We tested both methods and decided to not utilize the logarithmic domain because the accuracy did not increase and the overhead of transforming the results from/to the log-domain gave us a small increase in the runtime. (TODO: anderswo hin, kuerzen?)
 
 \mypar{Code structure}
-Figure \ref{overviewflow} shows a very high level overview of our code structure. After an initialization phase the belief propagation algorithm is invoked. The algorithms then loops until a specified number of maximum iteration is reached, the maximum residual becomes zero or the change in the updated messages is smaller than some specified tolerance. In every iteration 'findMaxResidual' is called to determine the message which should be updated next. After the message is determined it gets updated with a call to 'updateMessage' which also calls 'updateResidual' to update the corresponding residual. This can be done quickly because we already store not only the current messages for each node but also the new message in a container called 'newMessages'. Therefore 'updateMessage' only needs to set the current message to the new one. Finally all messages inside the 'newMessages' container that would be affected by this change needs to be recomputed. We call 'calcNewMessage' which goes through the neighbourhood of the updated message and recomputes the messages, storing the updated version in our 'newMessages' container. In order to compute the new message we first need to compute a product over all incoming messages which is done in 'calcIncomingMessageProduct'. Because we are only interested in a single variable the product is then marginalized (over all other variables) which is done with a call to 'marginalizeProductOntoMessage'. We observe that the methods that get called the most often are 'updateResidual', 'calcIncomingMessageProduct' and 'marginalizeProductOntoMessage'. This is why our optimizations will mostly focus on these.
+Figure \ref{overviewflow} shows a high-level overview of the code structure. After an initialization phase the BP algorithm is invoked that loops until a specified maximum number of iterations is reached, the maximum residual becomes zero or the change in the updated messages is smaller than some specified tolerance. In every iteration, findMaxResidual is called to determine the message that should be updated next (by updateMessage). The actual update step goes quick, because it only assigns newMessage to message. The costly part of the algorithm is the re-computation of newMessage for all neighboring nodes that are affected by the change of message. To do so, calcNewMessage is called for every candidate, which first computes a product over all incoming messages (calcIncomingMessageProduct) and then marginalizes this product of messages over all other variables (marginalizeProductOntoMessage). Note that the residual is simply $||\mathtt{message}-\mathtt{newMessage}||_\infty$. 
+
+%\lstset{basicstyle=\tiny\ttfamily}
+%\begin{table}
+%\begin{lstlisting}
+%init()
+%while (not done)
+%   messageToUpdate <-- findMaxResidual;
+%\end{lstlisting}
+%\caption{Pseudo code for Residual BP}
+%\end{table}
+
+The methods that get called the most often are updateResidual, calcIncomingMessageProduct and marginalizeProductMessage. Hence, our optimizations will mostly focus on these.
 
 \begin{figure}\centering
     \includegraphics[scale=0.63, trim={6.5cm 0cm 0 0cm},clip]{graphics/loopybp.pdf}
@@ -18,27 +33,45 @@ Figure \ref{overviewflow} shows a very high level overview of our code structure
 
 
 \mypar{Optimizations}
+The optimization of the code was performed iteratively, driven by insights from analyzing and profiling the code. In a first phase, we focused on general optimizations that would not change the interfaces and generality of the implementation. In a second phase the special property of the recommender system were exploited, trading in generality for speed and interfering drastically with the interface of the library.
 
-After we created our baseline and set up a testing environment to automatically validate all our changes we started with the optimizations. We tried to focus on general optimizations first that wouldn't change the interface/functionality of the library. After that was done we focused on our concrete example (recommendation), trading in generality for speed, drastically changing the interface and functionality of the library. In both parts we started with optimizations concerning the number of flops, without considering the computational intensity. We then profiled our code to find critical points where we could optimize memory access patterns or reorder operations to increase the computational intensity. This was also the point where we decided to switch from double to single precision which decreased our accuracy slightly but gave us an significant boost for the runtime. %TODO: How much?
+(TODO: rewrite) 
+In both phases, we started off by reducing the Op counts, without considering the computational intensity. We then profiled our code to find critical points where we could optimize memory access patterns or reorder operations to increase the computational intensity. This was also the point where we decided to switch from double to single precision which decreased our accuracy slightly but gave us an significant boost for the runtime. %TODO: How much?
 As a final step we considered vectorization which gave us only a very small speed-up. We will know explain all our optimizations in more detail.
  
-\mypar{General optimizations}
-We started with optimizations that could be applied without changing or limiting the functionality of the library.
+\mypar{Phase 1: General optimizations}
+% -- Optimize calculation of product -- 
+A first observation was that the incoming message product is recomputed each time a message gets updated. To avoid the re-computation we compute the product once over all messages. Whenever a message changes we also update the product by multiplying it with the new message and dividing it by the old message. This gave us an speed-up of 1.6 reducing the runtime of the algorithm from 80 to 50 seconds.
 
-The first issue was that we are recomputing the incoming message product every time a message gets updated. This is wasteful because the product could include well over a hundred factors from which only one would change. To avoid the re-computation we compute the product once over all messages. Whenever a message changes we also update the product by multiplying it with the new message and dividing it by the old message. This gave us an speed-up of 1.6 reducing the runtime of the algorithm from 80 to 50 seconds.
+TODO: sicherstellen, ziemlich früh zu erwähnen, dass alle performance angaben stark vom datensatz (size AND shape) abhängen. Konvention: wir beziehen den speedup immer auf den datensatz u1, den wir zu beginn immer verwendet haben
 
-Next Norman did a bunch of stuff...
+% -- C++ refactoring --
+The baseline libDAI favors readability over performance. Encouraged by evidence from the profiler, a subsequent optimization step consisted in the refactoring of the code base with the main objective to reduce memory ops. The biggest improvement we achieved by modifying functions to operate in-place. Another improvement consisted in the creation of buffers for intermediate results and to avoid superfluous creation and destruction of data. 
+By applying memory-friendly C++ we achieved an overall speedup of about a factor 2.0 (reference data set u1).
 
-\mypar{Specific optimisations}
-Floats -> Double = specific because it changes the result, not okay for a library
+%-- Switch to single precision
+At this stage, the code was memory bound. To further reduce memory traffic, we enabled the support for single floating point precision. However, because the sum-product algorithm requires to calculate products with a large number of factors (the actual number is defined by the degree of the nodes in the factor graph), a trade-off approach was chosen: the calculation of products is still performed with double precision, but the messages can be stored as single precision floats. Note that due to the reduced precision the convergence tolerance had to be changed, which has a strong impact on the number of message processed by the algorithm: for our reference dataset the number was reduced by a factor of 6. But with a total speedup of a factor of 12, a net speedup of a factor 2 was achieved, which in this case is equivalent to an equally increase of the operational intensity. Our code can be compiled for both single and double precision (storage) through a compiler flag.
 
-Pattern 0101 and 0011
+\mypar{Phase 2: Specific optimizations}
+%-- More efficient storage of messages.
+For every iteration, a possibly large number of messages is read and stored. Therefore, it is beneficial to reduce the number of message lookups. Because a message $m$ represents a normalized probability distribution that satisfies $\sum_i=1^N m_i = 1$, it suffices to store only $N-1$ values for every message. Taking into account that the recommender system uses variables with only two states, the amount of bytes required to store a message can be divided by a factor of two. 
 
-Used the fact that we only stored p, 1-p
+%-- Exploit the special pattern how messages are updated
+An analysis of the pattern how message products are calculated revealed a calculation pattern that is specific for the factor graph of the recommender system. Hardcoding this pattern is beneficial because one can save an index lookup that is required for the generic case. To be more specific: calcIncomingMessageProduct\_0101\_0011 calculates the optimized (unmarginalized) product coming from factor I required to update variable i. 
+Technically, the optimization is comparable with a loop unrolling where the innermost loop necessary for the index lookup is flattened away.
 
-Residual
+The two specific optimization steps improved runtime by a factor of two (reference data set u1)
 
-Vectorization
+%-- Precalculate reciprocals
+The first optimization (pre-calculation of message products, with later division of a message) increased the pressure on the floating point division unit. As our investigations pointed out, this issue turned into one of the major bottlenecks of our code. By pre-calculating reciprocals (“1/message”) the dependency on the fp division unit could be reduced. 
+
+%-- Vectorization
+To further reduce the dependency on the division unit, we decided to introduce vectorization.
+Unfortunately, the fast but less accurate \_mm\_rcp\_ps is not applicable for our use case because of precision problems, so the precalculation is performed with ordinary division.
+
+
+TODO: Residual ?? (Was hast du damit gemeint, Elias?)
+
 %As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
 
 %Mention and cite any external resources including library or other code.

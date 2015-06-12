@@ -2,19 +2,17 @@
 %   spconf.sty  - LaTeX style file, and
 %   IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
-
 \documentclass[letterpaper]{article}
-\usepackage{spconf,amsmath,amssymb,graphicx}
-\usepackage{epstopdf}
+\usepackage{amsmath,amssymb,graphicx,spconf}
 \usepackage{color}
-\usepackage{subfig}
+%\usepackage{listings}
 
 
 % Example definitions.
 % --------------------
 % nice symbols for real and complex numbers
-\newcommand{\R}[0]{\mathbb{R}}
-\newcommand{\C}[0]{\mathbb{C}}
+%\newcommand{\R}[0]{\mathbb{R}}
+%\newcommand{\C}[0]{\mathbb{C}}
 
 % bold paragraph titles
 \newcommand{\mypar}[1]{{\bf #1.}}
@@ -32,6 +30,8 @@
 \begin{document}
 %\ninept
 \maketitle
+
+\texttt{this should go!}
 
 \input{00-abstract}
 \input{01-introduction}
