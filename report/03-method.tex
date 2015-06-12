@@ -69,11 +69,6 @@ The two specific optimization steps improved runtime by a factor of two (referen
 %-- Precalculate reciprocals
 The first optimization (pre-calculation of message products, with later division of a message) increased the pressure on the floating point division unit. As our investigations pointed out, this issue turned into one of the major bottlenecks of our code. We tried to solve this issue by pre-calculating reciprocals (“1/message”) but the speed-up was not significant and the division unit stayed the major bottleneck. This is why we turned to vectorization, to compute multiple divisions at once and also make use of the fast but less accurate \_mm\_rcp\_ps. Unfortunately our experiments showed that the lack of accuracy with the \_mm\_rcp\_ps instruction lead to a worse convergence of our algorithm, greatly increasing the runtime. Nevertheless we tried to utilize vectorization throughout our whole codebase to get some instruction level parallelism. This turned out to be harder than anticipated because our computations strongly depend on each other. We could not even predict which message we would update next unless we finish updating the current message. This is why, in the end, vectorization had not a significant impact on our performance.
 
-%-- Vectorization
-To further reduce the dependency on the division unit, we decided to introduce vectorization.
-Unfortunately, the fast but less accurate \_mm\_rcp\_ps is not applicable for our use case because of precision problems, so the precalculation is performed with ordinary division.
-
-
 %As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
 
 %Mention and cite any external resources including library or other code.
