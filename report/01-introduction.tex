@@ -6,8 +6,9 @@
 % 1) it was the initial motivation to work with this topic
 % 2) most of our improvements are applicable to general BP and not just our example
 
-Whether you are planing to segment an image \cite{1544822}, recognize speech \cite{5373446} or analyze medical datasets \cite{bailly2011finding}, \textit{belief propagation} (BP) plays an important role in all these research areas. This is due to the very general nature of the BP algorithm which allows to calculate the probabilities for certain events (e.g. a pixel belonging to a region, an audio segment belonging to a language,...). In recent years, BP has been applied successfully also for the recommendation of items: Popularized by the Netflix challenge, recommendation systems try to predict which items a user wants to see based on his own ratings and the ratings of other users.
+Whether you are planing to segment an image \cite{1544822}, recognize speech \cite{5373446} or analyze medical datasets \cite{bailly2011finding}, \textit{Belief Propagation} (BP) plays an important role in all these research areas. This is due to the very general nature of the BP algorithm which allows to approximate the probabilities for certain events (e.g. a pixel belonging to an object, an audio fragment belonging to a language,...). In recent years, BP has also been applied successfully in the domain of recommender systems \cite{Ha:2012:TRT:2396761.2398636}. Popularized by the Netflix challenge and E-Commerce shops such as Amazon, recommender systems try to predict which movies/items a user wants to watch/buy based on his previous ratings as well as the ratings of other, often similar, users. Belief propagation can be used to compute the probability of a user to like a particular item. Given these probabilities we are able to rank items and output the Top-N items for the given user.
 
+ 
 %The work at hand presents a run-time optimized implementation of loopy Belief Propagation, tuned for a Recommender System. In the following, we quickly motivate our work and present the structure of this document.
 
 
@@ -19,12 +20,8 @@ Whether you are planing to segment an image \cite{1544822}, recognize speech \ci
 % Elias: We should keep that in mind because the introduction to the introduction sounds quite similiar to an abstract.
 
 \mypar{Motivation} 
-\textit{Belief Propagation} (BP) is a very general and therefore popular algorithm in the domain of machine learning. %It has found application in many different areas, ranging from natural to social sciences. 
-% Elias: To unspecifc, shouldn't we just include some examples here?
-
-In this project, \textit{Loopy Belief Propagation} (LBP) is used to build a \textit{Recommender System} (RS). In this system the goal is to generate a list of recommended items for a specific user of a platform or marketplace. The recommendation is based upon the ratings of other users and previous ratings of the user under consideration. With the huge success of online platforms such as Amazon, Youtube and Netflix, Recommender Systems gained a lot of traction in the scientific communities. There exist many different techniques to solve the recommendation problem, some of which make use of BP. Ha et al. \cite{Ha:2012:TRT:2396761.2398636} recently proposed such a method. 
-
-A run-time efficient implementation of the RS can be of economic relevance for platforms with large and dynamic user-bases. In the following, we present an analysis on how to achieve this objective for the Top-N Recommender System through loopy BP.
+While the results of \cite{Ha:2012:TRT:2396761.2398636} looked very promising, one problem was that BP often takes a long time to converge. Even worse, because we needed to run BP once for every user (to predict his ratings), the system seemed to be impossible to use for a large number of users. In our initial tests a baseline implementation took about 21 hours to predict all the ratings on a fairly small dataset (80367 ratings from 943 users for 1683 movies). To change this a run-time efficient implementation of the BP algorithm was needed.
+This would not only make this one particular approach feasible but also enable a wide range of other applications to benefit from the increased speed.
 
 \mypar{Related work} 
 We know about two popular open-source C++ frameworks for graph-based inference that implement the message passing algorithm \footnote{This term will be used synonymously for BP in this article.} in a generic way: \textit{libDAI} \cite{Mooij_libDAI_10} on the one hand is a clean and accessible piece of software, whereas \textit{OpenGM} \cite{andres2012opengm} on the other hand is richer in feature and written with a higher degree of abstraction. We chose libDAI as our reference, mostly because it offers, as opposed to OpenGM, a native implementation of \textit{residual} BP (see below for an explanation). 
