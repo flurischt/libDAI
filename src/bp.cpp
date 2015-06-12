@@ -286,43 +286,45 @@ namespace dai {
     }
 
 #else
-    void BP::marginalizeProductOntoMessage(double* prod, size_t i, size_t _I, size_t prodsize)
-    {
-        MessageType &marg = newMessage(i,_I);
+
+    void BP::marginalizeProductOntoMessage(double *prod, size_t i, size_t _I, size_t prodsize) {
+        MessageType &marg = newMessage(i, _I);
         // Calculate marginal AND normalize probability.
         // Avoid the indirect lookup via ind_t if possible.
         switch (_edges[i][_I].index) {
             // Check which case and do the marginalization (explained above) directly.
             case INDEX_0011: {
-                const ProbProduct::value_type a = (prod[0]+prod[1]);
-                const ProbProduct::value_type s = a + (prod[2]+prod[3]);
-                marg = a/s;
-            } break;
+                const ProbProduct::value_type a = (prod[0] + prod[1]);
+                const ProbProduct::value_type s = a + (prod[2] + prod[3]);
+                marg = a / s;
+            }
+                break;
             case INDEX_0101: {
-                const ProbProduct::value_type a = (prod[0]+prod[2]);
-                const ProbProduct::value_type s = a + (prod[1]+prod[3]);
-                marg = a/s;
-            } break;
+                const ProbProduct::value_type a = (prod[0] + prod[2]);
+                const ProbProduct::value_type s = a + (prod[1] + prod[3]);
+                marg = a / s;
+            }
+                break;
             default: {
                 // let us do the slow approach.
                 // This will never happen with our graph structure.
                 marg = 0;
                 // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
                 // corresponds x_i == ind[k]
-                const ind_t& ind = index(i,_I);
+                const ind_t &ind = index(i, _I);
                 ProbProduct::value_type a = 0.;
                 ProbProduct::value_type s = 0.;
-                for( size_t r = 0; r < prodsize; ++r )
-                {
+                for (size_t r = 0; r < prodsize; ++r) {
                     if (ind[r] == 0)
                         a += prod[r];
                     s += prod[r];
                     DAI_ASSERT(ind[r] == 0 || ind[r] == 1);
                 }
-                marg = a/s;
+                marg = a / s;
             }
         }
     }
+
 #endif
 
     void BP::calcNewMessage(size_t i, size_t _I) {
@@ -541,7 +543,8 @@ namespace dai {
     }
 
 #else
-    void BP::updateMessage( size_t i, size_t _I ) {
+
+    void BP::updateMessage(size_t i, size_t _I) {
 
         // Damping is not supported here.
         DAI_DEBASSERT(props.damping == false);
@@ -550,8 +553,8 @@ namespace dai {
 
         auto temp = (1.f - _edges[i][_I].newMessage);
 
-        _oldProd[i][0] =  _oldProd[i][0] /       _edges[i][_I].message  *       _edges[i][_I].newMessage;
-        _oldProd[i][1] =  _oldProd[i][1] / (1.f - _edges[i][_I].message) * temp;
+        _oldProd[i][0] = _oldProd[i][0] / _edges[i][_I].message * _edges[i][_I].newMessage;
+        _oldProd[i][1] = _oldProd[i][1] / (1.f - _edges[i][_I].message) * temp;
 
         //_oldProd[i][0] *=  _edges[i][_I].reciprocals[0] * _edges[i][_I].newMessage;
         //_oldProd[i][1] *=  _edges[i][_I].reciprocals[1] * temp;
@@ -561,10 +564,10 @@ namespace dai {
 
         // Count message.
         messageCount++;
-        if( recordSentMessages )
-            _sentMessages.push_back(make_pair(i,_I));
-        message(i,_I) = newMessage(i,_I);
-        updateResidual( i, _I, 0.0 );
+        if (recordSentMessages)
+            _sentMessages.push_back(make_pair(i, _I));
+        message(i, _I) = newMessage(i, _I);
+        updateResidual(i, _I, 0.0);
     }
 
 #endif
@@ -604,36 +607,38 @@ namespace dai {
     }
 
 #else
-void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const {
-    const Neighbors& n = nbF(I);
-    DAI_ASSERT(nbF(I).size() == 2);
 
-    const size_t n0  = n[0].node;
-    if (i!=n0) {
-        const size_t _I0 = n[0].dual;
-        DAI_ASSERT(_edges[n0][_I0].index == INDEX_0101);
+    void BP::calcIncomingMessageProduct_0101_0011(double *prod, size_t I, size_t i) const {
+        const Neighbors &n = nbF(I);
+        DAI_ASSERT(nbF(I).size() == 2);
 
-        double temp1 = _oldProd[n0][0] * _edges[n0][_I0].reciprocals[0];
-        double temp2 = _oldProd[n0][1] * _edges[n0][_I0].reciprocals[1];
-        prod[0] *= temp1;
-        prod[1] *= temp2;
-        prod[2] *= temp1;
-        prod[3] *= temp2;
+        const size_t n0 = n[0].node;
+        if (i != n0) {
+            const size_t _I0 = n[0].dual;
+            DAI_ASSERT(_edges[n0][_I0].index == INDEX_0101);
+
+            double temp1 = _oldProd[n0][0] * _edges[n0][_I0].reciprocals[0];
+            double temp2 = _oldProd[n0][1] * _edges[n0][_I0].reciprocals[1];
+            prod[0] *= temp1;
+            prod[1] *= temp2;
+            prod[2] *= temp1;
+            prod[3] *= temp2;
+        }
+
+        const size_t n1 = n[1].node;
+        if (i != n1) {
+            const size_t _I1 = n[1].dual;
+            DAI_ASSERT(_edges[n1][_I1].index == INDEX_0011);
+
+            double temp1 = _oldProd[n1][0] * _edges[n1][_I1].reciprocals[0];
+            double temp2 = _oldProd[n1][1] * _edges[n1][_I1].reciprocals[1];
+            prod[0] *= temp1;
+            prod[1] *= temp1;
+            prod[2] *= temp2;
+            prod[3] *= temp2;
+        }
     }
 
-    const size_t n1  = n[1].node;
-    if (i!=n1) {
-        const size_t _I1 = n[1].dual;
-        DAI_ASSERT(_edges[n1][_I1].index == INDEX_0011);
-
-        double temp1 = _oldProd[n1][0] * _edges[n1][_I1].reciprocals[0];
-        double temp2 = _oldProd[n1][1] * _edges[n1][_I1].reciprocals[1];
-        prod[0] *= temp1;
-        prod[1] *= temp1;
-        prod[2] *= temp2;
-        prod[3] *= temp2;
-    }
-}
 #endif
 } // end of namespace dai
 
