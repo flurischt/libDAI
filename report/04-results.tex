@@ -9,13 +9,13 @@
 The program versions were compiled with the following flags: 
 -std=c++11 -Wno-deprecated -Wall -W -Wextra -fPIC -march=native -O3 -DNDEBUG -fPIC
 \\
-For performance analysis Intel\textsuperscript{\textregistered} VTune Amplifier XE 2015 (build 403110) was used. Cycle counts were compared with the readings obtained by using the RDTSC instruction to check the accuracy of VTune Amplifier XE 2015. Measurements deviated by less than 1\%.
+For performance analysis Intel\textsuperscript{\textregistered} VTune Amplifier XE 2015 (build 403110) was used. Cycle counts were compared with the readings obtained by the RDTSC instruction to check the accuracy of VTune Amplifier XE 2015. Measurements deviated by less than 1\%.
 
 \mypar{Baseline}
 The analysis of the baseline implementation showed a lot of potential for optimization. Most notably by reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the roofline analysis \cite{Ofenbeck:14} (see figure~\ref{roofline-mixed}).
 
 \mypar{Impact of Optimizations}
-As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 8.7 to 27.4 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 13.5 as shown in figure~\ref{flops-per-message}. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore by reducing the op count and introducing divisions the division unit became a bottle neck.
+As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 8.7 to 27.4 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 13.5 as shown in figure~\ref{flops-per-message}. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore by reducing the op count and introducing divisions the division unit became a bottleneck.
 
 \mypar{Memory Accesses}
 Despite all the optimizations some operations (e.g. retrieving the greatest residual to determine which message to process next or graph lookup operations) are inherently non linear in memory. These operations are expensive as they access random memory locations. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
@@ -32,13 +32,13 @@ Despite all the optimizations some operations (e.g. retrieving the greatest resi
 
 \begin{figure*}\centering
   \includegraphics[scale = 1, trim={7cm 11cm 6.4cm 14cm}]{graphics/runtime_plot.pdf}
-  \caption{Runtime plot showing the execution time on the Linux system across different versions of our program for three different input sizes. Dataset details: big: 80367 ratings, 943 users, 1683 movies; medium: 33392 ratings, 943 users, 272 movies; small: 3594 ratings, 943 users, 32 movies.\label{runtime}}
+  \caption{Runtime plot showing the execution times on the Linux system across different versions of our program for three different input sizes. Dataset details: big: 80367 ratings, 943 users, 1683 movies; medium: 33392 ratings, 943 users, 272 movies; small: 3594 ratings, 943 users, 32 movies.\label{runtime}}
 \end{figure*}
 
 \mypar{Vectorization}
-To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement, due to some difficulties:
+To further improve the runtime some parts of the code were vectorized manually. Unfortunately, this did not bring a significant improvement, due to the following difficulties:
 \begin{itemize}
 	\item The op count was reduced significantly by replacing floating point multiplications with floating point divisions (by reusing previously calculated products). This lead to a performance bound by the division unit.
-	\item Vectorizing this division is not possible as the program flow depends on the result immediately, thus calculation 4 divisions at once is impossible. This dependency stems from the fact that the residuals are influenced by the result of the division. And calculating only one division using AVX is slower than a scalar division \cite{intrinsics_guide}.
+	\item Vectorizing this division is not possible as the program flow depends on the result immediately. This dependency stems from the fact that the residuals are influenced by the result of the division. And calculating only one division using AVX is slower than a scalar division \cite{intrinsics_guide}.
 	\item Doing a scalar division results in a dependency on the write back of the floating point vector, which is expensive.
 \end{itemize}
