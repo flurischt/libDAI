@@ -7,8 +7,10 @@
 #include <iostream>
 
 /*
- * Sample code from lecture FNC
- * TODO: Give More credits
+ * We use the RDTSC timer code from the FNC Lecture.
+ * Our timer is based on the homework code taken from here:
+ *    http://www.inf.ethz.ch/personal/markusp/teaching/263-2300-ETH-spring15/homeworks/hw01files/tsc_x86.h
+ * Credits go to Prof. and Assistants of the FNC Lecture 2015 ETH Zurich.
  */
 
 /* ================ GNU C and possibly other UNIX compilers ================ */
