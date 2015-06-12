@@ -272,37 +272,55 @@ namespace dai {
 #ifdef DAI_VECTORIZATION
     void BP::marginalizeProductOntoMessage(__m256d& avx_prod, size_t i, size_t _I, size_t prodsize)
     {
+        __m256d values = _mm256_hadd_pd(avx_prod, _mm256_permute2f128_pd(avx_prod, avx_prod, 1)); //a0 + a1, a2 + a3, a2 + a3, a0 + a1
+        //__m256d values_all = _mm256_hadd_pd(values, values); will make it only slower...
+        // do the division as early as possible.
+        const ProbProduct::value_type s = 1/(((double*)&values)[0] + ((double*)&values)[1]);
         MessageType &marg = newMessage(i,_I);
-
-        __m256d xswap = _mm256_permute_pd(avx_prod, 0b0101);                        // [1, 0, 3, 2]
-        __m256d xflip128 = _mm256_permute2f128_pd(avx_prod, avx_prod, 0x01);        // [2, 3, 0, 1]
-        __m256d prod_2 = _mm256_blend_pd(xswap, xflip128, 0b1001);                  // [2, 0, 3, 1]
-
-        __m256d sums =  _mm256_hadd_pd(avx_prod, prod_2); // [0+1, 2+0, 2+3, 3+1] aka [a, a, s-a, s-a]
-        __m256d flipedSums = _mm256_permute2f128_pd(sums, sums, 0x01); // [2+3, 3+1, 0+1, 2+0]
-        __m256d avx_s = _mm256_add_pd(sums, flipedSums); // [s, s, s, s]
-        __m256d avx_a = _mm256_blend_pd(sums, flipedSums, 0b1100);         // [0+1, 2+0, 0+1, 2+0]
-
-        // mm256_div_pd is slow on sandy bridge. use scalar division
-        //__m256d avx_marg = _mm256_div_pd(avx_a, avx_s);
-        __m128d a_low = _mm256_extractf128_pd(avx_a, 0);    // [0+1, 2+0]
-        __m128d s_low = _mm256_extractf128_pd(avx_s, 0);    // [s, s]
-
-        ProbProduct::value_type s;
-        ProbProduct::value_type a;
-        _mm_storel_pd(&s, s_low);
-
-        //TODO instead of switch we could use a mask and blend. see below
-        // didn't implement because my setup currently has trouble with _mm_blendv_pd..
+        // Calculate marginal AND normalize probability.
+        // Avoid the indirect lookup via ind_t if possible.
         switch (_edges[i][_I].index) {
+            // Check which case and do the marginalization (explained above) directly.
             case INDEX_0011: {
-                _mm_storel_pd(&a, a_low);
-            } break;
-            case INDEX_0101: {
-                _mm_storeh_pd(&a, a_low);
-            } break;
+                const ProbProduct::value_type a = ((double*)&values)[0];
+                marg = a*s;
+                return;
+            }
+            default: {
+                const ProbProduct::value_type a = (((double*)&avx_prod)[0]+((double*)&avx_prod)[2]);
+                marg = a*s;
+                return;
+            }
         }
-        marg = a/s;
+//        __m256d xswap = _mm256_permute_pd(avx_prod, 0b0101);                        // [1, 0, 3, 2]
+//        __m256d xflip128 = _mm256_permute2f128_pd(avx_prod, avx_prod, 0x01);        // [2, 3, 0, 1]
+//        __m256d prod_2 = _mm256_blend_pd(xswap, xflip128, 0b1001);                  // [2, 0, 3, 1]
+//
+//        __m256d sums =  _mm256_hadd_pd(avx_prod, prod_2); // [0+1, 2+0, 2+3, 3+1] aka [a, a, s-a, s-a]
+//        __m256d flipedSums = _mm256_permute2f128_pd(sums, sums, 0x01); // [2+3, 3+1, 0+1, 2+0]
+//        __m256d avx_s = _mm256_add_pd(sums, flipedSums); // [s, s, s, s]
+//        __m256d avx_a = _mm256_blend_pd(sums, flipedSums, 0b1100);         // [0+1, 2+0, 0+1, 2+0]
+//
+//        // mm256_div_pd is slow on sandy bridge. use scalar division
+//        //__m256d avx_marg = _mm256_div_pd(avx_a, avx_s);
+//        __m128d a_low = _mm256_extractf128_pd(avx_a, 0);    // [0+1, 2+0]
+//        __m128d s_low = _mm256_extractf128_pd(avx_s, 0);    // [s, s]
+//
+//        ProbProduct::value_type s;
+//        ProbProduct::value_type a;
+//        _mm_storel_pd(&s, s_low);
+//
+//        //TODO instead of switch we could use a mask and blend. see below
+//        // didn't implement because my setup currently has trouble with _mm_blendv_pd..
+//        switch (_edges[i][_I].index) {
+//            case INDEX_0011: {
+//                _mm_storel_pd(&a, a_low);
+//            } break;
+//            case INDEX_0101: {
+//                _mm_storeh_pd(&a, a_low);
+//            } break;
+//        }
+//        marg = a/s;
 //        // to be able to use _mm_storel below
 //        // TODO we switch from avx to sse here. need to clear some bits?
 //        __m128d marg_low = _mm256_extractf128_pd(avx_marg, 0);                  // [0+1/s, 2+0/s]
