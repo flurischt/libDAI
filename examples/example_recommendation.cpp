@@ -1,9 +1,15 @@
-// basic file operations
+//
+// this example implements "Top-n recommendation through belief propagation" by Ha et al.
+// 
+// USAGE:
+//  ./example_recommendation -dataset u1
+// this expects a u1.base and u1.test file in the local directory.
+//
+
 #include <iostream>
 #include <fstream>
-#include <algorithm>    // std::max, min
-#include <dai/alldai.h>  // Include main libDAI header file
-#include <CImg.h>        // This example needs CImg to be installed
+#include <dai/alldai.h>
+#include <CImg.h>
 #include <dai/utils/timer.h>
 
 using namespace dai;
@@ -30,65 +36,22 @@ Factor createFactorRecommendation(const Var &n1, const Var &n2, Real alpha) {
     return fac;
 }
 
-FactorGraph example2fg() {
-    vector<Var> vars;
-    vector<Factor> factors;
-
-    size_t N = 5;
-    size_t M = 5;
-    Real alpha = 0.1;
-    // Reserve memory for the variables
-    vars.reserve(N + M);
-
-    // Create a binary variable for each movie/person
-    for (size_t i = 0; i < N + M; i++)
-        vars.push_back(Var(i, 2));
-
-    factors.push_back(createFactorRecommendation(vars[0], vars[N], alpha));
-    factors.push_back(createFactorRecommendation(vars[0], vars[N + 1], alpha));
-    factors.push_back(createFactorRecommendation(vars[1], vars[N], alpha));
-    factors.push_back(createFactorRecommendation(vars[1], vars[N + 1], alpha));
-    factors.push_back(createFactorRecommendation(vars[1], vars[N + 2], alpha));
-    factors.push_back(createFactorRecommendation(vars[2], vars[N + 1], alpha));
-    factors.push_back(createFactorRecommendation(vars[2], vars[N + 3], alpha));
-    factors.push_back(createFactorRecommendation(vars[3], vars[N + 2], alpha));
-    factors.push_back(createFactorRecommendation(vars[3], vars[N + 3], alpha));
-    factors.push_back(createFactorRecommendation(vars[4], vars[N + 3], alpha));
-    factors.push_back(createFactorRecommendation(vars[4], vars[N + 4], alpha));
-    Factor fac1(vars[5]);
-    fac1.set(0, 0.9);
-    fac1.set(1, 0.1);
-    Factor fac2(vars[6]);
-    fac2.set(0, 0.9);
-    fac2.set(1, 0.1);
-    factors.push_back(fac1);
-    factors.push_back(fac2);
-
-    // Create the factor graph out of the variables and factors
-    cout << "Creating the factor graph..." << endl;
-    FactorGraph fg(factors.begin(), factors.end(), vars.begin(), vars.end(), factors.size(), vars.size());
-    //string fileName = "factorGraphExampleOut.dot";
-    //fg.WriteToFile(fileName.c_str());
-    return fg;
-}
-
-
 pair<size_t, Real> doInference(FactorGraph &fg,
-                                 const string &options,
-                                 size_t maxIter,
-                                 Real tol,
-                                 vector<Real> &m,
-                                 size_t specialFactors) {
+                               const string &options,
+                               size_t maxIter,
+                               Real tol,
+                               vector<Real> &m,
+                               size_t specialFactors) {
     BP bp(fg, options);
 
     // Choose here whether message recording should be enabled or not.
     bp.recordSentMessages = false;
     // Set properties explicitly.
     PropertySet props;
-    props.set("damping", (Real)   0.0f);
+    props.set("damping", (Real) 0.0f);
     props.set("maxiter", (size_t) maxIter);
-    props.set("maxtime", (Real)   INFINITY);
-    props.set("tol",     (Real)   tol);
+    props.set("maxtime", (Real) INFINITY);
+    props.set("tol", (Real) tol);
     props.set("verbose", (size_t) 0);
     props.set("specialFactors", (size_t) specialFactors);
 
@@ -97,7 +60,6 @@ pair<size_t, Real> doInference(FactorGraph &fg,
     cout << "Properties: " << bp.printProperties() << endl;
 
     // Initialize inference algorithm
-    //cout << "Initializing inference algorithm..." << endl;
     bp.init();
 
     // Initialize vector for storing the recommendations
@@ -118,28 +80,21 @@ pair<size_t, Real> doInference(FactorGraph &fg,
         // Perform the requested inference algorithm for only one step
         bp.setMaxIter(iter + 1);
         maxDiff = bp.run();
-
-        // Output progress
-        //cout << "  Iterations = " << iter << ", maxDiff = " << maxDiff << endl;
     }
 
     cout << "Inference done!" << endl;
     cout << "Messages processed: " << bp.messageCount << endl;
 
-    if (bp.recordSentMessages)
-    {
+    if (bp.recordSentMessages) {
         const string filename("message.txt");
         ofstream file;
         file.open(filename);
         cout << "Dumping messages to " << filename << "..." << endl;
         if (file.is_open())
-            for (const auto& m : bp.getSentMessages())
+            for (const auto &m : bp.getSentMessages())
                 file << m.first << " <-- " << m.second << std::endl;
         file.close();
     }
-
-
-    // Clean up inference algorithm
 
     // Return num of iterations and reached convergence level
     return make_pair(++iter, maxDiff);
@@ -149,8 +104,7 @@ pair<size_t, Real> doInference(FactorGraph &fg,
 vector<vector<pair<int, int> > > extract_ratings(string file_name) {
     ifstream fin;
     fin.open(file_name.c_str(), ifstream::in);
-    if (!fin.is_open())
-    {
+    if (!fin.is_open()) {
         cerr << "Could not open file: " << file_name << endl;
         exit(1);
     }
@@ -164,7 +118,6 @@ vector<vector<pair<int, int> > > extract_ratings(string file_name) {
         long long time;
         fin >> user >> movie >> rating >> time;
         user--;
-        //cout << user << " " << movie << " " << rating << endl;
         while (user >= ratings.size()) {
             ratings.push_back(vector<pair<int, int> >());
         }
@@ -174,7 +127,7 @@ vector<vector<pair<int, int> > > extract_ratings(string file_name) {
 }
 
 
-FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user, size_t& specialFactors) {
+FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user, size_t &specialFactors) {
     // We will create a variable for every potential user/movie. We know the number of users, let us estimate the number of movies.
     int num_users = votings.size();
     int num_movies = 0;
@@ -224,9 +177,8 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user, s
     for (size_t i = 0; i < votings[user].size(); ++i) {
         Factor fac(vars[num_users + votings[user][i].first]);
         Real like = max(0.1, min(0.9, 0.5 + (votings[user][i].second - mean) / (stdev * normalization_factor_p)));
-        //cout << votings[user][i].second << " to " << like << endl;
         fac.set(0, like);
-        fac.set(1, 1-like);
+        fac.set(1, 1 - like);
         factors.push_back(fac);
     }
 
@@ -236,15 +188,15 @@ FactorGraph data2fg(const vector<vector<pair<int, int> > > &votings, int user, s
 }
 
 
-pair<Real, Real> getPrecisionAndRecall(    const vector<vector<pair<int, int> > > &test_data,
-                                           const vector<pair<Real, int> > &ratings,
-                                           const vector<vector<pair<int, int> > > &input,
-                                           int user, size_t N) {
+pair<Real, Real> getPrecisionAndRecall(const vector<vector<pair<int, int> > > &test_data,
+                                       const vector<pair<Real, int> > &ratings,
+                                       const vector<vector<pair<int, int> > > &input,
+                                       int user, size_t N) {
     // get the top predicted elements.
     vector<int> predicted;
     for (size_t i = 0; i < ratings.size(); ++i) {
         bool rated = false;
-        for (size_t j=0; j<input[user].size(); ++j) {
+        for (size_t j = 0; j < input[user].size(); ++j) {
             if (input[user][j].second == ratings[i].second) {
                 rated = true;
                 break;
@@ -275,7 +227,6 @@ pair<Real, Real> getPrecisionAndRecall(    const vector<vector<pair<int, int> > 
                                                 v.begin());
     v.resize(it - v.begin());
 
-    //std::cout << "The intersection has " << (v.size()) << " elements:\n";
     if (wanted.size() == 0) {
         // dummy element to prevent division by zero.
         wanted.push_back(0);
@@ -285,23 +236,21 @@ pair<Real, Real> getPrecisionAndRecall(    const vector<vector<pair<int, int> > 
 
 
 // compares the calculated ratings to the reference file
-void verify_results(const string dataset, const Real delta, vector<pair<Real, int>>& ratings){
+void verify_results(const string dataset, const Real delta, vector<pair<Real, int>> &ratings) {
     ifstream fin;
     string file_name = dataset + ".reference";
     fin.open(file_name.c_str(), ifstream::in);
-    if(!fin.is_open())
-    {
+    if (!fin.is_open()) {
         cerr << "Test FAILED! Reference file " << dataset << ".reference cannot be opened." << endl;
         exit(1);
     }
     Real ref_d;
     Real ref_i;
     size_t line = 1;
-    for(vector<pair<Real, int> >::iterator it=ratings.begin();it!=ratings.end();it++,line++) {
+    for (vector<pair<Real, int> >::iterator it = ratings.begin(); it != ratings.end(); it++, line++) {
         fin >> ref_d;
         fin >> ref_i;
-        if(fabs(ref_d - it->first) > delta || ref_i != it->second)
-        {
+        if (fabs(ref_d - it->first) > delta || ref_i != it->second) {
             cerr << "TEST FAILED! Difference at line " << line << " found!" << endl;
             cerr << "Expected: " << ref_d << " / " << ref_i << endl;
             cerr << "Actual: " << it->first << " / " << it->second << endl;
@@ -315,7 +264,7 @@ void verify_results(const string dataset, const Real delta, vector<pair<Real, in
 /// Main program
 int main(int argc, char **argv) {
 
-    cimg_usage("This example shows how libDAI can be used for a simple recommendation task");
+    cimg_usage("top-n recommendation using libDAI");
     const string options("[updates=SEQMAX,maxiter=100,tol=1e-15,logdomain=0]");
     const size_t maxiter = cimg_option("-maxiter", 100, "Maximum number of iterations for inference method");
     const Real tol = cimg_option("-tol", 1e-15, "Desired tolerance level for inference method");
@@ -327,7 +276,7 @@ int main(int argc, char **argv) {
                                        "The name of the dataset without file extension. Values: {u1, uV2New1, uNew1}");
     const bool run_tests = cimg_option("-test", false, "compare calculated ratings to reference (dataset.reference)");
     const Real delta = cimg_option("-testDelta", 1e-6,
-                                     "Max float difference after which the tests should fail");
+                                   "Max float difference after which the tests should fail");
     const int num_measurements = cimg_option("-numMeasurements", 1, "Run numMeasurements times and print median");
 
     cout << "reading " << dataset << ".base now..." << endl;
@@ -342,15 +291,14 @@ int main(int argc, char **argv) {
     long measured_cycles = 0;
     Timer timer;
     vector<long> measurements;
-    for(int run=0;run<num_measurements;run++) {
+    for (int run = 0; run < num_measurements; run++) {
         p10 = 0;
         p20 = 0;
         r10 = 0;
         r20 = 0;
         measured_cycles = 0;
-        for (int user=0; user<N; ++user) {
-            cout << "building factor graph for user " << user+1 << " out of " << N << endl;
-            //FactorGraph fg  = example2fg();
+        for (int user = 0; user < N; ++user) {
+            cout << "building factor graph for user " << user + 1 << " out of " << N << endl;
             size_t specialFactors = -1;
             FactorGraph fg = data2fg(input_data, user, specialFactors);
 
@@ -365,37 +313,32 @@ int main(int argc, char **argv) {
 
             cout << "Iterations = " << result.first << ", maxDiff = " << result.second << endl;
 
-            // Debug output with all the values:
-            // for (size_t i = 0; i < m.size(); ++i) {
-            //    cout << i << " with " << m[i] << endl;
-            // }
-
             vector<pair<Real, int> > ratings;
             for (size_t i = input_data.size(); i < m.size(); ++i) {
                 // push back the negative so we can use the standard sorting.
                 ratings.push_back(make_pair<Real, int>(-m[i], i - input_data.size() + 1));
             }
             cout << "RatingsSize" << ratings.size() << endl;
-            if(output_ratings && run == num_measurements -1) {
+            if (output_ratings && run == num_measurements - 1) {
                 // output the calculated ratings to STDERR so that they can be stored and reused for regression tests
                 // you can create a reference file the following way:
                 //      ./example_recommendation > output.txt 2> ratings.txt
                 cerr.precision(15);
-                for(vector<pair<Real, int> >::iterator it=ratings.begin();it!=ratings.end();it++) {
+                for (vector<pair<Real, int> >::iterator it = ratings.begin(); it != ratings.end(); it++) {
                     cerr << it->first << " " << it->second << endl;
                 }
             }
-            if(run_tests)
+            if (run_tests)
                 verify_results(dataset, delta, ratings);
 
             sort(ratings.begin(), ratings.end());
             pair<Real, Real> pr10 = getPrecisionAndRecall(test_data, ratings, input_data, user, 10);
             pair<Real, Real> pr20 = getPrecisionAndRecall(test_data, ratings, input_data, user, 20);
 
-            p10 +=  pr10.first;
-            p20 +=  pr20.first;
-            r10 +=  pr10.second;
-            r20 +=  pr20.second;
+            p10 += pr10.first;
+            p20 += pr20.first;
+            r10 += pr10.second;
+            r20 += pr20.second;
             cout << "Precision (N=10): " << pr10.first << endl;
             cout << "Precision (N=20): " << pr20.first << endl;
             cout << "Recall (N=10): " << pr10.second << endl;
