@@ -76,13 +76,19 @@ data_points = data_points + 1;
 builds = [builds, {'B040'}];
 
 %% Flop/message plot styling
-fontsize = 14;
+fontsize = 18;
 figure; hold on; grid on;
 p=plot(data(:,1), data(:,2), '-o', 'linewidth', 2);
 set(p(1),'color',[0.6 0.2 0.2]);
-y = ylabel('[flops/message]','rot',0, 'fontsize', fontsize);
-set(y, 'position', [0.43,1.03*10^5,0]);
+y = ylabel('[flops/message]','rot',0, 'fontsize', fontsize, 'HorizontalAlignment', 'left');
+set(y, 'position', [0,1.03*10^5,0]);
 xlabel('Build', 'fontsize', fontsize);
+legend('Number of flops per message')
+text(data(1,1)+0.1,data(1,2),{num2str(data(1,2),'%.0f')},'VerticalAlignment','bottom','HorizontalAlignment','left', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',2);
+text(data(2,1)+0.1,data(2,2)*1.1,{num2str(data(2,2),'%.0f')},'VerticalAlignment','bottom','HorizontalAlignment','left', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',2);
+text(data(3,1)+0.1,data(3,2)*1.1,{num2str(data(3,2),'%.0f')},'VerticalAlignment','bottom','HorizontalAlignment','left', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',2);
+text(data(4,1)+0.1,data(4,2)*1.1,{num2str(data(4,2),'%.0f')},'VerticalAlignment','bottom','HorizontalAlignment','left', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',2);
+text(data(5,1)-0.05,data(5,2)*0.9,{num2str(data(5,2),'%.0f')},'VerticalAlignment','top','HorizontalAlignment','right', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',2);
 set(gca,'XTick',0:1:(data_points-1));
 set(gca,'XTickLabel',builds, 'fontsize',fontsize);
 set(gca,'YScale','log')
