@@ -18,7 +18,7 @@ The analysis of the baseline implementation showed a lot of potential for optimi
 As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a factor of 8.7 to 27.4 depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 13.5 as shown in figure~\ref{flops-per-message}. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore by reducing the op count and introducing divisions the division unit became a bottle neck.
 
 \mypar{Memory Accesses}
-Despite all the optimizations some operations (e.g. retrieving the greatest residual to determine which message to process next or graph lookup operations) are inherently non linear in memory and are therefore expensive due to their random nature. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
+Despite all the optimizations some operations (e.g. retrieving the greatest residual to determine which message to process next or graph lookup operations) are inherently non linear in memory. These operations are expensive as they access random memory locations. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
 
 \begin{figure}\centering
     \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
