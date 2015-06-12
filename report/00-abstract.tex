@@ -1,5 +1,6 @@
 \begin{abstract}
-Belief propagation (BP) is a very general algorithm to perform inference on graphical models. Recently it has been applied in the domain of recommender system by Jiwoon Ha et al.\ (2012). While the results seemed promising, a high computational cost has prevented this method from becoming widely used. In this report we analyse the computational challenges and create a highly optimized version of the BP algorithm that works very well with a recommender system. Our implementation is based on the libDAI library, which provides an excellent code base for BP.
-We developed a number of different optimisations which are not only applicable for recommendation engines but can be used to improve the runtime of any application which utilizes BP.
-In the end we are able to maintain the high precision of the recommendation system while improving the runtime by a factor of 120, making it feasible to use such recommendation engines in real world applications.
+Belief propagation (BP) is a very general algorithm to perform inference on graphical models. Recently it has been applied in the domain of recommender system by Jiwoon Ha et al.\ (2012). While the results seemed promising, a high computational cost has prevented this method from becoming widely used. In this report we analyse the computational challenges and present a fast version of the BP algorithm, highly optimized for a recommender system. 
+Our implementation is based on the libDAI library for approximate inference, which provides an excellent code base for BP.
+We developed a number of improvements which are not only applicable for recommendation engines but can be used also to improve the runtime of any application which utilizes BP.
+In the end we are able to maintain the high precision of the recommendation system while reducing the runtime by a factor of 120, making it feasible to use such recommendation engines in real world applications.
 \end{abstract}
