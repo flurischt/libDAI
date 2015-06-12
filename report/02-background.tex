@@ -1,23 +1,13 @@
 \section{Background}\label{sec:background}
-
-%Give a short, self-contained summary of necessary
-%background information. For example, assume you present an
-%implementation of FFT algorithms. You could organize into DFT
-%definition, FFTs considered, and cost analysis. The goal of the
-%background section is to make the paper self-contained for an audience
-%as large as possible. As in every section
-%you start with a very brief overview of the section. Here it could be as follows: In this section 
-%we formally define the discrete Fourier transform, introduce the algorithms we use
-%and perform a cost analysis.
-In this section we introduce the reader to Belief propagation and Top-N Recommendation.
+We first introduce the reader to Belief Propagation, then to Top-N recommendation.
 
 \mypar{Belief Propagation}
-BP is a technique in the domain of machine learning to perform probabilistic inference on graphical models, out of which Bayesian Networks and Mar\-kov Random Fields are the most well known. The standard version of BP is designed to deal with \textit{factor graphs}, special bipartite graphs that can represent Bayesian Networks or Markov Random Fields. Nodes in a factor graph $G(V,F,E)$ are either variables $v \in V = \{ v_1, \ldots, v_N \}$ or factors $f \in F = \{f_1, \ldots, f_M \}$. Edges $e\in E$ model dependencies between nodes.
+BP is a technique in the domain of machine learning to perform probabilistic inference on graphical models. The standard version of BP is designed to deal with \textit{factor graphs}, special bipartite graphs that can represent Bayesian Networks or Markov Random Fields. Nodes in a factor graph $G(V,F,E)$ are either variables $v \in V = \{ v_1, \ldots, v_N \}$ or factors $f \in F = \{f_1, \ldots, f_M \}$. Edges $e\in E$ model dependencies between nodes.
 \textit{Variable nodes} $v$ hold a belief about the variable assigned to them. A belief $p(i):=p[v=x_i\in\Omega_{v}]$ is a density function that assigns a probability to each state $x_v \in \Omega_v$ of variable $v$. Since the number of states of a variable is often finite this belief can be represented as a vector $v \in \mathbb{R}^n$, with $n$ being the number of states. 
 \textit{Factor nodes} $f$, on the other hand, hold a belief about the joint probabilities of their neighbors. 
-This means that if, for example, there are two (discrete) variable nodes $v_a, v_b$ connected to a factor node $f$ the belief can be represented as a matrix, where entry $i,j$ holds the belief about one variable being in state $i$  and the other in state $j$. Figuratively speaking, \textit{messages} are sent to inform neighboring nodes about the beliefs of the sender. All receivers update their beliefs accordingly and forward the updated messages to their neighbors. This is repeated until messages (and therefore beliefs) converge. 
+This means that if, for example, there are two (discrete) variable nodes $v_a, v_b$ connected to a factor node $f$ the belief can be represented as a matrix, where entry $i,j$ holds the belief about the variables being in state $i$ or $j$ respectively. Figuratively speaking, \textit{messages} are sent to inform neighboring nodes about the beliefs of the sender. All receivers update their beliefs accordingly and forward the updated messages to their neighbors. This is repeated until messages (and therefore beliefs) converge. 
 
-Conceptually there are two types of messages: $\mu_{v\rightarrow f}$ from variable nodes $v$ to factor nodes $f$, and $\mu_{f\rightarrow v}$ from factor nodes $f$ to variable nodes $v$. Understanding the concrete formulas is not required to follow this report but we give both update equations in figure \ref{eqn:bp_message} because they show nicely why this version of the belief propagation is often called the \textit{sum-product algorithm}. The update equations involve a product over all neighboring nodes, followed by a sum that marginalizes over all variables, except  the one to which the message is send. We will encounter this sum-product pattern again when we describe our baseline implementation in section \ref{sec:method}.
+Conceptually there are two types of messages: $\mu_{v\rightarrow f}$ from variable nodes $v$ to factor nodes $f$, and $\mu_{f\rightarrow v}$ from factor nodes $f$ to variable nodes $v$. Both update equations are given in figure \ref{eqn:bp_message}. They show nicely why this version of BP is often called the \textit{sum-product algorithm}. The update equations involve a product over all neighboring nodes, followed by a sum that marginalizes over all variables except the one to which the message is sent.
 
 \begin{figure}
 \label{eqn:bp_message}
