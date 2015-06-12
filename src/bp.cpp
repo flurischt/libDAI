@@ -89,8 +89,8 @@ namespace dai {
         _oldProd.clear();
 #endif
 
-        _edge2lutNew.clear();
-        _edge2lutNew.reserve(nrVars());
+        _edge2lut.clear();
+        _edge2lut.reserve(nrVars());
 
         // Add the predefined indices first.
         // The order matters and will be used later!
@@ -107,8 +107,8 @@ namespace dai {
 #ifndef DAI_VECTORIZATION
             _oldProd.push_back(vector<double>(var(i).states(), 1));
 #endif
-            _edge2lutNew.push_back(vector<heap_data_handle>());
-            _edge2lutNew[i].reserve(nbV(i).size());
+            _edge2lut.push_back(vector<heap_data_handle>());
+            _edge2lut[i].reserve(nbV(i).size());
             for (const Neighbor &I : nbV(i)) {
                 EdgeProp newEP;
                 newEP.message = 0;
@@ -135,7 +135,7 @@ namespace dai {
 
                 newEP.residual = 0.0;
                 _edges[i].push_back(newEP);
-                _edge2lutNew[i].push_back(_lutNew.push(make_pair(newEP.residual, make_pair(i, _edges[i].size() - 1))));
+                _edge2lut[i].push_back(_lut.push(make_pair(newEP.residual, make_pair(i, _edges[i].size() - 1))));
             }
         }
         // create old beliefs
@@ -196,11 +196,11 @@ namespace dai {
 // Finds the maximum residual which determines which part of the graph should be updated next. This can be done
 // efficiently because we already store the residuals in order and only need to take the top element.
     bool BP::findMaxResidual(size_t &i, size_t &_I) {
-        DAI_ASSERT(!_lutNew.empty());
-        i = _lutNew.top().second.first;
-        _I = _lutNew.top().second.second;
+        DAI_ASSERT(!_lut.empty());
+        i = _lut.top().second.first;
+        _I = _lut.top().second.second;
 
-        return _lutNew.top().first > 0;
+        return _lut.top().first > 0;
     }
 
 
@@ -576,7 +576,7 @@ namespace dai {
         EdgeProp *pEdge = &_edges[i][_I];
         pEdge->residual = r;
         // rearrange look-up table (delete and reinsert new key)
-        _lutNew.update(_edge2lutNew[i][_I], make_pair(r, make_pair(i, _I)));
+        _lut.update(_edge2lut[i][_I], make_pair(r, make_pair(i, _I)));
     }
 
 

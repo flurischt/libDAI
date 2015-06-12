@@ -127,17 +127,11 @@ namespace dai {
 
         // Buffer for simple calculations.
         mutable ProbProduct _probTemp;
-
-        /// Type of lookup table (only used for maximum-residual BP)
-        typedef std::multimap<Real, std::pair<size_t, size_t> > LutType;
-        /// Lookup table (only used for maximum-residual BP)
-        std::vector<std::vector<LutType::iterator> > _edge2lutOld;
         typedef std::pair<Real, std::pair<size_t, size_t>> heap_data;
         typedef boost::heap::pairing_heap<heap_data, boost::heap::mutable_<true>>::handle_type heap_data_handle;
-        std::vector<std::vector<heap_data_handle> > _edge2lutNew;
+        std::vector<std::vector<heap_data_handle> > _edge2lut;
         /// Lookup table (only used for maximum-residual BP)
-        LutType _lut;
-        boost::heap::pairing_heap<heap_data, boost::heap::mutable_<true>> _lutNew;
+        boost::heap::pairing_heap<heap_data, boost::heap::mutable_<true>> _lut;
         /// Maximum difference between variable beliefs encountered so far
         Real _maxdiff;
         /// Number of iterations needed
@@ -202,7 +196,6 @@ namespace dai {
                 , _edges()
                 , _indices()
                 , _oldProd()
-                , _edge2lutOld()
                 , _lut()
                 , _maxdiff(0.0)
                 , _iters(0U)
@@ -239,7 +232,6 @@ namespace dai {
                 , _edges(x._edges)
                 , _indices(x._indices)
                 , _oldProd(x._oldProd)
-                , _edge2lutOld(x._edge2lutOld)
                 , _lut(x._lut)
                 , _maxdiff(x._maxdiff)
                 , _iters(x._iters)
@@ -249,8 +241,6 @@ namespace dai {
                 , _updateSeq(x._updateSeq)
                 , props(x.props)
                 , recordSentMessages(x.recordSentMessages) {
-            for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
-                _edge2lutOld[l->second.first][l->second.second] = l;
         }
 
         /// Assignment operator
@@ -261,8 +251,6 @@ namespace dai {
                 _indices = x._indices;
                 _oldProd = x._oldProd;
                 _lut = x._lut;
-                for( LutType::iterator l = _lut.begin(); l != _lut.end(); ++l )
-                    _edge2lutOld[l->second.first][l->second.second] = l;
                 _maxdiff = x._maxdiff;
                 _iters = x._iters;
                 _sentMessages = x._sentMessages;
