@@ -69,7 +69,16 @@ Using loopy belief propagation the most important messages are sent through the 
 
 \mypar{Cost Analysis}
 
-\textbf{TODO}
+Floating point operations are used as a cost measure, since the result of belief propagation is a list of probabilites which are represented as floating point numbers. Unfortunately, it is not possible to calculate the exact amount of floationg point operations for a given input size, as belief propagation is an iterative algorithm and the factor graph is heavily dependent on the input as it directly represents the user ratings. Therefore floating point operations are counted using performance counters. The following counters were used:
+
+\begin{itemize}
+	\item FP\_COMP\_OPS\_EXE.SSE\_SCALAR\_SINGLE and \\FP\_COMP\_OPS\_EXE.SSE\_SCALAR\_DOUBLE:\\count the number of SSE instructions on single floats and doubles.
+	\item FP\_COMP\_OPS\_EXE.SSE\_PACKED\_SINGLE and \\FP\_COMP\_OPS\_EXE.SSE\_PACKED\_DOUBLE:\\count the number of packed SSE instructions on floats and doubles.
+	\item SIMD\_FP\_256.PACKED\_SINGLE and \\SIMD\_FP\_256.PACKED\_DOUBLE:\\count the number of packed AVX instructions on floats and doubles.
+	\item FP\_COMP\_OPS\_EXE.X87:\\counts the legacy X87 floating point instructions.
+\end{itemize}
+
+Since these counters do not allow to distinguish the operations (e.g separate additions from multiplications and divisions) all floating point operations are weighted the same. The performance counters were evaluated using VTune Amplifier XE 2015 (see section~\ref{sec:results}).
 
 %\mypar{Discrete Fourier Transform}
 %Precisely define the transform so I understand it even if I have never
