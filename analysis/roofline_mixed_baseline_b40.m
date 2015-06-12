@@ -64,7 +64,7 @@ roofline_points = [roofline_points; intensity, flops_cycle];
 %% Roofline Plot Baseline
 figure;
 hold on; grid on
-fontsize = 14;
+fontsize = 18;
 x = logspace(-2,0);
 
 maxBytesCycle = 4;
@@ -74,7 +74,7 @@ oneOpCycle = 1;
 
 % Scalar peak performance
 ys = ones(length(x),1).*peakPerf;
-perfBound = loglog(x,ys,'-k','LineWidth',2);
+perfBound = loglog(x,ys,'--k','LineWidth',2);
 
 % memory bandwidth
 yb = x.*maxBytesCycle;
@@ -87,8 +87,8 @@ set(p(1),'color',[0.2 0.2 0.6])
 
 legend('Peak Performance','Maximal Memory Bandwidth','Location','northwest');
 xlabel('Operational Intensity [flops/byte]', 'fontsize', fontsize)
-y=ylabel({'Performance [flops/cycle]'}, 'fontsize', fontsize,'rot', 0);
-set(y, 'position', [0.0225,10.2,0]);
+y=ylabel({'Performance [flops/cycle]'}, 'fontsize', fontsize,'rot', 0, 'Horizontalalignment', 'left');
+set(y, 'position', [0.01,10.2,0]);
 set(gca,'XScale','log')
 set(gca,'YScale','log')
 % t=title('Roofline Plot Baseline','fontsize', fontsize+1);
@@ -187,13 +187,13 @@ roofline_points = [roofline_points; intensity, flops_cycle];
 %% Roofline Plot Baseline & B040
 % Peak division perf
 ys = ones(length(x),1).*(1/22);
-divBound = loglog(x,ys,'--k','LineWidth',2);
+divBound = loglog(x,ys,'-k','LineWidth',2);
 % title('Roofline Plot Build 40','fontsize', fontsize);
 legend([perfBound, divBound, memBound],{'Peak Performance', 'Peak Division Performance', 'Maximal Memory Bandwidth'},'Location','northwest');
 % measurements
 p=loglog(roofline_points(:,1), roofline_points(:,2), '-o', 'LineWidth',2);
 set(p(1),'color',[0.1 0.5 0.1]);
-text(0.2, 0.025,{'Baseline'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize);
-text(0.075, 0.025,{'Build 40'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize);
+text(0.2, 0.023,{'Baseline'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize,'BackgroundColor',[1 1 1],'Margin',1);
+text(0.075, 0.023,{'Build 40'},'VerticalAlignment','middle','HorizontalAlignment','center', 'fontsize', fontsize,'BackgroundColor',[1 1 1],'Margin',1);
 print(gcf, '-r150', 'roofline_mixed.png', '-dpng');
 saveas(gcf, 'roofline_mixed', 'pdf')
