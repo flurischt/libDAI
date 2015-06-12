@@ -21,12 +21,12 @@ As can be seen in figure~\ref{runtime}, the overall runtime was reduced by a fac
 Despite all the optimizations some operations (e.g. retrieving the greatest residual to determine which message to process next or graph lookup operations) are inherently non linear in memory. These operations are expensive as they access random memory locations. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
 
 \begin{figure}\centering
-    \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
+    \includegraphics[scale=0.47, trim={2.1cm 6.5cm 1.1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
   \caption{Roofline analysis of the baseline and our optimized version (build 40). The analysis was conducted on the Windows system described above.\label{roofline-mixed}}
 \end{figure}
 
 \begin{figure}\centering
-    \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/flops_per_message.pdf}
+    \includegraphics[scale=0.47, trim={2.1cm 6.5cm 1.1cm 8.5cm},clip]{graphics/flops_per_message.pdf}
   \caption{Comparison of the number floating point operations needed to update a single message for different builds of the program.\label{flops-per-message}}
 \end{figure}
 
