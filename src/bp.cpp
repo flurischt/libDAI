@@ -5,9 +5,6 @@
  *  Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
  */
 
-
-#include <dai/dai_config.h>
-
 #ifdef DAI_WITH_BP
 
 
@@ -15,10 +12,7 @@
 #include <sstream>
 #include <map>
 #include <set>
-#include <algorithm>
 #include <dai/bp.h>
-#include <dai/util.h>
-#include <dai/properties.h>
 
 #ifdef DAI_VERBOSE
 #   define DAI_LOG(MESSAGE) do { std::cout << MESSAGE << std::endl; } while(0)
