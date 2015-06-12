@@ -335,7 +335,6 @@ namespace dai {
         static const int INDEX_0011 = 0;
         static const int INDEX_0101 = 1;
         static const int INDEX_01 = 2;
-        static const int INDEX_0101_0011 = 3;
 
 
         /// Calculate the updated message from the \a _I 'th neighbor of variable \a i to variable \a i
