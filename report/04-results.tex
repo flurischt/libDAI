@@ -19,12 +19,10 @@ The analysis of the baseline implementation showed a lot of potential for optimi
 \end{figure}
 
 \mypar{Impact of Optimizations}
-The overall runtime was reduced by a factor of 8.7 to 27.4 (see figure~\ref{runtime}) depending on input size. Most of these improvements were achieved by reducing the number of operations by a factor of 13.5 as shown in figure~\ref{flops-per-message}. One particular optimization (build 6 in figure~\ref{runtime}) replaced many multiplications with one division. Due to such optimizations the performance of the optimized version did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore by reducing the op count and introducing divisions the division unit became a bottle neck.
+The overall runtime was reduced by a factor of 8.7 to 27.4, 120 when including single precision, depending on input (see figure~\ref{runtime}). Most of these improvements were achieved by reducing the OP count by a factor of 13.5 as shown in figure~\ref{flops-per-message}. The product calculation optimization (see section~\ref{sec:method}) replaced many multiplications with one division. Due to such optimizations the performance did not improve, as indicated by the roofline analysis in figure~\ref{roofline-mixed}. Furthermore, by reducing the OP count and introducing divisions the division unit became a bottleneck.
 
 \mypar{Memory Accesses}
-Despite all the optimizations some operations (e.g. retrieving the greatest residual to determine which message to process next or graph lookup operations) are inherently non linear in memory and are therefore expensive due to their random nature. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
-
-
+Despite all the optimizations some operations (e.g. retrieving the greatest residual or graph lookup operations) are inherently non linear in memory and are therefore expensive. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
 
 \begin{figure}\centering
     \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/flops_per_message.pdf}
@@ -44,4 +42,3 @@ To further improve the runtime some parts of the code were vectorized manually. 
 	\item Doing a scalar division results in a dependency on the write back of the floating point vector, which is expensive.
 	\item Furthermore, relieving the pressure on the division unit by replacing the 1/x divisions by special intrinsics was not feasible due to the accuracy requirement.
 \end{itemize}
-(ToDo, we tried to pre calculate the 1/x values, no use!)
