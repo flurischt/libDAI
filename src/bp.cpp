@@ -5,9 +5,6 @@
  *  Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
  */
 
-
-#include <dai/dai_config.h>
-
 #ifdef DAI_WITH_BP
 
 
@@ -15,10 +12,7 @@
 #include <sstream>
 #include <map>
 #include <set>
-#include <algorithm>
 #include <dai/bp.h>
-#include <dai/util.h>
-#include <dai/properties.h>
 
 #ifdef DAI_VERBOSE
 #   define DAI_LOG(MESSAGE) do { std::cout << MESSAGE << std::endl; } while(0)
@@ -310,7 +304,7 @@ namespace dai {
                 marg = a/s;
             } break;
             default: {
-                // No idea what is going on here (maybe the matrix is not 2x2, let us do the slow approach).
+                // let us do the slow approach.
                 // This will never happen with our graph structure.
                 marg = 0;
                 // ind is the precalculated IndexFor(i,I) i.e. to x_I == k
@@ -581,6 +575,66 @@ namespace dai {
         // rearrange look-up table (delete and reinsert new key)
         _lutNew.update(_edge2lutNew[i][_I], make_pair(r, make_pair(i, _I)));
     }
+
+
+#ifdef DAI_VECTORIZATION
+
+    void BP::calcIncomingMessageProduct_0101_0011(__m256d &prod_vec, size_t I, size_t i) const {
+        const Neighbors &n = nbF(I);
+        DAI_ASSERT(nbF(I).size() == 2);
+        const size_t n0 = n[0].node;
+        if (i != n0) {
+            const size_t _I0 = n[0].dual;
+            DAI_ASSERT(_edges[n0][_I0].index == INDEX_0101);
+
+            __m256d temp_vec = _mm256_mul_pd(_oldProd[n0], _mm256_cvtps_pd(_edges[n0][_I0].reciprocals));
+            // a a b b into a b a b
+            __m256d xswap = _mm256_permute2f128_pd(temp_vec, temp_vec, 0x01);
+            temp_vec = _mm256_blend_pd(xswap, temp_vec, 0b1001);
+            prod_vec = _mm256_mul_pd(prod_vec, temp_vec);
+        }
+
+        const size_t n1 = n[1].node;
+        if (i != n1) {
+            const size_t _I1 = n[1].dual;
+            DAI_ASSERT(_edges[n1][_I1].index == INDEX_0011);
+            __m256d temp_vec = _mm256_mul_pd(_oldProd[n1], _mm256_cvtps_pd(_edges[n1][_I1].reciprocals));
+            prod_vec = _mm256_mul_pd(prod_vec, temp_vec);
+        }
+    }
+
+#else
+void BP::calcIncomingMessageProduct_0101_0011(double* prod, size_t I, size_t i) const {
+    const Neighbors& n = nbF(I);
+    DAI_ASSERT(nbF(I).size() == 2);
+
+    const size_t n0  = n[0].node;
+    if (i!=n0) {
+        const size_t _I0 = n[0].dual;
+        DAI_ASSERT(_edges[n0][_I0].index == INDEX_0101);
+
+        double temp1 = _oldProd[n0][0] * _edges[n0][_I0].reciprocals[0];
+        double temp2 = _oldProd[n0][1] * _edges[n0][_I0].reciprocals[1];
+        prod[0] *= temp1;
+        prod[1] *= temp2;
+        prod[2] *= temp1;
+        prod[3] *= temp2;
+    }
+
+    const size_t n1  = n[1].node;
+    if (i!=n1) {
+        const size_t _I1 = n[1].dual;
+        DAI_ASSERT(_edges[n1][_I1].index == INDEX_0011);
+
+        double temp1 = _oldProd[n1][0] * _edges[n1][_I1].reciprocals[0];
+        double temp2 = _oldProd[n1][1] * _edges[n1][_I1].reciprocals[1];
+        prod[0] *= temp1;
+        prod[1] *= temp1;
+        prod[2] *= temp2;
+        prod[3] *= temp2;
+    }
+}
+#endif
 } // end of namespace dai
 
 #endif

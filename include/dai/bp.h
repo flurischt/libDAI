@@ -337,7 +337,6 @@ namespace dai {
         virtual void calcIncomingMessageProduct(ProbProduct &prod, size_t I, bool without_i, size_t i) const;
 
         /// Specialised versions of calcIncomingMessageProduct for special patterns.
-        /// Implementation in bp_ext.cpp.
 #ifdef DAI_VECTORIZATION
         void calcIncomingMessageProduct_0101_0011(__m256d& prod_vec, size_t I, size_t i) const;
         void marginalizeProductOntoMessage(__m256d& prod_vec, size_t i, size_t _I, size_t prodsize);
