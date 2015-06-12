@@ -58,7 +58,10 @@ Our baseline implementation used a std::multimap to store the residuals. The max
 
 \mypar{Phase 2: Specific optimizations}
 %-- More efficient storage of messages.
-For every iteration, a possibly large number of messages is read and stored. Therefore, it is beneficial to reduce the number of message lookups. Because a message $m$ represents a normalized probability distribution that satisfies $\sum_i=1^N m_i = 1$, it suffices to store only $N-1$ values for every message. Taking into account that the recommender system uses variables with only two states (like/dis-like), the amount of bytes required to store a message can be divided by a factor of two. 
+For every iteration, a possibly large number of messages is read and stored. Therefore, it is beneficial to optimize the message lookups. Because a message $m$ represents a normalized probability distribution that satisfies $\sum_i=1^N m_i = 1$, it suffices to store only $N-1$ values for every message. Taking into account that the recommender system uses variables with only two states (like/dis-like), the amount of bytes required to store a message can be divided by a factor of two. 
+
+Another optimisation unique to our recommendation system was to compress the graph by using the same factor object for all factors. This was possible because the factors do not change and are always represented by the same 2x2 matrix. (ToDo: Ref Background-description of a factor!) Using only a single factor greatly reduced memory traffic and resulted in a speed-up of 1.4 for the large (u1) dataset.
+
 
 %-- Exploit the special pattern how messages are updated
 An analysis of the pattern how message products are calculated revealed a calculation pattern that is specific for the factor graph of the recommender system. Hardcoding this pattern is beneficial because one can save an index lookup that is required for the generic case. To be more specific: calcIncomingMessageProduct\_0101\_0011 calculates the optimized (unmarginalized) product coming from factor I required to update variable i. 
