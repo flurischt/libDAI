@@ -32,7 +32,7 @@ Despite all the optimizations some operations (e.g. retrieving the greatest resi
 
 \begin{figure*}\centering
   \includegraphics[scale = 1, trim={7cm 11cm 6cm 14cm}]{graphics/runtime_plot.pdf}
-  \caption{Runtime plot showing the execution time on the Linux system across different versions of our program for three different input sizes.\label{runtime}}
+  \caption{Runtime plot showing the execution time on the Linux system across different versions of our program for three different input sizes. Dataset details: big: 80367 ratings, 943 users, 1683 movies; medium: 33392 ratings, 943 users, 272 movies; small: 3594 ratings, 943 users, 32 movies.\label{runtime}}
 \end{figure*}
 
 \mypar{Vectorization}
@@ -41,6 +41,4 @@ To further improve the runtime some parts of the code were vectorized manually. 
 	\item The op count was reduced significantly by replacing floating point multiplications with floating point divisions (by reusing previously calculated products). This lead to a performance bound by the division unit.
 	\item Vectorizing this division is not possible as the program flow depends on the result immediately, thus calculation 4 divisions at once is impossible. This dependency stems from the fact that the residuals are influenced by the result of the division. And calculating only one division using AVX is slower than a scalar division \cite{intrinsics_guide}.
 	\item Doing a scalar division results in a dependency on the write back of the floating point vector, which is expensive.
-	\item Furthermore, relieving the pressure on the division unit by replacing the 1/x divisions by special intrinsics was not feasible due to the accuracy requirement.
 \end{itemize}
-(ToDo, we tried to pre calculate the 1/x values, no use!)
