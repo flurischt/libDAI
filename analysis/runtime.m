@@ -13,19 +13,19 @@ hold on; grid on;
 
 p = semilogy(big_double(:,1), big_double(:,2), '-x', 'LineWidth',1);
 set(p(1),'color',[0.2 0.2 0.2])
-t=text(50,12,{'big dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+t=text(49.9,13,{'big dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',1);
 set(t(1),'color',[0.2 0.2 0.2])
+t=text(49.9,0.8,{'medium dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',1);
+set(t(1),'color',[0.2 0.2 0.6])
 p = semilogy(medium_double(:,1), medium_double(:,2), '-+', 'LineWidth',1);
 set(p(1),'color',[0.2 0.2 0.6])
-t=text(50,0.8,{'medium dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
-set(t(1),'color',[0.2 0.2 0.6])
 p = semilogy(small_double(:,1), small_double(:,2), '-o', 'LineWidth',1);
 set(p(1),'color',[0.1 0.5 0.1])
-t=text(50,0.015,{'small dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+t=text(49.9,0.014,{'small dataset','double precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',1);
 set(t(1),'color',[0.1 0.5 0.1])
 p = semilogy(big_float(:,1), big_float(:,2), '-s', 'LineWidth',1);
 set(p(1),'color',[0.6 0.2 0.2])
-t=text(50,0.15,{'big dataset','single precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2);
+t=text(49.9,0.14,{'big dataset','single precision'},'VerticalAlignment','bottom','HorizontalAlignment','right', 'fontsize', fontsize-2, 'BackgroundColor',[1 1 1],'EdgeColor',[0 0 0],'Margin',1);
 set(t(1),'color',[0.6 0.2 0.2])
 set(gca,'YScale','log')
 xlabel('Build', 'fontsize', fontsize)
