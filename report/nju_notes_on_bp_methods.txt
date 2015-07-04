@@ -1,0 +1,98 @@
+Belief Propagation Methods for Loopy Graphical Models
+------------------------------------------------------
+
+- Plain Belief Propagation
+      - synchronous update scheme (all messages processed "in parallel")
+            (libDAI: PARALL update option)
+      - asynchronous update scheme (messages are processed sequentially)
+            (update scheme has a strong impact on convergence)
+            (libDAI: SEQFIX, SEQMAX, SEQRND update schemes)
+            (SEQMAX: efficient scheme: update those messages that currently 
+             convey "new" information => residual belief propagation)
+      - sparse message passing (a message depends only on few others)
+      - dense message passing (contrary)
+      - sum-product BP is the default variant, by a mathematical consideration
+        it can be transformed into the max-product BP where the + is replaced
+        by the max() operator for which associativity law is the same:
+               ab + ac = a(b+c)  => max(ab,ac) = a max(b,c)
+
+- Residual Belief Propagation (RBP)
+      - Applies to many different belief propagation methods - RBP is more a
+        processing heuristic than an actual method for approximate BP
+      - Background: the calculation of joint probabilities or marginals for 
+        loopy graphical models by means of message passing is approximative
+        only. Roughly speaking, one can look at the MP algorithm as a fix-point
+        solver that seeks the stationary point z = f(z) of a funcation f(x).
+        Depending on the structure of the graphical problem and the initial 
+        value x_0 loopy BP might converge or might not.
+      - Idea: Messages are calculated to propagate belief between the nodes.
+        Instead of calculating all messages for every iteration (synchronous)
+        one can just update one message for every iteration (asynchronous) - 
+        it can be shown that this does not change the convergence 
+        characteristics of the problem z=f(z). Now, that we are allowed to 
+        update only one message at the the time, the question arises 'which?'.
+        RBP suggests to choose that message that conveys "most information",
+        which has the biggest impact on x_(n+1) = f(x_n). The measure that 
+        estimates the impact of one message update is called "residual".
+        Apparently this has a good effect on convergence and convergence speed.
+        But never forget: it strongly depends on the graphical model and, if
+        the problem turns out not to be convex, the initial position x_0.
+      - The paper describing the method is worth to read: 
+            (http://arxiv.org/pdf/1206.6837)
+            (Google Citations: 198)
+
+- Generalised Belief Propagation (GBP)
+      - Converges much more often, but is considerably slower
+      - The paper that describes GBP and discusses WHY BP also works for 
+        non-tree like models (for which BP was designed):
+            (Generalized Belief Propagation, 2000, JS Yedidia et al.)
+            (http://www.merl.com/publications/docs/TR2000-26.pdf)
+            (Google Citations: 933)
+      
+- Tree Re-Weighted Belief Propagation
+      - Is faster than normal BP with general synchronous and asynchronous 
+        update schemes.
+      - Paper describing the method:
+            (Tree-reweighted belief propagation algorithms and approximate
+             ML estimation by pseudo-moment matching, 2003, MJ Wainwright)
+            (Google Citations: 124)
+      
+- Loop Corrected Belief Propagation
+      - Step 1) Approximate inference on "cavity distributions" (derived GMs)
+      - Step 2) Massage passing for all "cavity distributions"
+      - Is said to lead to smaller errors than normal BP
+      - http://www.jmlr.org/papers/volume8/mooij07a/mooij07a.pdf
+            (Google Citations: 23)
+            
+- Junction Tree Algorithm
+      - Exact inference for loopy belief propagation
+      - Transform a graphical model into a junction tree
+      - Applies BP on that junction tree
+      - Potentially expensive!
+      
+- Gibbs Sampling
+      - Alternative to BP
+      - Uses Markov Chain Monte-Carlo to estimate joint or marginal probs.
+      - Not interesting for our needs
+
+List of inference methods available in libDAI:      
+      - BP     (belief propagation)
+      - FBP    (fractional belief propagation)
+      - TRWBP  (tree re-weighted belief propagation)
+      - MF     (mean field algorithm)
+      - HAK    (generalised belief propagation (by Heskes, Albers and Kappen))
+      - LC     (loop corrected belief propagation, extends MR)
+      - TreeEP (tree-structured approximations by expectation propagation)
+      - JTree  (junction tree algorithm, generalises TreeEP)
+      - MR     (loop corrected belief propagation by Montanari and Rizzo)
+      - Gibbs  (approximate inference by Gibbs sampling, MCMC)
+      - CBP    (conditioned belief propagation)
+      - DecMAP (MAP state by decimation) (?)
+      - GLC    (generalised loop corrected belief propagation)
+
+
+Interesting papers about belief propagation worth to read:
+   - Residual Belief Propagation, 2012, G Elidan et al.
+     (http://arxiv.org/pdf/1206.6837)
+   - Generalized Belief Propagation, 2000, JS Yedidia et al.
+     (http://www.merl.com/publications/docs/TR2000-26.pdf)

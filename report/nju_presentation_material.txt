@@ -1,0 +1,84 @@
+About BP
+
+- A technique in the domain of machine learning / artificial intelligence
+- Inference on graphical models
+- Idea: depict dependencies of random variables as edges in a graph
+- Different types of graphs:
+   - Bayesian Network
+   - Markov Random Field
+   - Generalization: Factor Graphs
+- Stochastic system -> Graph
+- Inference -> what is the chance of some variable being in some state, given the observations?
+- Belief Propagation does this job on graphical models:
+  transfer belief from observed nodes to unobserved ones by passing messages
+- Is one of the more important algorithms that humanity came up with :)
+
+- BP can be seen as a highly generic toolbox for statistical inference, applicable to many different problems
+==> Concretize the problem!!
+
+1) There are different variants of BP. We focused on:
+   - Loopy belief propagation (the graphical model contains loops)
+   - (Non-logarithmic domain)
+   - Efficient "scheduling" scheme for messages based on residuals: Residual BP
+2) Apply BP to a Recommender System
+
+
+About Recommender System
+
+About Baseline
+- libDAI: "A free and open source C++ library for discrete approximate inference in graphical models"
+- Generic toolbox, cleanly implemented, supports lots of options
+- Sacrifices computational speed for generality, ease-of-use and readability
+- Runs with double precision
+
+Improvement Overview
+1) Simplification of code base, apply better coding style
+   - comparable with the "superslow" exercise (homework 02)
+   - avoid superfluous copies of objects, operate "in-place" as much as possible
+   - remove "options" and unused code
+   - no loss of generality (for this optimization)
+   - speedup: about a factor of ~2
+2) Efficient calculation of message products
+   - can be seen as a pre-calculation step, avoid to calculate the same
+   - idea: instead of repeatedly calculating a*b*c*d, b*c*d*e, pre-calculate p=a*b*c*d*e once and then use p/e and p/a, etc...
+   - this pays off for the recommender system: higher costs of division are easily outweighed by the number of multiplications that can be saved
+   - no loss of generality
+   - speedup: ~2 (depends on data set)
+3) Single precision
+   - at this stage we were still clearly bound to memory. Further reduce memory traffic!
+   - it's feasible to calculate results (the recommendations) with single precision only
+   - difficulty: because of the potentially large number of factors, we have to stick to double precision for internal calculations.
+   - idea: calculate intermediate results with double precision, but store data as floats only.
+   - side effect: convergence criterion (the convergence tolerance) had to be increased. Therefore: less messages need to be processed until convergence (~6x for our datasets) ==> fairer judgement: divide runtime by number of messages
+   - no loss of generality
+   - still: we gain a net speedup of a factor ~2 (the code runs 12x faster for floats)
+
+Note: with the optimization 3) we were able to increase the OI considerably (based on our initial cost measure: #flops). However, we could not observe this equally well in the run-time. Reason: the division unit turned out to be one of the bottlenecks. Besides that, memory traffic was still high compared to the amount of computations to be performed.
+The next two optimization steps boosted the runtime because they both reduce the pressure on both the division unit of the CPU and the caches.
+
+4) More efficient storage of messages
+   - messages have to be stored for every iteration
+   - messages are probabilities, they ought to sum up to 1
+   - messages are vector of 2 in our application (recommender system)
+   - idea: only store one value p0 = q and calculate p1 = 1-q for the other state
+   - loss of generality, change specific to recommender system (requirement: a variable has exactly two states)
+   - speedup only in combination with 5)
+5) Exploit the special pattern how messages are updated
+   - get rid of an "index lookup" when calculating the marginals because the lookup pattern is fixed for the graph (hard-code instead of a generic lookup)
+   - consequence: get rid of the innermost loop when calculating the new messages
+   - can be compared with loop unrolling in combination with single static assignment (???)
+   - loss of generality, lookup pattern highly specific to our application
+
+Result: another speedup of factor ~2.
+
+
+In-progress
+
+6) Gain precision by representing probabilities that fall into a larger range ()[a, b] instead of [0,1]). I'm not expecting any speedup here, though...
+
+7) More pre-calculation. Further reduce the amount of
+
+
+Outlook
+- apply those changes to the public library that do not break generality
+-
