@@ -22,7 +22,35 @@ Conceptually there are two types of messages: $\mu_{v\rightarrow f}$ from variab
 
 The standard version of BP is designed to deal with acyclic graphs. When graphical models contain loops BP is often called \textit{Loopy Belief Propagation} (LBP).
 
-Compared to standard BP, LBP problems don't always converge and infer much higher computational costs. Nevertheless the approximated solutions are often accurate enough to be used in real world applications. Elidan et al. \cite{elidan2012residual} proposes a method to improve the convergence rate by propagating belief in an informed way through the graph. The technique is called \textit{Residual Belief Propagation} because a residual is calculated for each message. A residual estimates the impact of updating the associated message. Therefore messages with a high residual are updated first. Mathematically the residual is defined as the $L_\infty$ norm of the difference of the current value of a message and its prospected value: $||\mu_{new} - \mu_{old}||_\infty$.
+Compared to standard BP, loopy BP problems don't always converge and infer much higher computational costs. Nevertheless, the approximative solutions are often accurate enough to be used in real world applications. Elidan et al. \cite{elidan2012residual} proposed a method to improve the convergence rate by propagating belief in an informed way through the graph. The technique is called \textit{Residual Belief Propagation} because a residual is calculated for each message that estimates the impact of updating it. Therefore messages with a large residual are updated first. Formally, the residual is defined as the $L_\infty$ norm of the difference of the current value of a message and its prospected value: $||\mu_{new} - \mu_{old}||_\infty$.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}{\columnwidth}
+	   \centering
+	   \includegraphics[scale=0.33]{graphics/top-n-graph.pdf}%
+	      \caption{Factor Graph for predicting Top-N movies for user $\hat u = u_2$.
+	      \label{top_n_graph}
+	   }
+	\end{subfigure}\hfill%
+	\vspace{5mm}
+	\begin{subfigure}{\columnwidth}
+	   \centering
+	   \includegraphics[scale=0.33]{graphics/top-n-important-messages.pdf}%
+      	   \caption{Propagate belief from observed node $m_2$ to unobserved ones.
+	      \label{top_n_graph_important_msg}
+	   }
+	\end{subfigure}\hfill%
+	\vspace{5mm}
+	\begin{subfigure}{\columnwidth}
+	   \centering
+	   \includegraphics[scale=0.33]{graphics/top-n-final.pdf}%
+	      \caption{A possible third state: $m_1$ is the top-1 recommendation for $u_2$. 
+	      \label{top_n_graph_final_state}
+	   }
+	\end{subfigure}
+	\caption{Top-N step by step}
+\end{figure}
 
 
 \mypar{Top-N Recommendation}
@@ -40,37 +68,15 @@ Figure \ref{top_n_graph} shows a small factor graph for  $\hat u = u_2$ where us
 
 Now, using BP, this initial belief is propagated through the factor graph by sending messages (see Figure \ref{top_n_graph_important_msg}). Once the BP's message passing has converged, each movie has a probability assigned that tells us, how likely user $\hat u$ liked this movie. Figure \ref{top_n_graph_final_state} shows a possible final state. The movies can be sorted by these probabilities and the top $N$ elements are returned. In this example movie $m_1$ would be the top-one recommendation for $\hat u$.
 
-\begin{figure*}
-	\centering
-	\begin{subfigure}{.6\columnwidth}
-	   \includegraphics[scale=0.3]{graphics/top-n-graph.pdf}%
-	      \caption{Factor Graph for predicting Top-N movies for user $\hat u = u_2$.
-	      \label{top_n_graph}
-	   }
-	\end{subfigure}\hfill%
-	\begin{subfigure}{.6\columnwidth}
-	   \includegraphics[scale=0.3]{graphics/top-n-important-messages.pdf}%
-      	   \caption{Belief is propagated from observed node $m_2$ to unobserved nodes 
-	      \label{top_n_graph_important_msg}
-	   }
-	\end{subfigure}\hfill%
-	\begin{subfigure}{.6\columnwidth}
-	   \includegraphics[scale=0.3]{graphics/top-n-final.pdf}%
-	      \caption{A possible third state with $m_1$ being the top-1 recommendation for $u_2$. 
-	      \label{top_n_graph_final_state}
-	   }
-	\end{subfigure}
-	\caption{Top-N step by step}
-\end{figure*}
 
 \mypar{Cost Analysis}
 A reasonable choice for the cost measure is the FLOP count, since BP operates on floating point numbers to calculate the beliefs. Unfortunately, it is not viable to calculate the exact amount of FLOPS for a given input size analytically, as BP is driven by the list of maximal message residuals and it cannot be foreseen, how many messages have to be calculated until convergence. Even worse, the count of processed messages (and, related, the FLOPS) is not only a function of the input \textit{size}, but also a function of the actual \textit{shape} of the graph. Therefore, we decided to count FLOPS using performance counters. The following counters were used:
 
 \begin{itemize}
-	\item FP\_COMP\_OPS\_EXE.SSE\_SCALAR\_SINGLE and \\FP\_COMP\_OPS\_EXE.SSE\_SCALAR\_DOUBLE:\\count the number of SSE instructions on single floats and doubles.
-	\item FP\_COMP\_OPS\_EXE.SSE\_PACKED\_SINGLE and \\FP\_COMP\_OPS\_EXE.SSE\_PACKED\_DOUBLE:\\count the number of packed SSE instructions on floats and doubles.
-	\item SIMD\_FP\_256.PACKED\_SINGLE and \\SIMD\_FP\_256.PACKED\_DOUBLE:\\count the number of packed AVX instructions on floats and doubles.
-	\item FP\_COMP\_OPS\_EXE.X87:\\counts the legacy X87 floating point instructions.
+	\item \texttt{FP\_COMP\_OPS\_EXE.SSE\_SCALAR\_SINGLE} and \\* \texttt{FP\_COMP\_OPS\_EXE.SSE\_SCALAR\_DOUBLE}: count the number of SSE instructions on single floats and doubles.
+	\item \texttt{FP\_COMP\_OPS\_EXE.SSE\_PACKED\_SINGLE} and \\* \texttt{FP\_COMP\_OPS\_EXE.SSE\_PACKED\_DOUBLE}: count the number of packed SSE instructions on floats and doubles.
+	\item \texttt{SIMD\_FP\_256.PACKED\_SINGLE} and \\* \texttt{SIMD\_FP\_256.PACKED\_DOUBLE}: count the number of packed AVX instructions on floats and doubles.
+	\item \texttt{FP\_COMP\_OPS\_EXE.X87}: counts the X87 floating point instructions.
 \end{itemize}
 
 The performance counters were evaluated using VTune Amplifier XE 2015 (see section~\ref{sec:results}).

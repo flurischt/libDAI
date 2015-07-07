@@ -14,7 +14,7 @@ For performance analysis Intel\textsuperscript{\textregistered} VTune Amplifier 
 \mypar{Baseline}
 The analysis of the baseline implementation showed a lot of potential for optimization. for example, reducing memory overhead caused by object creation and deletion, random reads from lookup tables and vector operations. This can also be seen in the roofline analysis \cite{Ofenbeck:14} (see figure~\ref{roofline-mixed}).
 \begin{figure}\centering
-    \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
+    \includegraphics[scale=0.4, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/roofline_mixed.pdf}
   \caption{Roofline analysis of the baseline and our optimized version (build 40). The analysis was conducted on the Windows system described above.\label{roofline-mixed}}
 \end{figure}
 
@@ -25,13 +25,13 @@ The overall runtime was reduced by a factor of 8.7 to 27.4, 120 when including s
 Despite all the optimizations some operations (e.g. retrieving the greatest residual or graph lookup operations) are inherently non linear in memory and are therefore expensive. This is especially an issue if the factor graph is larger than 1 MB as then the TLB (in the systems we measured with) can no longer serve all address translations for the graph accesses.
 
 \begin{figure}\centering
-    \includegraphics[scale=0.48, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/flops_per_message.pdf}
+    \includegraphics[scale=0.4, trim={2cm 6.5cm 1cm 8.5cm},clip]{graphics/flops_per_message.pdf}
   \caption{Comparison of the number floating point operations needed to update a single message for different builds of the program.\label{flops-per-message}}
 \end{figure}
 
 \begin{figure*}\centering
-  \includegraphics[scale = 0.97, trim={7cm 11cm 6cm 14cm}]{graphics/runtime_plot.pdf}
-  \caption{Runtime plot showing the execution time on the Linux system across different versions of our program for three different input sizes.\label{runtime}}
+  \includegraphics[scale = 0.8, trim={7cm 11cm 6cm 14cm}]{graphics/runtime_plot.pdf}
+  \caption{Runtime plot for the Linux system across different versions of our program for three different input sizes.\label{runtime}}
 \end{figure*}
 
 \mypar{Vectorization}

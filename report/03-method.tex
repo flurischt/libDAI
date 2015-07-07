@@ -7,46 +7,46 @@
 %For this class, explain all the optimizations you performed. This mean, you first very briefly
 %explain the baseline implementation, then go through locality and other optimizations, and finally SSE (every project will be slightly different of course). Show or mention relevant analysis or assumptions. A few examples: 1) Profiling may lead you to optimize one part first; 2) bandwidth plus data transfer analysis may show that it is memory bound; 3) it may be too hard to implement the algorithm in full generality: make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we consider only one type of input image); 4) explain how certain data accesses have poor locality. Generally, any type of analysis adds value to your work.
 
-The optimization of the code was performed iteratively, driven by insights from analysing and profiling the code. In a first phase, we focused on general optimizations that would not change the interfaces and generality of the implementation. In a second phase the special property of the recommender system were exploited, trading in generality for speed and interfering drastically with the interface of the library.
+The code was optimized in an iterative manner, driven by insights from analysing and profiling the code. In a first phase, we focused on general optimizations that would not change the interfaces and generality of the implementation. In a second phase the special property of the recommender system were exploited, trading in generality for speed and interfering drastically with the interface of the library.
 
 In both phases, we started off by reducing the OP count, without considering the computational intensity. We then profiled our code to find critical points where we could optimize memory access patterns or reorder operations to increase the performance.
 
-We also considered working in the logarithmic domain. This would have enabled us to express the product over the messages as a sum,  making it less likely to suffer from numerical rounding errors and sometimes making the computation faster. In our case the accuracy did not improve. Furthermore the runtime increased due to the additional overhead when transforming from/to the log domain. We, therefore, decided to not utilize this option.
+We also considered to work in the logarithmic domain. This would have enabled us to express the product over the messages as a sum,  making it less likely to suffer from numerical rounding errors and sometimes making the computation faster. In our case the accuracy did not improve. Furthermore the runtime increased due to the additional overhead when transforming from/to the log domain. We therefore decided to not utilize this option.
 
 % -- Optimize calculation of product -- 
-\mypar{Phase 1: Optimize calculation of product}
+\mypar{Optimize calculation of product (Phase 1)}
 We observed that the incoming message product is recomputed each time a message gets updated. This is expensive because the product often spans a hundred or more factors. To improve the situation we pre-computed the product once over all messages. When changing a message the product is updated by multiplying with the new message and dividing by the old one. 
 Speed-up: 1.6 on the big dataset.
 
 %TODO: sicherstellen, ziemlich früh zu erwähnen, dass alle performance angaben stark vom datensatz (size AND shape) abhängen. Konvention: wir beziehen den speedup immer auf den datensatz u1, den wir zu beginn immer verwendet haben
 
 % -- C++ refactoring --
-\mypar{Phase 1: Memory friendly C++}
-Encouraged by profiling results, a subsequent optimization step consisted in the re-factoring of the code base with the main objective to reduce memory ops. The biggest improvement we achieved was modifying functions to operate in-place. Another improvement consisted in the creation of buffers for intermediate results and to avoid superfluous creation and destruction of data. 
-Speed-up: 2 on the big dataset.
+\mypar{Memory friendly C++ (Phase 1)}
+Encouraged by profiling results, a subsequent optimization step consisted in the re-factoring of the code base with the main objective to reduce memory ops. The biggest improvement we achieved by modifying functions to operate in-place. Another improvement consisted in the creation of buffers for intermediate results and to avoid superfluous creation and destruction of data. 
+Speed-up: 2.0 on the big dataset.
 
 %-- Switch to single precision
-\mypar{Phase 1: Switch to single precision}
-At this stage, the code was memory bound. To further reduce memory traffic, we enabled the support for single point precision. However, because the sum-product algorithm requires to calculate products with a large number of factors, a trade-off approach was chosen: the calculation of products was still performed with double precision, but the messages could be stored in single precision (due to normalisation). Due to decreased precision this reduced the number of message processed by a factor of 6 while giving a speed-up around 12, this means a net speed-up of 2. Our code can still be compiled for both single and double precision (storage) through a compiler flag.
+\mypar{Switch to single precision  (Phase 1)}
+At this stage, the code was memory bound. To further reduce memory traffic, we enabled the support for single point precision. However, because the sum-product algorithm requires to calculate products with a large number of factors $f \in [0,1]$, a trade-off approach was chosen: the calculation of products was still performed with double precision, but the messages were stored in single precision (after normalisation). Due to decreased precision, the number of message processed was reduced by a factor of 6 while giving a total speed-up of around 12, so a net speed-up of 2.0 can be achieved. Our code can still be compiled for both single and double precision (storage) through a compiler flag.
 
 %-- Heap/Multimap
-\mypar{Phase 1: Using a Heap}
-The baseline implementation used a sorted std::multimap to store the residuals. Updating a specific value was, however, expensive because the std::multimap only supports erase/insert. We introduced a pairing heap from the boost library which provided an efficient update method. Initially the heap introducing more memory intensive operations. In our first versions this seemed to have a negative effect on the runtime. However, as we moved forward we became less memory bound, in the final version the heap results in a speed-up of 3 compared to the multimap.
+\mypar{Using a Heap (Phase 1)}
+The baseline implementation used a sorted \texttt{std::multimap} to store the residuals. Updating a specific value was, however, expensive because the \texttt{std::multimap} only supports erase/insert. We introduced a pairing heap from the boost library which provided an efficient update method. Initially the heap introducing more memory intensive operations. In our first versions this seemed to have a negative effect on the runtime. However, as we moved forward we became less memory bound, in the final version the heap results in a speed-up of 3 compared to the multimap.
 
-\mypar{Phase 2: Efficient storage of messages}
+\mypar{Efficient storage of messages (Phase 2)}
 %-- More efficient storage of messages.
-For every iteration, a possibly large number of messages is read and stored. Therefore, it is beneficial to optimize the message lookups. Because a message $m$ represents a normalized probability distribution that satisfies $\sum_{i=1}^N m_i = 1$, it suffices to store only $N-1$ values for every message. The recommender system uses binary variables (like/dislike). Therefore the amount of bytes required to store a message can be divided by two. 
+For every iteration, a possibly large number of messages is read and stored. Therefore, it is beneficial to optimize the message lookups. Because a message $m$ represents a normalized probability distribution that satisfies $\sum_{i=1}^N m_i = 1$, it suffices to store only $N-1$ values for every message. The re\-commender system uses binary variables:  like and dislike. Therefore the amount of bytes required to store a message can be divided by two. 
 
 %-- Exploit the special pattern how messages are updated
-\mypar{Phase 2: Exploit special patterns}
-Pattern analysis of message products revealed a specific repeating pattern. Hardcoding this pattern is beneficial because an index lookup can be avoided. Technically, the optimization is comparable with a loop unrolling where the innermost loop necessary for the index lookup is flattened away.
-Efficient storage of messages and exploiting special patterns result in a speed-up of 2 for the big dataset.
+\mypar{Exploit special patterns (Phase 2)}
+Pattern analysis of message products revealed a repeating pattern. Hard-coding this pattern is beneficial because an index lookup can be avoided. Technically, the optimization is comparable with a loop unrolling where the innermost loop necessary for the index lookup is flattened away.
+Efficient storage of messages and exploiting special patterns result in a speed-up of 2.0 for the big dataset.
 
-\mypar{Phase 2: Compressing the graph}
+\mypar{Compressing the graph (Phase 2)}
 We compress the graph by using the same factor object for all factors. This was possible because the factors do not change and are always represented by the same $2\times2$ matrix. Using only a single factor greatly reduced memory traffic and resulted in a speed-up of 1.4 for the big dataset.
 
 %-- Precalculate reciprocals
-\mypar{Phase 2: Pre-calculate reciprocals}
+\mypar{Pre-calculate reciprocals (Phase 2)}
 The first optimization (pre-calculation of message products, with later division of a message) increased the pressure on the division unit. This turned into one of the major bottlenecks of the code. We tried to solve this issue by pre-calculating reciprocals (“1/message”) but the speed-up was not significant. We tried to utilize vectorization to compute multiple divisions at once and make use of the fast but less accurate \_mm\_rcp\_ps. Unfortunately our experiments showed that the lack of accuracy with the \_mm\_rcp\_ps instruction lead to a worse convergence of our algorithm, greatly increasing the runtime. Furthermore, vectorizing turned out to be harder than anticipated because our computations strongly depend on each other. We could not predict which message we would update next unless we finished updating the current message. This is why vectorization had not a significant impact on our performance.
 
 %As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
